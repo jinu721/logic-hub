@@ -1,0 +1,19 @@
+import mongoose, { Schema, Document } from "mongoose";
+import { InventoryIF } from "../types/inventory.types";
+
+const BannerSchema: Schema<InventoryIF> = new Schema(
+  {
+    name: { type: String, required: true },
+    description: { type: String, default: "" },
+    image: { type: String, required: true },
+    isActive: { type: Boolean, default: true },
+    rarity: {
+      type: String,
+      enum: ["Common", "Uncommon", "Rare", "Epic", "Legendary"],
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
+
+export const BannerModel = mongoose.model<InventoryIF>("Banner", BannerSchema);
