@@ -141,11 +141,11 @@ export class ChallengeProgressRepository
   ): Promise<ChallengeProgressIF[]> {
     return await this.model.find({ challengeId });
   }
-  async getSubmissionsByUserAndYear(username: string, year: number) {
+  async getSubmissionsByUserAndYear(userId: string, year: number) {
     const start = new Date(`${year}-01-01`);
     const end = new Date(`${year}-12-31T23:59:59.999Z`);
     return ChallengeProgress.find({
-      username,
+      userId,
       submittedAt: { $gte: start, $lte: end },
     });
   }

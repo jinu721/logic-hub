@@ -10,5 +10,5 @@ export interface IChallengeProgressService {
   getAllProgressByUser(userId: string): Promise<PublicChallengeProgressDTO[]>;
   getAllProgressByChallenge(challengeId: string): Promise<PublicChallengeProgressDTO[]>;
   getAllProgress(): Promise<PublicChallengeProgressDTO[] | null>;
-  getUserHeatmapData(username: string, year: number): Promise<{ [date: string]: number }>;
+  getUserHeatmapData(userId: string, year: number): Promise<{ [date: string]: number }>;
 }

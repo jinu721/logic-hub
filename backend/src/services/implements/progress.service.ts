@@ -69,8 +69,8 @@ export class ChallengeProgressService implements IChallengeProgressService {
     const progresses = await this.challengeProgressRepository.getAllProgressByChallenge(challengeId);
     return toPublicProgressDTOs(progresses);
   }
-  async getUserHeatmapData(username: string, year: number): Promise<{ [date: string]: number }> {
-    const submissions = await this.challengeProgressRepository.getSubmissionsByUserAndYear(username, year);
+  async getUserHeatmapData(userId: string, year: number): Promise<{ [date: string]: number }> {
+    const submissions = await this.challengeProgressRepository.getSubmissionsByUserAndYear(userId, year);
     const heatMapData: Record<string, number>  = {};
 
 

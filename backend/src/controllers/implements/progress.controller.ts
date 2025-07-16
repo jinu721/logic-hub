@@ -205,15 +205,15 @@ export class ChallengeProgressController
         return;
       }
   
-      const username = req.params.username === "me" ? (req.user as any).username : req.params.username;
+      const userId = req.params.userId === "me" ? (req.user as any).userId : req.params.userId;
 
-      if(!username){
+      if(!userId){
         res.status(HttpStatus.BAD_REQUEST).json({ message: "Username is required" });
         return;
       } 
 
       const progress = await this.challengeProgressService.getUserHeatmapData(
-        username,
+        userId,
         Number(year)
       );
 

@@ -24,7 +24,7 @@ router.delete("/:id", challengeProgressController.deleteProgress.bind(challengeP
 router.get("/user/:username", challengeProgressController.getAllProgressByUser.bind(challengeProgressController));
 router.get("/recent/user/:input", challengeProgressController.getRecentProgress.bind(challengeProgressController));
 router.get("/challenge/:challengeId", challengeProgressController.getAllProgressByChallenge.bind(challengeProgressController));
-router.get("/user/heatmap/:username", challengeProgressController.getHeatmap.bind(challengeProgressController));
+router.get("/user/heatmap/:userId", challengeProgressController.getHeatmap.bind(challengeProgressController));
 router.get("/user/:userId/challenge/:challengeId", challengeProgressController.getProgressByUserAndChallenge.bind(challengeProgressController));
 
 export default router;

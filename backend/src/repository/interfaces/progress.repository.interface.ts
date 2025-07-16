@@ -13,5 +13,5 @@ export interface IChallengeProgressRepository {
   getMostCompletedChallengeOfWeek(oneWeekAgo: Date): Promise<string | null>;
   getAllProgressByChallenge(challengeId: string): Promise<ChallengeProgressIF[]>;
   getAllProgress(): Promise<ChallengeProgressIF[] | null>;
-  getSubmissionsByUserAndYear(username: string, year: number): Promise<ChallengeProgressIF[] | null>;
+  getSubmissionsByUserAndYear(userId: string, year: number): Promise<ChallengeProgressIF[] | null>;
 }

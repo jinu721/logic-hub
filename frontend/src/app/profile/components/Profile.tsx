@@ -39,10 +39,10 @@ const UserProfileView = ({ username }: { username: string }) => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const userData = await getUser(username)
+      const userData = await getUser(username);
       const levelData = await getLevels();
       console.log("Level Data :- ", levelData);
-      const progressData = await getUserProgress(username)
+      const progressData = await getUserProgress(username);
       console.log("userData", userData);
       setCurrentUser(userData.user.currentUser);
       setOnlineStatus(userData.user.isOnline);
@@ -73,7 +73,7 @@ const UserProfileView = ({ username }: { username: string }) => {
     };
     fetchUserData();
     setShowAnimation(true);
-  },[username]);
+  }, [username]);
 
   useEffect(() => {
     if (!userData) return;
@@ -132,7 +132,6 @@ const UserProfileView = ({ username }: { username: string }) => {
   return (
     <>
       <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-indigo-950 text-white min-h-screen">
-
         {userData ? (
           <>
             <ProfileHeader
@@ -155,10 +154,13 @@ const UserProfileView = ({ username }: { username: string }) => {
                 />
 
                 <div className="lg:col-span-8 space-y-6">
-                  <SubmissionHeatmap username={username} />
                   <AchievementShowcase
                     currentUser={currentUser}
                     userData={userData}
+                  />
+                  <SubmissionHeatmap
+                    userId={userData._id}
+                    isCurrentUser={currentUser}
                   />
                   <RecentActivity progressData={progressData} />
                 </div>

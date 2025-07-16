@@ -545,7 +545,7 @@ export const getDomain = async (domainId:string) => {
   return response.data;
 }
 
-export const getHeatMap = async (username:string,year?:string) => {
-  const response = await axiosInstance.get(`/progresses/user/heatmap/${username}?year=${year}`);
+export const getHeatMap = async (userId:string,year?:number) => {
+  const response = await axiosInstance.get(`/progresses/user/heatmap/${userId}?year=${year}`);
   return response.data;
 }
