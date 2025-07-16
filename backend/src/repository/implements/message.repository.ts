@@ -65,7 +65,7 @@ export class MessageRepository
   }
   async getMessages(limit: number, query: any): Promise<MessageIF[]> {
     return await this.model
-      .find()
+      .find(query)
       .sort({ createdAt: 1 })
       .limit(limit)
       .lean()

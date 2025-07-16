@@ -78,5 +78,7 @@ export const generateSystemMessage = async (
     content,
   };
 
+  console.log("System MessagesData :- ",systemMessageData)
+
   return await messageService.createMessage(systemMessageData, null);
 };

@@ -185,6 +185,7 @@ export default function useChat({
       conversationId: string;
       message: MessageIF;
     }) => {
+      console.log("Message Received", message);
       if (conversationId === selectedChatId) {
         setMessages((prev) => [...prev, message]);
       }

@@ -139,6 +139,7 @@ export default function ChatPage() {
       console.log("Messages", messages);
       setMessages((prev) => [...prev, ...messages.data]);
       setConversationData(conversation.data);
+      setActiveTab(conversation.data.type === "one-to-one" ? "personal" : "groups");
     } catch (error) {
       console.log(error);
     } finally {
@@ -218,6 +219,9 @@ export default function ChatPage() {
   const getUserRole = (): UserRole => {
     if (!isGroupChat || !currentConversationData.group) return "member";
 
+    console.log("CURRENT USERIDD", currentUserId);
+    console.log("groups Admin", currentConversationData.group.admins);
+
     if (
       currentConversationData.group.createdBy._id.toString() === currentUserId
     ) {
@@ -226,7 +230,7 @@ export default function ChatPage() {
 
     if (
       currentConversationData.group.admins.some(
-        (id: any) => id.toString() === currentUserId
+        (usr: any) => usr._id.toString() === currentUserId
       )
     ) {
       return "admin";
@@ -236,6 +240,8 @@ export default function ChatPage() {
   };
 
   const userRole = getUserRole();
+
+  console.log(`User role: ${userRole}`);
 
   useEffect(() => {
     const fetchStickers = async () => {

@@ -133,10 +133,11 @@ export class GroupHandler {
             removeMember as string
           );
 
+
           if (systemMsg) {
             this.io
               .to(finalConversationId.toString())
-              .emit("recive_message", systemMsg);
+              .emit("recive_message", {conversationId:systemMsg.conversationId, message: systemMsg});
           }
 
           const updatedGroup = await AppContainer.groupService.findGroupById(
