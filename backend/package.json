@@ -47,6 +47,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "build": "tsc --skipLibCheck",
     "start": "node ./dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
   },

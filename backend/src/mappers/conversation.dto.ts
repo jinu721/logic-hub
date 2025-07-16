@@ -28,5 +28,5 @@ export const toPublicConversationDTO = (conversation: ConversationIF,publicTypin
 };
 
 export const toPublicConversationDTOs = (conversations: ConversationIF[]): PublicConversationDTO[] => {
-  return conversations.map(toPublicConversationDTO);
+  return conversations.map(toPublicConversationDTO as any);
 };

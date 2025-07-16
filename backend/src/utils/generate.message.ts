@@ -76,9 +76,8 @@ export const generateSystemMessage = async (
     conversationId,
     type: "system",
     content,
-  };
+  } as any;
 
-  console.log("System MessagesData :- ",systemMessageData)
 
   return await messageService.createMessage(systemMessageData, null);
 };
