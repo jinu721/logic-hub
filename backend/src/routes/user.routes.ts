@@ -21,6 +21,7 @@ const userController = new UserController(
 
 router.post("/check-user", userController.findUser.bind(userController));
 router.post("/resend-otp", userController.resendOtp.bind(userController));
+router.post("/verify-admin",  userController.verifyAdmin.bind(userController));
 
 router.get("/", authMiddleware, userController.getUsers.bind(userController));
 router.get("/me", authMiddleware, userController.getCurrentUser.bind(userController));

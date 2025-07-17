@@ -48,4 +48,5 @@ router.get(
   authController.githubAuth.bind(authController)
 );
 
+
 export default router;

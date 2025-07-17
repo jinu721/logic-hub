@@ -1,33 +1,56 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { axiosInstance } from "./services/apiServices";
 
-const middleware = async () => {
-  // const { pathname } = request.nextUrl;
+const adminRoutes = [
+  "/admin/dashboard",
+  "/admin/users",
+  "/admin/inventory",
+  "/admin/domains",
+  "/admin/levels",
+  "/admin/markets",
+  "/admin/membership",
+  "/admin/reports",
+  "/admin/groups",
+];
 
-  // if (pathname.startsWith("/auth")) {
-  //   return NextResponse.next();
-  // }
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-  // const accessToken = request.cookies.get("accessToken")?.value;
+  const isAdminRoute = adminRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
 
-  // console.log("Access Token: ", accessToken);
+  if (!isAdminRoute) {
+    return NextResponse.next(); 
+  }
 
-  // if (!accessToken) {
-  //   console.log("No AccessToken");
-  //   return NextResponse.redirect(new URL("/auth/login", request.url));
-  // }
+  const accessToken = request.cookies.get("accessToken")?.value;
 
-  return NextResponse.next();
-};
+  if (!accessToken) {
+    console.log("No access token found. Redirecting to login...");
+    return NextResponse.redirect(new URL("/auth/login", request.url));
+  }
 
-export default middleware;
+  try {
+    const response = await axiosInstance.post("/users/verify-admin", {
+      accessToken,
+    });
+
+    if (response.data.approved !== "admin") {
+      console.log("Not an admin. Redirecting to login...");
+      return NextResponse.redirect(new URL("/auth/login", request.url));
+    }
+
+    console.log("Admin verified");
+    return NextResponse.next(); 
+
+  } catch (err) {
+    console.log("Token invalid or expired:", err);
+    return NextResponse.redirect(new URL("/auth/login", request.url));
+  }
+}
 
 export const config = {
-  matcher: [
-    "/home/:path*",
-    "/profile/:path*",
-    "/admin/:path*",
-    "/domain/:path*",
-    "/market/:path*",
-  ],
+  matcher: ["/admin/:path*"], 
 };

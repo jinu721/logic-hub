@@ -131,8 +131,12 @@ export class UserController implements IUserController {
   }
   async getUsers(req: Request, res: Response): Promise<void> {
     try {
-      const {search,page,limit} = req.query;
-      const users = await this.userService.findUsers(search as string,Number(page),Number(limit));
+      const { search, page, limit } = req.query;
+      const users = await this.userService.findUsers(
+        search as string,
+        Number(page),
+        Number(limit)
+      );
       res.status(HttpStatus.OK).json({ users });
     } catch (err) {
       console.log(`Get Users Error : ${err}`);
@@ -181,10 +185,12 @@ export class UserController implements IUserController {
       const { itemId } = req.body;
 
       const result = await this.userService.giftItem(userId, itemId, type);
-      res.status(200).json({ message: `Gifted ${type} successfully`, result });
+      res
+        .status(HttpStatus.OK)
+        .json({ message: `Gifted ${type} successfully`, result });
     } catch (err: any) {
       console.log(`Gift Item Error : ${err}`);
-      res.status(400).json({ error: err.message });
+      res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
     }
   }
   async resendOtp(req: Request, res: Response): Promise<void> {
@@ -192,10 +198,12 @@ export class UserController implements IUserController {
       const { email } = req.body;
       console.log(req.body);
       const result = await this.userService.resendOtp(email);
-      res.status(200).json({ message: `OTP Sended Successfully`, result });
+      res
+        .status(HttpStatus.OK)
+        .json({ message: `OTP Sended Successfully`, result });
     } catch (err: any) {
       console.log(err);
-      res.status(400).json({ error: err.message });
+      res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
     }
   }
 
@@ -210,7 +218,7 @@ export class UserController implements IUserController {
 
       const updatedUser = await this.userService.claimDailyReward(userId);
 
-      res.status(200).json({
+      res.status(HttpStatus.OK).json({
         message: "Daily reward claimed!",
         dailyRewardDay: updatedUser.dailyRewardDay,
         lastRewardClaimDate: updatedUser.lastRewardClaimDate,
@@ -218,8 +226,38 @@ export class UserController implements IUserController {
     } catch (error: any) {
       console.log(error);
       res
-        .status(500)
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: error.message || "Error claiming reward" });
+    }
+  }
+  async verifyAdmin(req: Request, res: Response): Promise<void> {
+    try {
+      const token = req.headers.authorization?.split(" ")[1];
+
+      console.log("Req.headers :- ",token);
+
+      if (!token) {
+        res.status(HttpStatus.BAD_REQUEST).json({ message: "Token missing" });
+        return;
+      }
+
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
+        role: string;
+      };
+
+      if (!decoded || decoded.role !== "admin") {
+        res
+          .status(HttpStatus.FORBIDDEN)
+          .json({ message: "Only admins allowed", approved: false });
+        return;
+      }
+
+      res
+        .status(HttpStatus.OK)
+        .json({ message: "Admin verified successfully", approved: true });
+    } catch (err: any) {
+      console.log(`Verify Admin Error: ${err}`);
+      res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
     }
   }
 }
