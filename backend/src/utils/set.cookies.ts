@@ -4,7 +4,7 @@ import { env } from "../config/env";
 export const setAccessToken = (res: Response, token: string) => {
   res.cookie("accessToken", token, {
     httpOnly: true, 
-    secure: process.env.NODE_ENV === "production", 
+    secure: env.NODE_ENV === "production", 
     sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
     domain: env.NODE_ENV === "production" ? ".jinu.site" : undefined,
     path: "/",
@@ -15,7 +15,7 @@ export const setAccessToken = (res: Response, token: string) => {
 export const setRefreshToken = (res: Response, token: string) => {
   res.cookie("refreshToken", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
     domain: env.NODE_ENV === "production" ? ".jinu.site" : undefined,
     path: "/",

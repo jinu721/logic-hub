@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic';
 
 import { Metadata } from "next";
 import MemberShip from "./components/Membership";
-import { verifyUser } from "@/lib/auth";
 
 export async function generateMetadata({ params }: { params: { type: string } }): Promise<Metadata> {
   return {
@@ -13,7 +12,6 @@ export async function generateMetadata({ params }: { params: { type: string } })
 
 
   export default async function MembershipPage() {
-      await verifyUser("admin");
       const availableFeatures = [
         "Access to Open Domains",
         "Earn XP through challenges",

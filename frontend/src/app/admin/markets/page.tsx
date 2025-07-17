@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
 import MarketManagement from './components/Market';
-import { verifyUser } from '@/lib/auth';
 
 export const metadata: Metadata = {
   title: 'CodeMaze | Admin Market',
@@ -10,6 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default async function MarketPage() {
-    await verifyUser("admin");
   return <MarketManagement />
 }

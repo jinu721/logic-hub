@@ -17,15 +17,17 @@ const adminRoutes = [
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  
   const isAdminRoute = adminRoutes.some((route) =>
     pathname.startsWith(route)
-  );
+);
 
   if (!isAdminRoute) {
     return NextResponse.next(); 
   }
 
   const accessToken = request.cookies.get("accessToken")?.value;
+  console.log("ACCESS TOKENN ", accessToken);
 
   if (!accessToken) {
     console.log("No access token found. Redirecting to login...");
@@ -33,13 +35,15 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const response = await axiosInstance.post("/users/verify-admin", {
-      accessToken,
-    });
+    const response = await axiosInstance.post("/users/verify-admin", {},{headers:{
+      Authorization: `Bearer ${accessToken}`,
+    }});
 
-    if (response.data.approved !== "admin") {
+    console.log("Response ",response)
+
+    if (!response.data.approved) {
       console.log("Not an admin. Redirecting to login...");
-      return NextResponse.redirect(new URL("/auth/login", request.url));
+      return NextResponse.redirect(new URL("/home", request.url));
     }
 
     console.log("Admin verified");

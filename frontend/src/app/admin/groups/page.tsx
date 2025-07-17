@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
 import Groups from './components/Groups';
-import { verifyUser } from '@/lib/auth';
 
 export const metadata: Metadata = {
   title: 'CodeMaze | Admin Groups',
@@ -11,6 +10,5 @@ export const metadata: Metadata = {
 
 
 export default async function ProfilePage() {
-  await verifyUser("admin");
   return <Groups />
 }

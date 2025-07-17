@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic';
 
-import { verifyUser } from '@/lib/auth';
 import Users from './components/Users';
 import { Metadata } from 'next';
 
@@ -12,6 +11,5 @@ export const metadata: Metadata = {
 
 
 export default async function UsersPage() {
-    await verifyUser("admin");
   return <Users />;
 }
