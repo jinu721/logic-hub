@@ -9,6 +9,7 @@ import {
   Trophy,
   Settings,
   Store,
+  User2Icon,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -23,6 +24,7 @@ type User = {
     image: string;
   };
   userRank: number;
+  role: string;
   username: string;
   stats: {
     currentStreak: number;
@@ -39,7 +41,7 @@ export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const {notifications, unreadCount} = useNotifications();
+  const { notifications, unreadCount } = useNotifications();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -61,6 +63,7 @@ export default function Navbar() {
       image: "/default-avatar.png",
     },
     username: "Guest",
+    role: "user",
     userRank: 0,
     stats: {
       currentStreak: 0,
@@ -86,6 +89,17 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center space-x-5">
+            {currentUser.role === "admin" && (
+              <Link href="/admin/users">
+                <button className="relative cursor-pointer p-2.5 bg-gray-800/70 rounded-xl hover:bg-gray-700 transition-all duration-300 hover:ring-2 hover:ring-indigo-500/40 group">
+                  <User2Icon
+                    size={18}
+                    className="text-gray-300 group-hover:text-indigo-300"
+                  />
+                  <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-indigo-500 rounded-full border border-gray-900 animate-pulse"></span>
+                </button>
+              </Link>
+            )}
             {pathname !== "/home" ? (
               <div className="flex items-center space-x-3">
                 <Link href="/market">
