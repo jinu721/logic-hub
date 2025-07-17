@@ -1,12 +1,13 @@
 import { Response } from "express";
+import { env } from "../config/env";
 
 export const setAccessToken = (res: Response, token: string) => {
   res.cookie("accessToken", token, {
-    httpOnly: false,
-    secure: false,
-    sameSite: 'lax',
-    // domain:".jinu.site",
-    path: '/',
+    httpOnly: true, 
+    secure: process.env.NODE_ENV === "production", 
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+    domain: env.NODE_ENV === "production" ? ".jinu.site" : undefined,
+    path: "/",
     maxAge: 24 * 60 * 60 * 1000,
   });
 };
@@ -14,10 +15,11 @@ export const setAccessToken = (res: Response, token: string) => {
 export const setRefreshToken = (res: Response, token: string) => {
   res.cookie("refreshToken", token, {
     httpOnly: true,
-    secure: false,
-    sameSite: 'lax',
-    // domain:".jinu.site",
-    path: '/',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+    domain: env.NODE_ENV === "production" ? ".jinu.site" : undefined,
+    path: "/",
     maxAge: 24 * 60 * 60 * 1000,
   });
 };
+

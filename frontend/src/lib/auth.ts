@@ -14,6 +14,9 @@ export async function verifyUser(requiredRole?: string): Promise<AuthUser> {
   const cookieStore = cookies();
   const token = (await cookieStore).get("accessToken")?.value;
 
+
+  console.log("ACCESS TOKEN: ", token);
+
   if (!token) {
     console.log("No token found");
     redirect("/auth/login");
@@ -22,7 +25,7 @@ export async function verifyUser(requiredRole?: string): Promise<AuthUser> {
   let decoded: any;
   try {
     console.log("Decoded token: ", decoded);
-    decoded = jwt.verify(token, "sampleAccessTokenSecret123");
+    decoded = jwt.verify(token, process.env.JWT_SECRET as string);
   } catch (err) {
     console.log("Token verification failed:", err);
     redirect("/auth/login");
