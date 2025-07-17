@@ -15,20 +15,23 @@ export async function verifyUser(requiredRole?: string): Promise<AuthUser> {
   const token = (await cookieStore).get("accessToken")?.value;
 
   if (!token) {
+    console.log("No token found");
     redirect("/auth/login");
   }
 
   let decoded: any;
   try {
+    console.log("Decoded token: ", token);
     decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
   } catch (err) {
-    console.log(err);
+    console.log("Token verification failed:", err);
     redirect("/auth/login");
   }
 
   if (requiredRole && decoded.role !== requiredRole) {
+    console.log("User role does not match required role");
     redirect("/home");
   }
-
+  console.log("Completed user verification");
   return decoded as AuthUser;
 }
