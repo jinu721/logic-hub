@@ -22,7 +22,7 @@ export async function verifyUser(requiredRole?: string): Promise<AuthUser> {
   let decoded: any;
   try {
     console.log("Decoded token: ", token);
-    decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
+    decoded = jwt.verify(token, "sampleAccessTokenSecret123");
   } catch (err) {
     console.log("Token verification failed:", err);
     redirect("/auth/login");
