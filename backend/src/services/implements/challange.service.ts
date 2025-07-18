@@ -101,23 +101,21 @@ export class ChallengeService implements IChallengeService {
     challenges: PublicChallengeDTO[];
     popularChallange: PublicChallengeDTO | null;
   }> {
+    let query: any = {};
 
-
-    let query:any = {};
-
-    if(filter.type){
+    if (filter.type) {
       query.type = filter.type;
     }
-    if(filter.isPremium){
+    if (filter.isPremium) {
       query.isPremium = filter.isPremium;
     }
-    if(filter.level){
+    if (filter.level) {
       query.level = filter.level;
     }
-    if(filter.tags){
+    if (filter.tags) {
       query.tags = { $in: filter.tags };
     }
-    if(filter.searchQuery){
+    if (filter.searchQuery) {
       query.title = { $regex: filter.searchQuery, $options: "i" };
     }
 
@@ -218,11 +216,21 @@ export class ChallengeService implements IChallengeService {
     };
   }
 
-  async getAllChallenges(search: string, page: number, limit: number): Promise<{challenges:PublicChallengeDTO[],totalItems:number}> {
-    const skip = (page-1) * limit;
-    const challenges = await this.challengeRepository.getAllChallenges(search,skip,limit);
-    const totalItems = await this.challengeRepository.countAllChallenges(search);
-    return {challenges:toPublicChallengeDTOs(challenges),totalItems};
+  async getAllChallenges(
+    search: string,
+    page: number,
+    limit: number
+  ): Promise<{ challenges: PublicChallengeDTO[]; totalItems: number }> {
+    const skip = (page - 1) * limit;
+    const challenges = await this.challengeRepository.getAllChallenges(
+      search,
+      skip,
+      limit
+    );
+    const totalItems = await this.challengeRepository.countAllChallenges(
+      search
+    );
+    return { challenges: toPublicChallengeDTOs(challenges), totalItems };
   }
 
   async updateChallenge(
@@ -267,96 +275,79 @@ export class ChallengeService implements IChallengeService {
     return toPublicChallengeDTOs(challenges);
   }
 
-async runChallengeCode(
-  challengeId: string,
-  language: string,
-  sourceCode: string,
-  input: string,
-  userId: string
-): Promise<any> {
-  console.log("▶️ Input parameters:");
-  console.log({ challengeId, language, sourceCode, input, userId });
+  async runChallengeCode(
+    challengeId: string,
+    language: string,
+    sourceCode: string,
+    input: string,
+    userId: string
+  ): Promise<any> {
+    console.log({ challengeId, language, sourceCode, input, userId });
 
-  const challenge = await this.challengeRepository.getChallengeById(challengeId);
-  console.log("📦 Challenge fetched:", challenge);
-
-  if (!challenge || challenge.type !== "code") {
-    console.log("❌ Invalid challenge or not a code type");
-    throw new Error("Only for code type");
-  }
-
-  if (!challenge.functionSignature) {
-    console.log("❌ Function signature missing");
-    throw new Error("Function signature missing in challenge");
-  }
-
-  const testCases = challenge.testCases.slice(0, 3);
-  console.log("🧪 Selected test cases (max 3):", testCases);
-
-  const results: any = [];
-
-  for (let i = 0; i < testCases.length; i++) {
-    console.log(`🔁 Running test case ${i + 1}`);
-
-    await sleep(i * 300);
-
-    const testCase: any = testCases[i];
-    console.log("🧪 Current test case:", testCase);
-
-    const funcName = challenge.functionSignature?.split("(")[0];
-    console.log("📛 Extracted function name:", funcName);
-
-    const fullSource = generateExecutableCode(
-      language,
-      sourceCode,
-      funcName,
-      testCase.input
+    const challenge = await this.challengeRepository.getChallengeById(
+      challengeId
     );
-    console.log("📝 Full source code for execution:", fullSource);
 
-    const executionResult = await runInWorkerThread(
+    if (!challenge || challenge.type !== "code") {
+      throw new Error("Only for code type");
+    }
+
+    if (!challenge.functionSignature) {
+      throw new Error("Function signature missing in challenge");
+    }
+
+    const testCases = challenge.testCases.slice(0, 3);
+
+    const results: any = [];
+
+    for (let i = 0; i < testCases.length; i++) {
+      await sleep(i * 300);
+
+      const testCase: any = testCases[i];
+
+      const funcName = challenge.functionSignature?.split("(")[0];
+
+      const fullSource = generateExecutableCode(
+        language,
+        sourceCode,
+        funcName,
+        testCase.input
+      );
+
+      const executionResult = await runInWorkerThread(
+        language,
+        fullSource,
+        input
+      );
+
+      const expectedOutput = String(testCase.output).trim();
+      const userOutput = executionResult.run.stdout.trim();
+
+      const passedTest = isEqual(expectedOutput, userOutput);
+
+      results.push({
+        input: testCase.input,
+        name: testCase.isHidden ? `Hidden Test ${i + 1}` : `Test ${i + 1}`,
+        expectedOutput: testCase.isHidden ? "[hidden]" : expectedOutput,
+        actualOutput: testCase.isHidden
+          ? passedTest
+            ? "[matches]"
+            : "[doesn't match]"
+          : userOutput,
+        passed: passedTest,
+      });
+    }
+
+    return {
+      userId,
+      challengeId,
       language,
-      fullSource,
-      input
-    );
-    console.log("⚙️ Execution result:", executionResult);
-
-    const expectedOutput = String(testCase.output).trim();
-    const userOutput = executionResult.run.stdout.trim();
-
-    console.log("✅ Expected output:", expectedOutput);
-    console.log("🧾 User output:", userOutput);
-
-    const passedTest = isEqual(expectedOutput, userOutput);
-    console.log("✔️ Test passed:", passedTest);
-
-    results.push({
-      input: testCase.input,
-      name: testCase.isHidden ? `Hidden Test ${i + 1}` : `Test ${i + 1}`,
-      expectedOutput: testCase.isHidden ? "[hidden]" : expectedOutput,
-      actualOutput: testCase.isHidden
-        ? passedTest
-          ? "[matches]"
-          : "[doesn't match]"
-        : userOutput,
-      passed: passedTest,
-    });
+      results,
+    };
   }
 
-  console.log("🎯 Final result for all test cases:", results);
-
-  return {
-    userId,
-    challengeId,
-    language,
-    results,
-  };
-}
-
-
-  async submitChallange(data: SubmitPayload,userId: string): Promise<any> {
+  async submitChallange(data: SubmitPayload, userId: string): Promise<any> {
     const { challengeId, userCode, language } = data;
-
 
     console.log("Data", data);
     const challenge = await this.challengeRepository.getChallengeById(
@@ -474,6 +465,10 @@ async runChallengeCode(
     } else if (!passed && !data.isTimeLimitedSubmission) {
       status = "failed-output";
     }
+
+
+    console.log("Test Results:::_: ", testResults);
+
     const progressData: any = {
       challengeId: challenge._id,
       userId: user._id,
@@ -489,7 +484,7 @@ async runChallengeCode(
         language: data.language,
         codeSubmitted: userCode,
         resultOutput: testResults,
-        testCasesPassed: testResults.filter((r) => r.status === "passed")
+        testCasesPassed: testResults.filter((r) => r.passed === true)
           .length,
         totalTestCases: testResults.length,
       },
