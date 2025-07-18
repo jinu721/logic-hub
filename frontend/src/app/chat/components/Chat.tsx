@@ -23,7 +23,7 @@ import ChatList from "./ChatList";
 import ChatHeader from "./ChatHeader";
 import ChatInfo from "./ChatInfo";
 import ChatMessages from "./ChatMessages";
-import DeletedChatPanel from "./DeletedChatPanel";
+import AccessBlockedPanel from "./AccessBlockedPanel";
 import AudioRecorder from "./AudioRecorder";
 import ImagePreview from "./ImagePreview";
 import ChatInput from "./ChatInput";
@@ -36,6 +36,7 @@ import { ConversationIF } from "@/types/conversation.types";
 import { GroupIF } from "@/types/group.types";
 import { UserIF } from "@/types/user.types";
 import Spinner from "@/components/shared/CustomLoader";
+import GroupCreationModal from "./CreateGroupModal";
 
 interface StickerData {
   id: number;
@@ -106,6 +107,7 @@ export default function ChatPage() {
   const [audioUrl] = useState<string | null>(null);
 
   const [reportPopupOpen, setReportPopupOpen] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const safeConversationData = conversationData ?? null;
   const safeCurrentUsersChatsList = currentUsersChatsList ?? [];
@@ -122,11 +124,13 @@ export default function ChatPage() {
     onlineStatus,
     updateGroup,
     isDeleted,
+    isRemoved,
     sendMessage,
   } = useChat({
     selectedChatId,
     conversationData: safeConversationData,
     currentUsersChatsList: safeCurrentUsersChatsList,
+    currentUserId,
   });
 
   const fetchConversationData = async (conversationId: string | null) => {
@@ -139,7 +143,9 @@ export default function ChatPage() {
       console.log("Messages", messages);
       setMessages((prev) => [...prev, ...messages.data]);
       setConversationData(conversation.data);
-      setActiveTab(conversation.data.type === "one-to-one" ? "personal" : "groups");
+      setActiveTab(
+        conversation.data.type === "one-to-one" ? "personal" : "groups"
+      );
     } catch (error) {
       console.log(error);
     } finally {
@@ -208,13 +214,22 @@ export default function ChatPage() {
   const isBlocked = !isGroupChat && otherUser && otherUser.isBlocked;
 
   const [groupUpdateData, setGroupUpdateData] = useState<Partial<GroupIF>>({
-    name: isGroup ? currentConversationData.group?.name || "" : "",
-    description: isGroup
-      ? currentConversationData.group?.description || ""
-      : "",
-    image: isGroup ? currentConversationData.group?.image || "" : "",
-    groupType: isGroup ? currentConversationData.group?.groupType || "" : "",
+    name: "",
+    description: "",
+    image: "",
+    groupType: "",
   });
+
+  useEffect(() => {
+    if (isGroup && currentConversationData.group) {
+      setGroupUpdateData({
+        name: currentConversationData.group.name || "",
+        description: currentConversationData.group.description || "",
+        image: currentConversationData.group.image || "",
+        groupType: currentConversationData.group.groupType || "",
+      });
+    }
+  }, [isGroup, currentConversationData]);
 
   const getUserRole = (): UserRole => {
     if (!isGroupChat || !currentConversationData.group) return "member";
@@ -284,8 +299,7 @@ export default function ChatPage() {
   }, []);
 
   useEffect(() => {
-    const handleAudioEnd = () => {
-    };
+    const handleAudioEnd = () => {};
 
     const currentAudio = audioRef.current;
     if (currentAudio) {
@@ -343,7 +357,7 @@ export default function ChatPage() {
   };
 
   const handleNewGroup = () => {
-    router.push("/chat/group");
+    setIsModalOpen(true);
   };
 
   const handleChatSelection = (chatId: string) => {
@@ -380,7 +394,7 @@ export default function ChatPage() {
     replyTo?: string
   ) => {
     const content = messageContent || userMessage;
-    
+
     sendMessage(
       content,
       messageType,
@@ -519,12 +533,26 @@ export default function ChatPage() {
       image: imageUrl,
     };
 
+    if (groupUpdateData.name?.length === 0) {
+      showToast({
+        type: "error",
+        message: "Group name is required",
+      });
+      return;
+    } else if (groupUpdateData.description&&groupUpdateData.description?.length < 10) {
+      showToast({
+        type: "error",
+        message: "Description must be at least 10 characters",
+      });
+      return;
+    }
+
     updateGroup({
       type: "edit_group_info",
       conversationId: selectedChatId,
       groupId: currentConversationData.group._id,
       members: [],
-      userId: null,
+      userId: currentUserId,
       newGroupData: updatedGroupData,
     });
 
@@ -773,11 +801,13 @@ export default function ChatPage() {
                 Select a chat to start messaging
               </div>
             </div>
-          ) : isConversationLoading? (
+          ) : isConversationLoading ? (
             <div className="flex-1 flex items-center justify-center">
               <Spinner />
             </div>
-          ) :  currentConversationData && currentUserId && !isConversationLoading ? (
+          ) : currentConversationData &&
+            currentUserId &&
+            !isConversationLoading ? (
             <>
               <ChatHeader
                 isGroupChat={isGroup}
@@ -818,10 +848,17 @@ export default function ChatPage() {
                     {isDeleted ||
                     currentConversationData?.isDeleted ||
                     currentConversationData?.group?.isDeleted ? (
-                      <DeletedChatPanel
+                      <AccessBlockedPanel
                         isGroupChat={isGroup}
                         handleDeleteChat={handleDeleteChat}
                         handleLeaveGroup={handleLeaveGroup}
+                        type="deleted-chat"
+                      />
+                    ) : isRemoved || !conversationData.participants.some((p) => p._id === currentUserId) ? (
+                      <AccessBlockedPanel
+                        isGroupChat={isGroup}
+                        handleLeaveGroup={handleLeaveGroup}
+                        type="removed-group"
                       />
                     ) : isRecording ? (
                       <AudioRecorder
@@ -917,6 +954,12 @@ export default function ChatPage() {
         onSubmit={handleReport}
         reportType={isGroupChat ? "group" : "user"}
       />
+      {isModalOpen && (
+        <GroupCreationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </>
   );
 }

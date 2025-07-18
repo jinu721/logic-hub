@@ -9,12 +9,14 @@ interface UseChatProps {
   selectedChatId: string | null;
   conversationData: ConversationIF | null;
   currentUsersChatsList: ConversationIF[];
+  currentUserId: string;
 }
 
 export default function useChat({
   selectedChatId,
   conversationData,
   currentUsersChatsList,
+  currentUserId,
 }: UseChatProps) {
   console.log("HOOKS DATA", selectedChatId);
 
@@ -26,6 +28,7 @@ export default function useChat({
   );
   const [typingUsers, setTypingUsers] = useState<UserIF[]>([]);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [isRemoved, setIsRemoved] = useState(false);
   const [currentConversationDataState, setCurrentConversationData] =
     useState<ConversationIF | null>(null);
   const [onlineStatus, setOnlineStatus] = useState(false);
@@ -241,13 +244,13 @@ export default function useChat({
       updatedMembers,
       groupInfo = {},
       type,
+      removeMember,
     }: any) => {
       console.log("Group Updated:", conversationId, updatedMembers, groupInfo);
 
       if (currentConversationDataState._id === conversationId) {
         setCurrentConversationData((prev) => {
           if (!prev) return prev;
-
           return {
             ...prev,
             participants: updatedMembers || prev.participants || [],
@@ -260,8 +263,29 @@ export default function useChat({
           };
         });
 
+        setCurrentUsersChats((prevChats) =>{
+          return prevChats.map((chat) => {
+            if (chat._id === conversationId) {
+              return {
+                ...chat,
+                participants: updatedMembers || chat.participants || [],
+                group: {
+                  ...chat.group,
+                  ...groupInfo,
+                  admins: groupInfo.admins || chat.group?.admins || [],
+                  members: groupInfo.members || chat.group?.members || [],
+                },
+              };
+            }
+            return chat;
+          })
+        })
+
         if (type === "delete_group") {
           setIsDeleted(true);
+        }
+        if(type === "remove_member" && removeMember === currentUserId){
+          setIsRemoved(true);
         }
       }
     };
@@ -285,6 +309,17 @@ export default function useChat({
     }) => {
       if (conversationId === selectedChatIdRef.current) {
         setTypingUsers(typingUsers);
+        setCurrentUsersChats((prevChats)=>{
+          return prevChats.map((chat) => {
+            if (chat._id === conversationId) {
+              return {
+                ...chat,
+                typingUsers,
+              };
+            }
+            return chat;
+          })
+        })
       }
     };
 
@@ -399,6 +434,7 @@ export default function useChat({
     currentUsersChats,
     typingUsers,
     isDeleted,
+    isRemoved,
     currentConversationData: currentConversationDataState,
     onlineStatus,
 

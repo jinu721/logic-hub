@@ -24,7 +24,7 @@ const ChatList: React.FC<Props> = ({
   handleTabChange,
   handleChatSelection,
   handleNewGroup,
-  handleSearchChats
+  handleSearchChats,
 }) => {
   const filteredChats = currentUsersChats.filter((chat) =>
     activeTab === "groups" ? chat.type === "group" : chat.type === "one-to-one"
@@ -90,16 +90,14 @@ const ChatList: React.FC<Props> = ({
           <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">
             {activeTab === "groups" ? "Groups" : "Personal"}
           </h3>
-          { loading ?(
+          {loading ? (
             <div className="flex items-center p-3 rounded-lg mb-2 cursor-pointer hover:bg-gray-700">
               <div className="w-10 h-10 rounded-md bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center text-lg font-semibold text-white">
                 {activeTab === "groups" ? "G" : "P"}
               </div>
               <div className="ml-3 flex-1">
                 <div className="flex justify-between items-center">
-                  <h4 className="font-medium">
-                    {"Loading..."}
-                  </h4>
+                  <h4 className="font-medium">{"Loading..."}</h4>
                 </div>
               </div>
             </div>
@@ -180,22 +178,39 @@ const ChatList: React.FC<Props> = ({
                     </div>
                     <div className="flex justify-between items-center">
                       <div className="flex flex-row space-x-1 flex-1 min-w-0">
-                        <p className="text-sm text-purple-400 font-medium flex-shrink-0">
-                          {chat.type === "group" &&
-                            chat.latestMessage?.sender.username}
-                        </p>
-                        <p className="text-sm text-gray-400 truncate">
-                          {chat.latestMessage?.type === "text"
-                            ? chat.latestMessage.content
-                            : chat.latestMessage?.type === "image"
-                            ? "Image"
-                            : chat.latestMessage?.type === "audio"
-                            ? "Audio"
-                            : chat.latestMessage?.type === "sticker"
-                            ? "Sticker"
-                            : "No messages yet"}
-                        </p>
+                        {chat.typingUsers.length > 0 ? (
+                          <p className="text-sm text-purple-400 font-medium truncate">
+                            {chat.typingUsers.map((user, index) => (
+                              <span key={user._id}>
+                                {user.username}
+                                {index < chat.typingUsers.length - 1
+                                  ? ", "
+                                  : ""}
+                              </span>
+                            ))}{" "}
+                            is typing...
+                          </p>
+                        ) : (
+                          <>
+                            <p className="text-sm text-purple-400 font-medium flex-shrink-0">
+                              {chat.type === "group" &&
+                                chat.latestMessage?.sender.username}
+                            </p>
+                            <p className="text-sm text-gray-400 truncate">
+                              {chat.latestMessage?.type === "text"
+                                ? chat.latestMessage.content
+                                : chat.latestMessage?.type === "image"
+                                ? "Image"
+                                : chat.latestMessage?.type === "audio"
+                                ? "Audio"
+                                : chat.latestMessage?.type === "sticker"
+                                ? "Sticker"
+                                : "No messages yet"}
+                            </p>
+                          </>
+                        )}
                       </div>
+
                       {chat.unreadCounts &&
                         chat.unreadCounts[currentUserId] > 0 && (
                           <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium ml-2 flex-shrink-0">
@@ -213,9 +228,7 @@ const ChatList: React.FC<Props> = ({
               </div>
               <div className="ml-3 flex-1">
                 <div className="flex justify-between items-center">
-                  <h4 className="font-medium">
-                    {"No chats available"}
-                  </h4>
+                  <h4 className="font-medium">{"No chats available"}</h4>
                 </div>
               </div>
             </div>

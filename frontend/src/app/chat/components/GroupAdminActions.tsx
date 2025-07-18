@@ -11,7 +11,6 @@ interface Props {
   groupUpdateData: Partial<GroupIF>;
   setGroupUpdateData: React.Dispatch<React.SetStateAction<Partial<GroupIF>>>;
   currentConversationData: ConversationIF;
-  handleImageUploadGroup: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSaveChanges: () => void;
   showJoinRequests: boolean;
   setShowJoinRequests: React.Dispatch<React.SetStateAction<boolean>>;
@@ -25,7 +24,6 @@ const GroupAdminActions: React.FC<Props> = ({
   groupUpdateData,
   setGroupUpdateData,
   currentConversationData,
-  handleImageUploadGroup,
   handleSaveChanges,
   showJoinRequests,
   setShowJoinRequests,
@@ -81,37 +79,6 @@ const GroupAdminActions: React.FC<Props> = ({
                 }
                 className="w-full bg-gray-800 text-gray-300 text-sm rounded-md py-2 px-3 border border-gray-600 focus:outline-none focus:border-purple-500"
               />
-            </div>
-
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Group Avatar</label>
-              <div className="flex items-center space-x-3">
-                {groupUpdateData.image ? (
-                  <img
-                    src={groupUpdateData.image}
-                    alt={groupUpdateData.name}
-                    className="w-12 h-12 rounded-full"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-lg font-semibold">
-                    {currentConversationData.group?.name?.[0] || "G"}
-                  </div>
-                )}
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  id="group-avatar"
-                  onChange={handleImageUploadGroup}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="group-avatar"
-                  className="bg-gray-600 hover:bg-gray-500 text-xs text-white py-1 px-3 rounded-md cursor-pointer"
-                >
-                  Change Avatar
-                </label>
-              </div>
             </div>
 
             <div>

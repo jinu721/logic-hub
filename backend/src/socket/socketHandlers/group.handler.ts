@@ -148,6 +148,7 @@ export class GroupHandler {
             conversationId: finalConversationId,
             updatedMembers: updatedConversation.participants,
             groupInfo: updatedGroup,
+            removeMember,
             type,
           });
         } catch (socketErr) {

@@ -22,7 +22,6 @@ interface ChatInfoProps {
   setShowEditGroup: React.Dispatch<React.SetStateAction<boolean>>;
   groupUpdateData: Partial<GroupIF>;
   setGroupUpdateData:  React.Dispatch<React.SetStateAction<Partial<GroupIF>>>;
-  handleImageUploadGroup: (file: File) => void;
   handleSaveChanges: () => void;
   showJoinRequests: boolean;
   setShowJoinRequests: (value: boolean) => void;
@@ -61,7 +60,6 @@ const ChatInfo: React.FC<ChatInfoProps> = ({
   setShowEditGroup,
   groupUpdateData,
   setGroupUpdateData,
-  handleImageUploadGroup,
   handleSaveChanges,
   showJoinRequests,
   setShowJoinRequests,
@@ -88,6 +86,7 @@ const ChatInfo: React.FC<ChatInfoProps> = ({
   handleAddUser,
   handleAddSelectedMembers,
 }) => {
+
   if(!currentConversationData) return null
   return (
     <>
@@ -110,7 +109,6 @@ const ChatInfo: React.FC<ChatInfoProps> = ({
               groupUpdateData={groupUpdateData}
               setGroupUpdateData={setGroupUpdateData}
               currentConversationData={currentConversationData}
-              handleImageUploadGroup={handleImageUploadGroup as any}
               handleSaveChanges={handleSaveChanges}
               showJoinRequests={showJoinRequests}
               setShowJoinRequests={setShowJoinRequests as any}

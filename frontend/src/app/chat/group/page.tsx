@@ -33,19 +33,19 @@ const GroupCreationUI = () => {
   const [availableMembers, setAvailableMembers] = useState([]);
   const {showToast} = useToast();
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await getCrrentUserFriends();
-        console.log("Fetched Friends :- ", response.data);
-        setAvailableMembers(response.data);
-      } catch (err) {
-        showToast({ type: "error", message: "Error fetching friends", duration: 3000 });
-        console.log(err);
-      }
-    };
-    fetchUsers();
-  }, []);
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     try {
+  //       const response = await getCrrentUserFriends();
+  //       console.log("Fetched Friends :- ", response.data);
+  //       setAvailableMembers(response.data);
+  //     } catch (err) {
+  //       showToast({ type: "error", message: "Error fetching friends", duration: 3000 });
+  //       console.log(err);
+  //     }
+  //   };
+  //   fetchUsers();
+  // }, []);
 
   const handleDragOver = (e) => {
     e.preventDefault();
