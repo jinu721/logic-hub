@@ -26,6 +26,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next(); 
   }
 
+  console.log("Reqest URL: ", request.url);
+  console.log("Reqest URL: ", request);
+
   const accessToken = request.cookies.get("accessToken")?.value;
   console.log("ACCESS TOKENN ", accessToken);
 
