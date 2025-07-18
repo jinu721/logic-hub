@@ -2,11 +2,10 @@ import axios from "axios";
 import { store } from "@/redux/store";
 import { logout } from "@/redux/slices/authSlice";
 
-// const baseURL = "https://api.jinu.site/"; 
-const baseURL = "http://localhost:5000/"; 
+
 
 export const axiosInstance = axios.create({
-  baseURL,
+  baseURL:process.env.BACKEND_URL,
   withCredentials: true,
 });
 
