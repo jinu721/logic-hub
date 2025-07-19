@@ -8,10 +8,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { userRegister } from "@/redux/slices/authSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useToast } from "@/context/Toast";
-import { Github, Terminal } from "lucide-react";
+import { Github,  Terminal } from "lucide-react";
 import RegisterForm from "./RegisterForm";
 import { RegisterIF } from "@/types/auth.types";
 import Link from "next/link";
+
 
 export interface ErrorData {
   username: string;
@@ -55,10 +56,7 @@ const Register: React.FC = () => {
     }
   }, [auth.user]);
 
-  const checkAvailability = async (
-    type: keyof AvailabilityData,
-    value: string
-  ) => {
+  const checkAvailability = async (type: keyof AvailabilityData, value: string) => {
     try {
       const response = await checkUser({ type, value });
       setAvailability((prev) => ({
@@ -72,8 +70,7 @@ const Register: React.FC = () => {
         }));
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "An Unexpected Error Occured";
+      const message = err instanceof Error ? err.message : "An Unexpected Error Occured";
       showToast({ type: "error", message, duration: 3000 });
     }
   };
@@ -97,16 +94,14 @@ const Register: React.FC = () => {
     let formValid = true;
     const newErrors: ErrorData = { ...errors };
 
-    (["username", "email", "password"] as (keyof RegisterIF)[]).forEach(
-      (field) => {
-        const value = form[field];
-        const error = validation(field, value);
-        if (error) {
-          newErrors[field] = error;
-          formValid = false;
-        }
+    (["username", "email", "password"] as (keyof RegisterIF)[]).forEach((field) => {
+      const value = form[field];
+      const error = validation(field, value);
+      if (error) {
+        newErrors[field] = error;
+        formValid = false;
       }
-    );
+    });
 
     setErrors(newErrors);
     if (!formValid) return;
@@ -121,15 +116,10 @@ const Register: React.FC = () => {
         });
         router.push("/auth/verify");
       } else {
-        showToast({
-          type: "error",
-          message: "Registration failed",
-          duration: 3000,
-        });
+        showToast({ type: "error", message: "Registration failed", duration: 3000 });
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Registration failed";
+      const message = err instanceof Error ? err.message : "Registration failed";
       showToast({ type: "error", message, duration: 3000 });
     } finally {
       setIsLoading(false);
@@ -161,15 +151,12 @@ const Register: React.FC = () => {
 
         <div className="my-5 flex items-center justify-center">
           <div className="w-full border-t border-gray-700"></div>
-          <span className="px-2 bg-gray-800 text-gray-400 text-xs absolute">
-            OR
-          </span>
+          <span className="px-2 bg-gray-800 text-gray-400 text-xs absolute">OR</span>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Link
-            // href="http://localhost:5000/auth/github"
-            href={`https://api.jinu.site/auth/github`}
+            href="http://localhost:5000/auth/github"
             className="flex items-center justify-center text-white py-2.5 bg-gray-900/50 
             border border-gray-700 rounded-lg hover:bg-gray-800/50 transition"
           >
@@ -180,8 +167,7 @@ const Register: React.FC = () => {
           </Link>
 
           <Link
-            // href="http://localhost:5000/auth/google"
-            href={`https://api.jinu.site/auth/google`}
+            href="http://localhost:5000/auth/google"
             className="flex items-center justify-center text-white py-2.5 bg-gray-900/50 
             border border-gray-700 rounded-lg hover:bg-gray-800/50 transition"
           >
@@ -223,6 +209,6 @@ const Register: React.FC = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Register;
