@@ -63,17 +63,6 @@ const Login: React.FC = () => {
     }
   }, [dispatch, router, searchParams, showToast]);
 
-  // useEffect(() => {
-  //   if (
-  //     auth.user &&
-  //     !auth.user.security &&
-  //     auth.user.isVerified &&
-  //     !auth.user.isBanned
-  //   ) {
-  //     router.replace("/home");
-  //   }
-  // }, [auth.user, router]);
-
   useLayoutEffect(() => {
     if (auth.user) {
       router.replace("/home");
@@ -159,55 +148,53 @@ const Login: React.FC = () => {
     <>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-950 to-black p-4">
         <div className="w-4/5 max-w-sm bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-700/50 pr-6 pl-6 pb-4 pt-4 relative overflow-hidden">
-          <div className="absolute -top-16 -left-16 w-60 h-60 bg-cyan-500/20 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-16 -right-16 w-60 h-60 bg-purple-500/20 rounded-full blur-3xl"></div>
+          <div className="absolute -top-16 -left-16 w-60 h-60 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -bottom-16 -right-16 w-60 h-60 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-3">
-              <Terminal className="h-8 w-8 text-cyan-400" />
+          <div className="relative z-10">
+            <div className="text-center mb-8">
+              <div className="flex justify-center mb-3">
+                <Terminal className="h-8 w-8 text-cyan-400" />
+              </div>
+              <h1 className="text-xl font-bold text-white mb-1">Welcome Back</h1>
+              <p className="text-gray-400 text-sm">Sign in to your account</p>
             </div>
-            <h1 className="text-xl font-bold text-white mb-1">Welcome Back</h1>
-            <p className="text-gray-400 text-sm">Sign in to your account</p>
-          </div>
-          <LoginForm
-            form={form}
-            errors={errors}
-            isLoading={isLoading}
-            showPassword={showPassword}
-            setShowPassword={setShowPassword}
-            handleChange={handleChange}
-            handleSubmit={handleSubmit}
-          />
-          <div className="my-5 flex items-center justify-center">
-            <div className="w-full border-t border-gray-700"></div>
-            <span className="px-2 bg-gray-800 text-gray-400 text-xs absolute">
-              OR
-            </span>
-          </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Link
-              href={`https://api.jinu.site/auth/github`}
-              // href={`http://localhost:5000/auth/github`}
-              passHref
-              className="flex items-center justify-center text-white py-2.5 bg-gray-900/50 
-            border border-gray-700 rounded-lg hover:bg-gray-800/50 transition"
-            >
-              <button className="flex items-center justify-center">
-                <Github className="w-5 h-5 text-white mr-2" />
-                GitHub
-              </button>
-            </Link>
+            <LoginForm
+              form={form}
+              errors={errors}
+              isLoading={isLoading}
+              showPassword={showPassword}
+              setShowPassword={setShowPassword}
+              handleChange={handleChange}
+              handleSubmit={handleSubmit}
+            />
 
-            <Link
-              href={`https://api.jinu.site/auth/google`}
-              // href={`http://localhost:5000/auth/google`}
-              passHref
-              className="flex items-center justify-center text-white py-2.5 bg-gray-900/50 
-            border border-gray-700 rounded-lg hover:bg-gray-800/50 transition"
-            >
-              <button className="flex items-center justify-center">
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+            <div className="my-5 flex items-center justify-center relative">
+              <div className="w-full border-t border-gray-700"></div>
+              <span className="px-2 bg-gray-800 text-gray-400 text-xs absolute bg-gray-800/60 backdrop-blur-sm">
+                OR
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <Link
+                href={`https://api.jinu.site/auth/github`}
+                className="flex items-center justify-center text-white py-2.5 bg-gray-900/50 
+                border border-gray-700 rounded-lg hover:bg-gray-800/50 transition-colors duration-200
+                focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50"
+              >
+                <Github className="w-4 h-4 text-white mr-2" />
+                <span>GitHub</span>
+              </Link>
+
+              <Link
+                href={`https://api.jinu.site/auth/google`}
+                className="flex items-center justify-center text-white py-2.5 bg-gray-900/50 
+                border border-gray-700 rounded-lg hover:bg-gray-800/50 transition-colors duration-200
+                focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50"
+              >
+                <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -225,30 +212,28 @@ const Login: React.FC = () => {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                Google
-              </button>
-            </Link>
-          </div>
+                <span>Google</span>
+              </Link>
+            </div>
 
-          <div className="text-center mt-5 text-sm text-gray-400">
-            Dont have an account?{" "}
-            <div className="text-center mt-5 text-sm text-gray-400">
+            <div className="text-center text-sm text-gray-400 mb-3">
+              Don`t have an account?{" "}
               <Link
                 href="/auth/register"
-                className="flex items-center justify-center text-cyan-400 hover:text-cyan-300 transition-colors"
+                className="text-cyan-400 hover:text-cyan-300 transition-colors duration-200 inline-block"
               >
                 Create Account
               </Link>
             </div>
-          </div>
 
-          <div className="text-center mt-3 text-sm">
-            <Link
-              href="/auth/forgot"
-              className="text-gray-400 hover:text-cyan-300 transition-colors"
-            >
-              Forgot password?
-            </Link>
+            <div className="text-center text-sm">
+              <Link
+                href="/auth/forgot"
+                className="text-gray-400 hover:text-cyan-300 transition-colors duration-200 inline-block"
+              >
+                Forgot password?
+              </Link>
+            </div>
           </div>
         </div>
       </div>

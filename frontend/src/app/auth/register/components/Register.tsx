@@ -8,21 +8,25 @@ import { useDispatch, useSelector } from "react-redux";
 import { userRegister } from "@/redux/slices/authSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useToast } from "@/context/Toast";
-import { Github,  Terminal } from "lucide-react";
+import { Github, Terminal } from "lucide-react";
 import RegisterForm from "./RegisterForm";
 import { RegisterIF } from "@/types/auth.types";
 import Link from "next/link";
-
 
 export interface ErrorData {
   username: string;
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
 interface AvailabilityData {
   username: boolean;
   email: boolean;
+}
+
+interface FormData extends RegisterIF {
+  confirmPassword: string;
 }
 
 const Register: React.FC = () => {
@@ -33,16 +37,18 @@ const Register: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const [form, setForm] = useState<RegisterIF>({
+  const [form, setForm] = useState<FormData>({
     username: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
   const [errors, setErrors] = useState<ErrorData>({
     username: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
   const [availability, setAvailability] = useState<AvailabilityData>({
@@ -56,7 +62,10 @@ const Register: React.FC = () => {
     }
   }, [auth.user]);
 
-  const checkAvailability = async (type: keyof AvailabilityData, value: string) => {
+  const checkAvailability = async (
+    type: keyof AvailabilityData,
+    value: string
+  ) => {
     try {
       const response = await checkUser({ type, value });
       setAvailability((prev) => ({
@@ -70,17 +79,49 @@ const Register: React.FC = () => {
         }));
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "An Unexpected Error Occured";
+      const message =
+        err instanceof Error ? err.message : "An Unexpected Error Occured";
       showToast({ type: "error", message, duration: 3000 });
     }
+  };
+
+  const validateConfirmPassword = (
+    password: string,
+    confirmPassword: string
+  ): string => {
+    if (!confirmPassword) {
+      return "Please confirm your password";
+    }
+    if (password !== confirmPassword) {
+      return "Passwords do not match";
+    }
+    return "";
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
 
-    const errorMessage = validation(name, value);
-    setErrors((prev) => ({ ...prev, [name]: errorMessage }));
+    if (name === "confirmPassword") {
+      const confirmPasswordError = validateConfirmPassword(
+        form.password,
+        value
+      );
+      setErrors((prev) => ({ ...prev, confirmPassword: confirmPasswordError }));
+    } else if (name === "password") {
+      const passwordError = validation(name, value);
+      const confirmPasswordError = form.confirmPassword
+        ? validateConfirmPassword(value, form.confirmPassword)
+        : "";
+      setErrors((prev:any) => ({
+        ...prev,
+        [name]: passwordError,
+        confirmPassword: confirmPasswordError,
+      }));
+    } else {
+      const errorMessage = validation(name, value);
+      setErrors((prev) => ({ ...prev, [name]: errorMessage }));
+    }
 
     if (name === "username" || name === "email") {
       checkAvailability(name as keyof AvailabilityData, value);
@@ -94,20 +135,40 @@ const Register: React.FC = () => {
     let formValid = true;
     const newErrors: ErrorData = { ...errors };
 
-    (["username", "email", "password"] as (keyof RegisterIF)[]).forEach((field) => {
-      const value = form[field];
-      const error = validation(field, value);
-      if (error) {
-        newErrors[field] = error;
-        formValid = false;
+    (["username", "email", "password"] as (keyof RegisterIF)[]).forEach(
+      (field) => {
+        const value = form[field];
+        const error = validation(field, value);
+        if (error) {
+          newErrors[field] = error;
+          formValid = false;
+        }
       }
-    });
+    );
+
+    const confirmPasswordError = validateConfirmPassword(
+      form.password,
+      form.confirmPassword
+    );
+    if (confirmPasswordError) {
+      newErrors.confirmPassword = confirmPasswordError;
+      formValid = false;
+    }
 
     setErrors(newErrors);
-    if (!formValid) return;
+    if (!formValid) {
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      const response = await dispatch(userRegister(form));
+      const registrationData: RegisterIF = {
+        username: form.username,
+        email: form.email,
+        password: form.password,
+      };
+
+      const response = await dispatch(userRegister(registrationData));
       if (userRegister.fulfilled.match(response)) {
         showToast({
           type: "success",
@@ -116,10 +177,15 @@ const Register: React.FC = () => {
         });
         router.push("/auth/verify");
       } else {
-        showToast({ type: "error", message: "Registration failed", duration: 3000 });
+        showToast({
+          type: "error",
+          message: "Registration failed",
+          duration: 3000,
+        });
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Registration failed";
+      const message =
+        err instanceof Error ? err.message : "Registration failed";
       showToast({ type: "error", message, duration: 3000 });
     } finally {
       setIsLoading(false);
@@ -128,11 +194,11 @@ const Register: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-950 to-black p-4">
-      <div className="w-4/5 max-w-sm bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-700/50 pr-6 pl-6 pb-4 pt-4 relative overflow-hidden">
+      <div className="w-4/5 max-w-md bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-700/50 pr-6 pl-6 pb-4 pt-4 relative overflow-hidden">
         <div className="absolute -top-16 -left-16 w-60 h-60 bg-cyan-500/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-16 -right-16 w-60 h-60 bg-purple-500/20 rounded-full blur-3xl"></div>
 
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <div className="flex justify-center mb-3">
             <Terminal className="h-8 w-8 text-cyan-400" />
           </div>
@@ -149,19 +215,21 @@ const Register: React.FC = () => {
           handleSubmit={handleSubmit}
         />
 
-        <div className="my-5 flex items-center justify-center">
+        <div className="my-4 flex items-center justify-center">
           <div className="w-full border-t border-gray-700"></div>
-          <span className="px-2 bg-gray-800 text-gray-400 text-xs absolute">OR</span>
+          <span className="px-2 bg-gray-800 text-gray-400 text-xs absolute">
+            OR
+          </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 mb-4">
           <Link
             href="http://localhost:5000/auth/github"
             className="flex items-center justify-center text-white py-2.5 bg-gray-900/50 
             border border-gray-700 rounded-lg hover:bg-gray-800/50 transition"
           >
             <button className="flex items-center justify-center">
-              <Github className="w-5 h-5 text-white mr-2" />
+              <Github className="w-4 h-4 text-white mr-2" />
               GitHub
             </button>
           </Link>
@@ -172,7 +240,7 @@ const Register: React.FC = () => {
             border border-gray-700 rounded-lg hover:bg-gray-800/50 transition"
           >
             <button className="flex items-center justify-center">
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -195,20 +263,18 @@ const Register: React.FC = () => {
           </Link>
         </div>
 
-        <div className="text-center mt-5 text-sm text-gray-400">
+        <div className="text-center text-sm text-gray-400 relative z-10">
           Already have an account?{" "}
-          <div className="text-center mt-5 text-sm text-gray-400">
-            <Link
-              href="/auth/login"
-              className="flex items-center justify-center text-cyan-400 hover:text-cyan-300 transition-colors"
-            >
-              Login
-            </Link>
-          </div>
+          <Link
+            href="/auth/login"
+            className="text-cyan-400 hover:text-cyan-300 transition-colors relative z-10"
+          >
+            Login
+          </Link>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Register;
