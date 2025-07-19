@@ -29,9 +29,7 @@ const LeaderboardTable: React.FC<Props> = ({
     <table className="w-full">
       <thead>
         <tr className="bg-gradient-to-r from-gray-700 to-gray-750">
-          <th
-            className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
-          >
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer">
             <div className="flex items-center gap-1">
               <span>Rank</span>
             </div>
@@ -39,29 +37,23 @@ const LeaderboardTable: React.FC<Props> = ({
           <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
             User
           </th>
-          <th
-            className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
-          >
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer">
             <div className="flex items-center gap-1">
               <span>XP Gained</span>
             </div>
           </th>
-          <th
-            className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
-          >
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer">
             <div className="flex items-center gap-1">
               <span>Solved</span>
             </div>
           </th>
-          <th
-            className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
-          >
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer">
             <div className="flex items-center gap-1">
               <span>Domains</span>
             </div>
           </th>
           <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden lg:table-cell">
-            Level
+            Streak
           </th>
         </tr>
       </thead>
@@ -76,7 +68,7 @@ const LeaderboardTable: React.FC<Props> = ({
               </div>
             </td>
           </tr>
-        ) :users.length === 0 ? (
+        ) : users.length === 0 ? (
           <tr>
             <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
               <div className="flex flex-col items-center">
@@ -117,8 +109,10 @@ const LeaderboardTable: React.FC<Props> = ({
               <td className="px-4 py-4 whitespace-nowrap">
                 <div className="flex items-center">
                   <div className="w-8 h-8 flex items-center justify-center font-bold text-gray-400">
-                    {index + 1}
-                    <Trophy size={16} className="text-gray-900" />
+                    {index + 3 + 1}
+                    {user.membership?.isActive && (
+                      <Star size={14} className="text-yellow-500" />
+                    )}
                   </div>
                 </div>
               </td>
@@ -163,9 +157,7 @@ const LeaderboardTable: React.FC<Props> = ({
                 <div className="flex items-center">
                   <Check size={16} className="text-green-500 mr-2" />
                   <span>{0}</span>
-                  <span className="text-gray-500 text-sm ml-1">
-                    / {10}
-                  </span>
+                  <span className="text-gray-500 text-sm ml-1">/ {10}</span>
                 </div>
               </td>
 
@@ -180,14 +172,15 @@ const LeaderboardTable: React.FC<Props> = ({
                 <div
                   className={`px-2 py-1 text-xs rounded-lg inline-flex items-center
                     ${
-                      user.stats.level ?? "master"
-                        ? "bg-red-500 bg-opacity-20 text-red-400"
-                        : user.stats.level ?? "adept"
-                        ? "bg-yellow-500 bg-opacity-20 text-yellow-400"
-                        : "bg-green-500 bg-opacity-20 text-green-400"
+                      user.stats.longestStreak >= 30
+                        ? "bg-red-500 bg-opacity-20 text-white-400"
+                        : user.stats.longestStreak >=20
+                        ? "bg-yellow-500 bg-opacity-20 text-white-400"
+                        : "bg-green-500 bg-opacity-20 text-white-400"
                     }`}
                 >
                   <Target size={12} className="mr-1" />
+                  {user.stats.longestStreak}
                 </div>
               </td>
             </motion.tr>
