@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, use } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import socket from "@/utils/socket.helper";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/context/Toast";
@@ -40,6 +40,7 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
   );
   const [challengeStarted, setChallengeStarted] = useState<boolean>(false);
   const [challengeCompleted, setChallengeCompleted] = useState<boolean>(false);
+  const [xpReward,setXpReward] = useState<number>(0);
   const [consoleOutput, setConsoleOutput] = useState<ConsoleOutput[]>([]);
   const [previewResults, setPreviewResults] = useState<any>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -57,7 +58,7 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
   const [activeRightTab, setActiveRightTab] = useState<"console" | "testcases">(
     "console"
   );
-  const [timeExpired,setTimeExpired] = useState(false);
+  const [timeExpired, setTimeExpired] = useState(false);
   const [userInput, setUserInput] = useState("");
   const latestUserInputRef = useRef("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -212,7 +213,6 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
         if (prevTime <= 1) {
           clearInterval(timerInterval);
           setTimeExpired(true);
-          // handleSubmitSolution(true, latestUserInputRef.current);
           return 0;
         }
         return prevTime - 1;
@@ -234,8 +234,6 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
       setTimeLeft(challenge?.timeLimit * 60 || 1800);
     }
   };
-
-
 
   const runCode = async () => {
     setIsRunning(true);
@@ -271,81 +269,82 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
     }
   };
 
-const handleSubmitSolution = async (
-  isAutoSubmit: boolean = false,
-  codeToSubmit: string | null = null
-) => {
-  const finalCode = codeToSubmit || userInput;
+  const handleSubmitSolution = async (
+    isAutoSubmit: boolean = false,
+    codeToSubmit: string | null = null
+  ) => {
+    const finalCode = codeToSubmit || userInput;
 
-  if (isSubmitting) return;
+    if (isSubmitting) return;
 
-  setIsSubmitting(true);
+    setIsSubmitting(true);
 
-  try {
-    const timeTakenInSeconds = challenge
-      ? challenge.timeLimit * 60 - timeLeft
-      : 0;
-    const timeTaken = Math.ceil(timeTakenInSeconds / 60);
+    try {
+      const timeTakenInSeconds = challenge
+        ? challenge.timeLimit * 60 - timeLeft
+        : 0;
+      const timeTaken = Math.ceil(timeTakenInSeconds / 60);
 
-    const payload = {
-      challengeId: challenge?._id,
-      token: localStorage.getItem("accessToken"),
-      finishTime: timeTaken,
-      language: currentLanguage,
-      userCode: finalCode,
-    };
+      const payload = {
+        challengeId: challenge?._id,
+        token: localStorage.getItem("accessToken"),
+        finishTime: timeTaken,
+        language: currentLanguage,
+        userCode: finalCode,
+      };
 
-    const data = await submitCodeChallenge(payload);
+      const data = await submitCodeChallenge(payload);
 
-    const isCipher = challenge?.type === "cipher";
-    const isCode = challenge?.type === "code";
-    const passed = data?.passed;
+      const isCipher = challenge?.type === "cipher";
+      const isCode = challenge?.type === "code";
+      const passed = data?.passed;
 
-    let redirectHome = false;
+      let redirectHome = false;
 
-    if (isCipher && !passed) {
-      serCipherFailed(true);
-      setTimeout(() => serCipherFailed(false), 2000);
-      redirectHome = false;
-    }
-
-    if (isCode) {
-      setPreviewResults(data.testResults);
-    }
-
-    setChallengeCompleted(!!passed);
-
-    if (passed) {
-      if (data.newLevel && data.newLevel > 0) {
-        queueLevelUp({
-          newLevel: data.newLevel,
-          xpGained: data.xpGained,
-          remainingXP: data.remainingXP,
-          rewards: data.rewards || [],
-        });
-      }
-      redirectHome = true;
-    }
-
-    if (isAutoSubmit) {
-      setTimeExpired(false);
-      if (!isCipher || (isCipher && passed)) {
-        redirectHome = true;
-      } else {
+      if (isCipher && !passed) {
+        serCipherFailed(true);
+        setTimeout(() => serCipherFailed(false), 2000);
         redirectHome = false;
       }
+
+      if (isCode) {
+        setPreviewResults(data.testResults);
+      }
+
+      setChallengeCompleted(!!passed);
+
+      if (passed) {
+        setXpReward(data.xpGained);
+        if (data.newLevel && data.newLevel > 0) {
+          queueLevelUp({
+            newLevel: data.newLevel,
+            xpGained: data.xpGained,
+            remainingXP: data.remainingXP,
+            rewards: data.rewards || [],
+          });
+        }
+        redirectHome = true;
+      }
+
+      if (isAutoSubmit) {
+        setTimeExpired(false);
+        if (!isCipher || (isCipher && passed)) {
+          redirectHome = true;
+        } else {
+          redirectHome = false;
+        }
+      }
+
+      if (redirectHome) {
+        router.push("/home");
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
+      showToast({ type: "error", message: "Error Submitting Solution" });
     }
 
-    if (redirectHome) {
-      router.push("/home");
-    }
-  } catch (err) {
-    console.error("Submission error:", err);
-    showToast({ type: "error", message: "Error Submitting Solution" });
-  }
-
-  setIsSubmitting(false);
-};
+    setIsSubmitting(false);
+  };
 
   const handleBack = () => {
     const wasInChallenge = sessionStorage.getItem("challengeActive");
@@ -439,7 +438,7 @@ const handleSubmitSolution = async (
                 setActiveTab={setActiveTab}
                 challengeStarted={challengeStarted}
                 challenge={challenge}
-                user={user}
+                user={user as UserIF}
                 isLoading={isLoading}
                 handleReuseCode={handleReuseCode}
               />
@@ -622,7 +621,7 @@ const handleSubmitSolution = async (
           </div>
 
           {challengeCompleted && (
-            <DomainCompletePopup xp={challenge.xpRewards || 0} />
+            <DomainCompletePopup xp={xpReward} />
           )}
           {timeExpired && <TimeUpPopup />}
         </>

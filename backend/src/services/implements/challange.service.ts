@@ -429,6 +429,14 @@ export class ChallengeService implements IChallengeService {
 
     if (!user) throw new Error("User not found");
 
+    const existingProgress = await this.challengeProgressRepository.findOne({
+      challengeId: challenge._id,
+      userId: user._id,
+      passed: true,
+    });
+
+    const alreadyCompleted = !!existingProgress;
+
     const earnedXP = challenge.xpRewards || 0;
 
     let currentXP = user.stats.xpPoints || 0;
@@ -436,8 +444,9 @@ export class ChallengeService implements IChallengeService {
 
     let newXP = currentXP + earnedXP;
     let newLevel = currentLevel;
-    if (passed) {
+    if (passed && !alreadyCompleted) {
       user.stats.totalXpPoints = (user.stats.totalXpPoints || 0) + earnedXP;
+
       while (true) {
         const nextLevel = await this.levelRepository.getLevelByLevel(
           newLevel + 1
@@ -466,14 +475,13 @@ export class ChallengeService implements IChallengeService {
       status = "failed-output";
     }
 
-
     console.log("Test Results:::_: ", testResults);
 
     const progressData: any = {
       challengeId: challenge._id,
       userId: user._id,
       passed,
-      xpGained: passed ? earnedXP : 0,
+      xpGained: passed && !alreadyCompleted ? earnedXP : 0,
       timeTaken: timeTakenSeconds,
       level: challenge.level,
       type: challenge.type,
@@ -484,15 +492,14 @@ export class ChallengeService implements IChallengeService {
         language: data.language,
         codeSubmitted: userCode,
         resultOutput: testResults,
-        testCasesPassed: testResults.filter((r) => r.passed === true)
-          .length,
+        testCasesPassed: testResults.filter((r) => r.passed === true).length,
         totalTestCases: testResults.length,
       },
     };
 
     await this.challengeProgressRepository.createProgress(progressData);
 
-    if (passed) {
+    if (passed && !alreadyCompleted) {
       const today = new Date().toDateString();
       const yesterday = new Date(Date.now() - 86400000).toDateString();
       const lastSolvedDate = new Date(user.stats.lastSolvedDate).toDateString();
@@ -521,7 +528,7 @@ export class ChallengeService implements IChallengeService {
     const resData: any = {
       passed,
       testResults,
-      xpGained: earnedXP,
+      xpGained: passed && !alreadyCompleted ? earnedXP : 0,
       remainingXP: newXP,
     };
 
