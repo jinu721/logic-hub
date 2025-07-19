@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import { Camera, X } from "lucide-react";
-import { UserIF,User } from "@/types/user.types";
+import { UserIF, User } from "@/types/user.types";
 import { InventoryIF } from "@/types/inventory.types";
 
 interface Props {
   userData: UserIF;
   user: User;
-  currentBanner:string | null;
-  currentAvatar:string | null;
+  currentBanner: string | null;
+  currentAvatar: string | null;
   updateBanner: (item: InventoryIF) => void;
   updateAvatar: (item: InventoryIF) => void;
 }
-
 
 const EditHeader: React.FC<Props> = ({
   userData,
@@ -24,8 +23,6 @@ const EditHeader: React.FC<Props> = ({
   const [showBannerSelector, setShowBannerSelector] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-
-
 
   const selectBanner = (item: InventoryIF) => {
     updateBanner(item);
@@ -72,6 +69,16 @@ const EditHeader: React.FC<Props> = ({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
               <div
+                onClick={() =>
+                  selectBanner({
+                    _id: "",
+                    image: "",
+                    description: "",
+                    isActive: false,
+                    name: "",
+                    rarity: "Common",
+                  })
+                }
                 className={`absolute top-4 right-4 p-2 rounded-full bg-black/60 backdrop-blur-md cursor-pointer transform transition-all duration-300 ease-in-out hover:bg-red-500/80 ${
                   isHovering ? "scale-100 opacity-100" : "scale-75 opacity-60"
                 }`}
@@ -158,14 +165,54 @@ const EditHeader: React.FC<Props> = ({
         <div className="flex items-start gap-6">
           <div className="relative">
             {currentAvatar ? (
-              <div className="relative">
-                <img
-                  src={currentAvatar}
-                  alt="Current Avatar"
-                  className="w-32 h-32 rounded-2xl border-4 border-gray-700/50 object-cover shadow-xl"
-                />
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-500 rounded-full border-4 border-gray-900 flex items-center justify-center">
-                </div>
+              <div
+                className="relative"
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+              >
+                {currentAvatar ? (
+                  <>
+                    <img
+                      src={currentAvatar}
+                      alt="Current Avatar"
+                      className="w-32 h-32 rounded-2xl border-4 border-gray-700/50 object-cover shadow-xl"
+                    />
+
+                    <button
+                      onClick={() =>
+                        selectAvatar({
+                          _id: "",
+                          image: "",
+                          description: "",
+                          isActive: false,
+                          name: "",
+                          rarity: "Common",
+                        })
+                      }
+                      className={`absolute top-0 right-0 p-2 rounded-full bg-black/60 backdrop-blur-md cursor-pointer transform transition-all duration-300 ease-in-out hover:bg-red-500/80 ${
+                        isHovering
+                          ? "scale-100 opacity-100"
+                          : "scale-75 opacity-60"
+                      }`}
+                    >
+                      <X
+                        size={18}
+                        className="text-white transition-transform duration-300 hover:rotate-90"
+                      />
+                    </button>
+                  </>
+                ) : (
+                  <div className="w-32 h-32 rounded-2xl border-4 border-gray-700/50 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center shadow-xl">
+                    <div className="text-center">
+                      <div className="w-8 h-8 mx-auto mb-2 text-gray-400">
+                        <Camera size={32} />
+                      </div>
+                      <span className="text-gray-400 text-sm font-medium">
+                        No Avatar
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="w-32 h-32 rounded-2xl border-4 border-gray-700/50 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center shadow-xl">
