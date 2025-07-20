@@ -156,7 +156,9 @@ const Login: React.FC = () => {
               <div className="flex justify-center mb-3">
                 <Terminal className="h-8 w-8 text-cyan-400" />
               </div>
-              <h1 className="text-xl font-bold text-white mb-1">Welcome Back</h1>
+              <h1 className="text-xl font-bold text-white mb-1">
+                Welcome Back
+              </h1>
               <p className="text-gray-400 text-sm">Sign in to your account</p>
             </div>
 
@@ -179,6 +181,7 @@ const Login: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3 mb-5">
               <Link
+                // href="http://localhost:5000/auth/github"
                 href={`https://api.jinu.site/auth/github`}
                 className="flex items-center justify-center text-white py-2.5 bg-gray-900/50 
                 border border-gray-700 rounded-lg hover:bg-gray-800/50 transition-colors duration-200

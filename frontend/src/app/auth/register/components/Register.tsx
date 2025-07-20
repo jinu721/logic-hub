@@ -224,7 +224,8 @@ const Register: React.FC = () => {
 
         <div className="grid grid-cols-2 gap-3 mb-4">
           <Link
-            href="http://localhost:5000/auth/github"
+            // href="http://localhost:5000/auth/github"
+            href="https://api.jinu.site/auth/github"
             className="flex items-center justify-center text-white py-2.5 bg-gray-900/50 
             border border-gray-700 rounded-lg hover:bg-gray-800/50 transition"
           >
@@ -235,7 +236,8 @@ const Register: React.FC = () => {
           </Link>
 
           <Link
-            href="http://localhost:5000/auth/google"
+            // href="http://localhost:5000/auth/google"
+            href="https://api.jinu.site/auth/google"
             className="flex items-center justify-center text-white py-2.5 bg-gray-900/50 
             border border-gray-700 rounded-lg hover:bg-gray-800/50 transition"
           >
