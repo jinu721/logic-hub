@@ -241,7 +241,7 @@ export const updateChallenge = async (id: string, data: any) => {
 export const getChallenges = async (filter: any) => {
   const queryParams = new URLSearchParams();
 
-  Object.entries(filter).forEach(([key, value]) => {
+  Object.entries(filter).forEach(([key, value]: [string, any]) => {
     if (Array.isArray(value)) {
       value.forEach((item) => queryParams.append(`${key}[]`, item));
     } else {
