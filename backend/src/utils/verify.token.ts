@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { env } from "../config/env";
 
 type AccessTokenPayload = {
   userId: string;
@@ -17,7 +18,7 @@ export const verifyAccessToken = (token: string): AccessTokenPayload | null => {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.ACCESS_TOKEN_SECRET as string
+      env.ACCESS_TOKEN_SECRET as string
     ) as AccessTokenPayload;
 
     return decoded;
@@ -31,7 +32,7 @@ export const verifyRefreshToken = (token: string): RefreshTokenPayload | null =>
   try {
     const decoded = jwt.verify(
       token,
-      process.env.REFRESH_TOKEN_SECRET as string
+      env.REFRESH_TOKEN_SECRET as string
     ) as RefreshTokenPayload;
 
     return decoded;
@@ -45,7 +46,7 @@ export const verifyLinkToken = (token: string): AccessTokenPayload | null => {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.VERIFY_TOKEN_SECRET as string
+      env.VERIFY_TOKEN_SECRET as string
     ) as AccessTokenPayload;
 
     return decoded;

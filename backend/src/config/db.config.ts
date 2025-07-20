@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { env } from './env';
 
 
 export default class Database{
@@ -9,7 +10,7 @@ export default class Database{
     public static async getInstance():Promise<mongoose.Connection>{
         if(!Database.instance){
             try{
-                const connection = await mongoose.connect(process.env.MONGO_URL as string);
+                const connection = await mongoose.connect(env.MONGO_URL as string);
                 Database.instance = connection.connection;
                 console.log('DB Connected Successfully');
             }catch(err){

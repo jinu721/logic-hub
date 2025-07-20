@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { IUserController } from "../interfaces/user.controller.interface";
 import redisClient from "../../config/redis.config";
 import { TokenService } from "../../services/implements/token.service";
+import { env } from "../../config/env";
 
 export class UserController implements IUserController {
   constructor(
@@ -102,7 +103,7 @@ export class UserController implements IUserController {
 
       const decoded = jwt.verify(
         token,
-        process.env.ACCESS_TOKEN_SECRET as string
+        env.ACCESS_TOKEN_SECRET as string
       ) as { userId: string };
 
       let avatar = null;
@@ -241,7 +242,7 @@ export class UserController implements IUserController {
         return;
       }
 
-      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
+      const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET!) as {
         role: string;
       };
 

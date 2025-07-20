@@ -3,14 +3,15 @@ import {Strategy as GoogleStrategy,Profile as GoogleProfile, VerifyCallback} fro
 import {Strategy as GithubStrategy,Profile as GithubProfile} from 'passport-github2';
 import User from '../models/user.model';
 import { generateUsername } from '../utils/generate.username';
+import { env } from './env';
 
 
 
 passport.use(
     new GoogleStrategy({
-        clientID:process.env.GOOGLE_CLIENT_ID as string,
-        clientSecret:process.env.GOOGLE_CLIENT_SECRET as string,
-        callbackURL:process.env.GOOGLE_CALLBACK_URL as string
+        clientID:env.GOOGLE_CLIENT_ID as string,
+        clientSecret:env.GOOGLE_CLIENT_SECRET as string,
+        callbackURL:env.GOOGLE_CALLBACK_URL as string
     }, async (accessToken:string,refreshToken:string | undefined,profile:GoogleProfile,done:VerifyCallback)=>{
         try{
 
@@ -43,9 +44,9 @@ passport.use(
 
 passport.use(
     new GithubStrategy({
-        clientID: process.env.GITHUB_CLIENT_ID as string,
-        clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-        callbackURL: process.env.GITHUB_CALLBACK_URL as string,
+        clientID: env.GITHUB_CLIENT_ID as string,
+        clientSecret: env.GITHUB_CLIENT_SECRET as string,
+        callbackURL: env.GITHUB_CALLBACK_URL as string,
         scope:['user:email']
     }, async (accessToken: string, refreshToken: string | undefined, profile: GithubProfile, done: VerifyCallback) => {
         try {

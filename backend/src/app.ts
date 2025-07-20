@@ -36,13 +36,14 @@ import notificationRoutes from "./routes/notification.routes";
 import analyticsRoutes from "./routes/analytics.routes";
 import solutionRoutes from "./routes/solution.routes";
 import { errorHandler } from './middlewares/err.middleware';
+import { env } from './config/env';
 
 
 
 app.use(helmet());
 app.use(cookieParser());
 app.use(cors({
-    origin:process.env.FRONTEND_URL,
+    origin:env.FRONTEND_URL,
     credentials:true
 }));
 

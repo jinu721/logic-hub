@@ -3,6 +3,7 @@ import { PurchaseService } from "../../services/implements/purchase.service";
 import { HttpStatus } from "../../constants/http.status";
 import { IPurchaseController } from "../interfaces/purchase.controller.interface";
 import { razorpay } from "../../config/razorpay.config";
+import { env } from "../../config/env";
 
 export class PurchaseController implements IPurchaseController {
   constructor(private purchaseService: PurchaseService) {}
@@ -31,7 +32,7 @@ export class PurchaseController implements IPurchaseController {
         orderId: order.id,
         amount: order.amount,
         currency: order.currency,
-        key:process.env.RAZORPAY_KEY_ID
+        key:env.RAZORPAY_KEY_ID
       });
     } catch (err) {
       console.error(err);

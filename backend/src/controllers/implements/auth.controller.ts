@@ -240,7 +240,7 @@ export class AuthController implements IAuthController {
       maxAge: 1000 * 15,
     });
 
-    res.redirect(`${process.env.FRONTEND_URL}/home?logged=social&accessToken=${accessToken}`);
+    res.redirect(`${env.FRONTEND_URL}/home?logged=social&accessToken=${accessToken}`);
   }
 
   async githubAuth(req: Request, res: Response): Promise<void> {
@@ -268,7 +268,7 @@ export class AuthController implements IAuthController {
     setAccessToken(res, accessToken);
     setRefreshToken(res, refreshToken);
 
-    res.redirect(`${process.env.FRONTEND_URL}/home?logged=social&accessToken=${accessToken}`);
+    res.redirect(`${env.FRONTEND_URL}/home?logged=social&accessToken=${accessToken}`);
   }
 
   async forgotPassword(req: Request, res: Response): Promise<void> {

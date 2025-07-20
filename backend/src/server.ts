@@ -6,17 +6,18 @@ import app from "./app";
 import { Server } from 'socket.io';
 import {createServer} from "http";
 import { setupSocket } from './socket/setup.socket';
+import { env } from './config/env';
 
 
 
-const PORT = process.env.PORT || 5000;
+const PORT = env.PORT;
 
 
 const server = createServer(app);
 
 const io = new Server(server,{
     cors:{
-        origin:process.env.FRONTEND_URL,
+        origin:env.FRONTEND_URL,
         credentials:true
     }
 })

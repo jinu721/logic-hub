@@ -17,6 +17,7 @@ import {
   toPublicUserDTO,
   toPublicUserDTOs,
 } from "../../mappers/user.dto";
+import { env } from "../../config/env";
 
 type UserData = PublicUserDTO & {
   userRank: number;
@@ -115,8 +116,8 @@ export class UserService implements IUserService {
       return { email, isVerified: false, message: "OTP Verification Sent" };
     }
     if (user.twoFactorEnabled) {
-      const token = generateLinkToken(user as PublicUserDTO);
-      const link = `${process.env.FRONTEND_URL}/auth/verify-login?token=${token}`;
+      const token = generateLinkToken(user as any);
+      const link = `${env.FRONTEND_URL}/auth/verify-login?token=${token}`;
       await sendEmail({
         to: user.email as string,
         subject: "Verify your account",
@@ -144,7 +145,7 @@ export class UserService implements IUserService {
   ): Promise<{ accessToken: string; refreshToken: string; userId: string }> {
     const decoded = jwt.verify(
       token,
-      process.env.VERIFY_TOKEN_SECRET as string
+      env.VERIFY_TOKEN_SECRET as string
     ) as { userId: string };
     const user = await this.userRepo.findById(decoded.userId);
     if (!user) throw new Error("User Not Found");
@@ -160,7 +161,7 @@ export class UserService implements IUserService {
     if (!user) throw new Error("Email not found");
 
     const token = generateLinkToken(user as PublicUserDTO);
-    const link = `${process.env.FRONTEND_URL}/auth/reset?token=${token}`;
+    const link = `${env.FRONTEND_URL}/auth/reset?token=${token}`;
     await sendEmail({
       to: email,
       subject: "Reset Password",

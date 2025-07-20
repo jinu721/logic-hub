@@ -1,3 +1,4 @@
+import { env } from "../config/env";
 import { transporter } from "../config/mailer.config";
 
 type EmailType = "otp" | "link" | "announcement";
@@ -59,7 +60,7 @@ export const sendEmail = async ({ to, subject, content, type, link }: EmailOptio
     `;
 
     await transporter.sendMail({
-        from: process.env.EMAIL_USER,
+        from: env.EMAIL_USER,
         to,
         subject,
         html: emailHTML,
