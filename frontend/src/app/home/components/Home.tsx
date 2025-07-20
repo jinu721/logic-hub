@@ -372,7 +372,7 @@ const Home = () => {
                     </div>
 
                     <div className="lg:col-span-6 xl:col-span-8">
-                      <DomainsSection filters={filters} user={user as any} />
+                      <DomainsSection filters={filters} user={user as UserIF} />
                     </div>
 
                     <div className="lg:col-span-3 xl:col-span-2">

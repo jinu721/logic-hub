@@ -4,7 +4,7 @@ import { Types } from "mongoose";
 export interface IChallengeRepository {
   createChallenge(challengeData: Omit<ChallengeDomainIF, '_id'>): Promise<ChallengeDomainIF>;
   getChallengeById(id: string): Promise<ChallengeDomainIF | null>;
-  getChallenges(query: object,sort:object): Promise<ChallengeDomainIF[]>;
+  getChallenges(query: object,skip:number,limit: number): Promise<ChallengeDomainIF[]>;
   getAllChallenges(search:string,skip:number,limit: number): Promise<ChallengeDomainIF[]>;
   countAllChallenges(search:string): Promise<number>;
   updateChallenge(id: Types.ObjectId, updateData: Partial<ChallengeDomainIF>): Promise<ChallengeDomainIF | null>;

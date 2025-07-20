@@ -100,8 +100,12 @@ export class ChallengeService implements IChallengeService {
   ): Promise<{
     challenges: PublicChallengeDTO[];
     popularChallange: PublicChallengeDTO | null;
+    totalItems: number;
   }> {
     let query: any = {};
+    let limit = filter.limit || 10;
+    let page = filter.page || 1;
+    let skip = (page - 1) * limit || 0;
 
     if (filter.type) {
       query.type = filter.type;
@@ -137,9 +141,17 @@ export class ChallengeService implements IChallengeService {
         popularChallange: toPublicChallengeDTO(
           popularChallange as ChallengeDomainIF
         ),
+        totalItems: 0,
       };
 
-    const challenges = await this.challengeRepository.getChallenges(query);
+    const challenges = await this.challengeRepository.getChallenges(
+      query,
+      skip,
+      limit
+    );
+
+
+    const totalItems = await this.challengeRepository.countAllChallenges("");
 
     const progressList =
       await this.challengeProgressRepository.getAllProgress();
@@ -213,6 +225,7 @@ export class ChallengeService implements IChallengeService {
     return {
       challenges: challengesData as PublicChallengeDTO[],
       popularChallange: popularChallange as PublicChallengeDTO,
+      totalItems,
     };
   }
 

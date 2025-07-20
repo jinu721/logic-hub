@@ -19,7 +19,7 @@ export interface SubmitPayload {
 export interface IChallengeService {
   createChallenge(challengeData: Omit<ChallengeDomainIF, "_id">): Promise<PublicChallengeDTO>;
   getChallengeById(id: string, userId?: string): Promise<PublicChallengeDTO | null>;
-  getChallenges(filter: any,userId?: string): Promise<{challenges:PublicChallengeDTO[],popularChallange:PublicChallengeDTO | null}>;
+  getChallenges(filter: any,userId?: string): Promise<{challenges:PublicChallengeDTO[],popularChallange:PublicChallengeDTO | null,totalItems:number}>;
   getAllChallenges(search:string,page:number,limit:number): Promise<{challenges:PublicChallengeDTO[],totalItems:number}>;
   updateChallenge(id: Types.ObjectId, updateData: Partial<PublicChallengeDTO>): Promise<PublicChallengeDTO | null>;
   deleteChallenge(id: Types.ObjectId): Promise<boolean>;

@@ -22,8 +22,8 @@ export class ChallengeRepository
     return await this.model.findById(id);
   }
 
-  async getChallenges(filter: any): Promise<ChallengeDomainIF[]> {
-    return await this.model.find(filter);
+  async getChallenges(filter: any,skip:number,limit: number): Promise<ChallengeDomainIF[]> {
+    return await this.model.find(filter).skip(skip).limit(limit).sort({ _id: -1 });
   }
 
 
