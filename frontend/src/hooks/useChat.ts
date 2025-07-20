@@ -106,10 +106,25 @@ export default function useChat({
       userId: string;
       status: boolean;
     }) => {
-      console.log("Status Back Called", anothorUserId);
+      console.log("Current Users Chats", setCurrentUsersChats);
+      console.log("Status Back Called", userId);
+
       if (userId === anothorUserId) {
         setOnlineStatus(status);
       }
+      setCurrentUsersChats((prevChats) =>
+        prevChats.map((chat) =>
+          chat.otherUser?._id === userId
+            ? {
+                ...chat,
+                otherUser: {
+                  ...chat.otherUser,
+                  isOnline: status,
+                },
+              }
+            : chat
+        )
+      );
     };
 
     socket.on("user-status", handleUserOnline);
@@ -263,7 +278,7 @@ export default function useChat({
           };
         });
 
-        setCurrentUsersChats((prevChats) =>{
+        setCurrentUsersChats((prevChats) => {
           return prevChats.map((chat) => {
             if (chat._id === conversationId) {
               return {
@@ -278,13 +293,13 @@ export default function useChat({
               };
             }
             return chat;
-          })
-        })
+          });
+        });
 
         if (type === "delete_group") {
           setIsDeleted(true);
         }
-        if(type === "remove_member" && removeMember === currentUserId){
+        if (type === "remove_member" && removeMember === currentUserId) {
           setIsRemoved(true);
         }
       }
@@ -309,7 +324,7 @@ export default function useChat({
     }) => {
       if (conversationId === selectedChatIdRef.current) {
         setTypingUsers(typingUsers);
-        setCurrentUsersChats((prevChats)=>{
+        setCurrentUsersChats((prevChats) => {
           return prevChats.map((chat) => {
             if (chat._id === conversationId) {
               return {
@@ -318,8 +333,8 @@ export default function useChat({
               };
             }
             return chat;
-          })
-        })
+          });
+        });
       }
     };
 

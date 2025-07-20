@@ -76,7 +76,7 @@ const ChatHeader: React.FC<Props> = ({
               {isGroupChat ? group?.name : user?.username}
             </h3>
             <div className="flex items-center text-xs text-gray-400">
-              {!isGroupChat && user?.isOnline && (
+              {!isGroupChat && onlineStatus && (
                 <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
               )}
               {isGroupChat

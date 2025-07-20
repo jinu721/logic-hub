@@ -539,7 +539,10 @@ export default function ChatPage() {
         message: "Group name is required",
       });
       return;
-    } else if (groupUpdateData.description&&groupUpdateData.description?.length < 10) {
+    } else if (
+      groupUpdateData.description &&
+      groupUpdateData.description?.length < 10
+    ) {
       showToast({
         type: "error",
         message: "Description must be at least 10 characters",
@@ -757,15 +760,21 @@ export default function ChatPage() {
     }
   };
 
+  useEffect(() => {
+    if (window.innerWidth < 1024 && showSidebar) {
+      setShowUserInfo(false);
+    }
+  }, []);
+
   const handleSidebarToggle = (value: boolean) => {
-    if (window.innerWidth < 768 && value && showUserInfo) {
+    if (window.innerWidth < 1024 && value && showUserInfo) {
       setShowUserInfo(false);
     }
     setShowSidebar(value);
   };
 
   const handleUserInfoToggle = (value: boolean) => {
-    if (window.innerWidth < 768 && value && showSidebar) {
+    if (window.innerWidth < 1024 && value && showSidebar) {
       setShowSidebar(false);
     }
     setShowUserInfo(value);
@@ -854,7 +863,10 @@ export default function ChatPage() {
                         handleLeaveGroup={handleLeaveGroup}
                         type="deleted-chat"
                       />
-                    ) : isRemoved || !conversationData.participants.some((p) => p._id === currentUserId) ? (
+                    ) : isRemoved ||
+                      !conversationData.participants.some(
+                        (p) => p._id === currentUserId
+                      ) ? (
                       <AccessBlockedPanel
                         isGroupChat={isGroup}
                         handleLeaveGroup={handleLeaveGroup}
