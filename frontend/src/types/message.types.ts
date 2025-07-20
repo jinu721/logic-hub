@@ -7,7 +7,7 @@ export interface MessageIF {
   content?: string;
   type: 'text' | 'image' | 'video' | 'audio' | 'document' | 'voice' | 'poll' | 'system' | 'sticker' | 'date' | "typing";
   mentionedUsers?: string[];
-  seenBy?: string[];
+  seenBy?: UserIF[];
   media?: {
     url: string;
     type: 'image' | 'video' | 'audio' | 'document' | 'voice' | 'sticker';
@@ -20,20 +20,6 @@ export interface MessageIF {
   isEdited: boolean;
   isSeen: boolean;
   isDeleted: boolean;
-  poll?: {
-    question: string;
-    type: 'text' | 'code';
-    options: { 
-      text: string; 
-      votes: string[]; 
-      isCorrect?: boolean;
-    }[];
-    code?: {
-      language: string;
-      content: string;
-    };
-    isClosed: boolean;
-  };
   
   createdAt: Date | string;
   updatedAt: Date | string;

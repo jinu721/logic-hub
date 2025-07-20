@@ -53,8 +53,7 @@ const BaseMessage = ({
 
   const isSelf = !isOther;
 
-    const router = useRouter();
-
+  const router = useRouter();
 
   const handleEditClick = () => {
     setShowEditModal(true);
@@ -100,7 +99,7 @@ const BaseMessage = ({
 
     if (hasAvatar) {
       return (
-        <div onClick={()=>router.push(`/profile/${message.sender.username}`)} >
+        <div onClick={() => router.push(`/profile/${message.sender.username}`)}>
           <img
             src={message.sender.avatar.image}
             alt={username}
@@ -153,7 +152,6 @@ const BaseMessage = ({
           {replyMessage.type === "image" && "📷 Image"}
           {replyMessage.type === "video" && "🎥 Video"}
           {replyMessage.type === "audio" && "🎵 Audio"}
-          {replyMessage.type === "poll" && "📊 Poll"}
           {replyMessage.type === "voice" && "🎤 Voice Message"}
           {replyMessage.type === "sticker" && "😊 Sticker"}
           {replyMessage.type === "document" && "📄 Document"}
@@ -208,7 +206,6 @@ const BaseMessage = ({
             >
               {message.sender.username}
             </div>
-
           </div>
         )}
 
@@ -240,7 +237,7 @@ const BaseMessage = ({
 
             {isSelf && (
               <MessageStatus
-                isSeen={message.isSeen}
+                isSeen={!!message.seenBy?.length}
                 seenBy={message.seenBy as any[]}
                 isGroup={isGroup}
               />

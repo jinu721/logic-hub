@@ -130,7 +130,7 @@ export default function ChatPage() {
     selectedChatId,
     conversationData: safeConversationData,
     currentUsersChatsList: safeCurrentUsersChatsList,
-    currentUserId,
+    currentUserId:currentUserId,
   });
 
   const fetchConversationData = async (conversationId: string | null) => {
@@ -141,7 +141,7 @@ export default function ChatPage() {
       const messages = await getInitialMessages(conversationId, 50);
       console.log("conversation", conversation);
       console.log("Messages", messages);
-      setMessages((prev) => [...prev, ...messages.data]);
+      setMessages(messages.data);
       setConversationData(conversation.data);
       setActiveTab(
         conversation.data.type === "one-to-one" ? "personal" : "groups"

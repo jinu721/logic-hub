@@ -10,4 +10,5 @@ export interface IMessageService {
     removeReaction(messageId: string, userId: string, reaction: string): Promise<PublicMessageDTO | null>;
     markAsSeen(messageId: string, userId: string): Promise<PublicMessageDTO | null>;
     getMessageById(messageId: string): Promise<PublicMessageDTO | null>;
+    markMessagesAsSeen(conversationId: string, userId: string): Promise<void>;
 }

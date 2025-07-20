@@ -12,4 +12,5 @@ export interface IMessageRepository {
   findMessageById(messageId: string): Promise<MessageIF | null>
   save(message: MessageIF): Promise<MessageIF | null>
   closePoll(messageId: string): Promise<MessageIF | null>
+  markMessagesAsSeen(conversationId: string, userId: string): Promise<void>
 }

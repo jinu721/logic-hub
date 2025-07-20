@@ -8,7 +8,7 @@ export interface PublicMessageDTO {
   content?: string;
   type: 'text' | 'image' | 'video' | 'audio' | 'document' | 'voice' | 'poll' | 'system' | 'sticker';
   mentionedUsers?: string[];
-  seenBy?: string[];
+  seenBy?: any[];
   media?: {
     url: string;
     type: 'image' | 'video' | 'audio' | 'document' | 'voice' | 'sticker';
@@ -43,7 +43,7 @@ export const toPublicMessageDTO = (message: MessageIF): PublicMessageDTO => {
     content: message.content,
     type: message.type,
     mentionedUsers: message.mentionedUsers?.map(id => id.toString()) || [],
-    seenBy: message.seenBy?.map(id => id.toString()) || [],
+    seenBy: message.seenBy ,
     media: message.media,
     reactions: message.reactions?.map(r => ({
       emoji: r.emoji,

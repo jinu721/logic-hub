@@ -65,4 +65,8 @@ export class MessageService implements IMessageService {
     const message = await this.messageRepo.getMessageById(messageId);
     return message ? toPublicMessageDTO(message) : null;
   }
+
+  async markMessagesAsSeen(conversationId: string, userId: string): Promise<void> {
+    await this.messageRepo.markMessagesAsSeen(conversationId, userId);
+  }
 }

@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { Message } from "../../models/message.model";
 import { MessageIF } from "../../types/message.types";
 import { BaseRepository } from "../base.repository";
@@ -34,6 +35,11 @@ export class MessageRepository
         select: "username avatar banner membership stats",
         populate: [{ path: "avatar" }, { path: "banner" }],
       },
+      {
+        path: "seenBy",
+        select: "username avatar banner isOnline",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      },
     ]);
   }
 
@@ -41,27 +47,37 @@ export class MessageRepository
     messageId: string,
     newText: string
   ): Promise<MessageIF | null> {
-    return await this.model.findByIdAndUpdate(messageId, { content: newText,isEdited:true },{new:true})
-    .populate([
-      {
-        path: "sender",
-        select: "username avatar banner",
-        populate: [{ path: "avatar" }, { path: "banner" }],
-      },
-      {
-        path: "replyTo",
-        populate: {
+    return await this.model
+      .findByIdAndUpdate(
+        messageId,
+        { content: newText, isEdited: true },
+        { new: true }
+      )
+      .populate([
+        {
           path: "sender",
           select: "username avatar banner",
           populate: [{ path: "avatar" }, { path: "banner" }],
         },
-      },
-      {
-        path: "reactions.userId",
-        select: "username avatar banner",
-        populate: [{ path: "avatar" }, { path: "banner" }],
-      },
-    ]);;
+        {
+          path: "replyTo",
+          populate: {
+            path: "sender",
+            select: "username avatar banner",
+            populate: [{ path: "avatar" }, { path: "banner" }],
+          },
+        },
+        {
+          path: "reactions.userId",
+          select: "username avatar banner",
+          populate: [{ path: "avatar" }, { path: "banner" }],
+        },
+        {
+          path: "seenBy",
+          select: "username avatar banner isOnline",
+          populate: [{ path: "avatar" }, { path: "banner" }],
+        },
+      ]);
   }
   async getMessages(limit: number, query: any): Promise<MessageIF[]> {
     return await this.model
@@ -88,10 +104,19 @@ export class MessageRepository
           select: "username avatar banner",
           populate: [{ path: "avatar" }, { path: "banner" }],
         },
+        {
+          path: "seenBy",
+          select: "username avatar banner isOnline",
+          populate: [{ path: "avatar" }, { path: "banner" }],
+        },
       ]);
   }
   async deleteMessage(messageId: string): Promise<MessageIF | null> {
-    return await this.model.findByIdAndUpdate(messageId,{isDeleted:true},{new:true});
+    return await this.model.findByIdAndUpdate(
+      messageId,
+      { isDeleted: true },
+      { new: true }
+    );
   }
   async addReaction(
     messageId: string,
@@ -100,13 +125,13 @@ export class MessageRepository
   ): Promise<MessageIF | null> {
     const message = await this.model.findOne({
       _id: messageId,
-      'reactions.userId': userId,
+      "reactions.userId": userId,
     });
-  
+
     const query = message
       ? this.model.findOneAndUpdate(
-          { _id: messageId, 'reactions.userId': userId },
-          { $set: { 'reactions.$.emoji': emoji } },
+          { _id: messageId, "reactions.userId": userId },
+          { $set: { "reactions.$.emoji": emoji } },
           { new: true }
         )
       : this.model.findByIdAndUpdate(
@@ -114,7 +139,7 @@ export class MessageRepository
           { $push: { reactions: { userId, emoji } } },
           { new: true }
         );
-  
+
     return await query.populate([
       {
         path: "sender",
@@ -134,40 +159,52 @@ export class MessageRepository
         select: "username avatar banner",
         populate: [{ path: "avatar" }, { path: "banner" }],
       },
+      {
+        path: "seenBy",
+        select: "username avatar banner isOnline",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      },
     ]);
   }
-  
+
   async removeReaction(
     messageId: string,
     userId: string,
     reaction: string
   ): Promise<MessageIF | null> {
-    return await this.model.findByIdAndUpdate(
-      messageId,
-      { $pull: { reactions: { userId, emoji: reaction } } },
-      { new: true }
-    ).populate([
-      {
-        path: "sender",
-        select: "username avatar banner",
-        populate: [{ path: "avatar" }, { path: "banner" }],
-      },
-      {
-        path: "replyTo",
-        populate: {
+    return await this.model
+      .findByIdAndUpdate(
+        messageId,
+        { $pull: { reactions: { userId, emoji: reaction } } },
+        { new: true }
+      )
+      .populate([
+        {
           path: "sender",
           select: "username avatar banner",
           populate: [{ path: "avatar" }, { path: "banner" }],
         },
-      },
-      {
-        path: "reactions.userId",
-        select: "username avatar banner",
-        populate: [{ path: "avatar" }, { path: "banner" }],
-      },
-    ]);
+        {
+          path: "replyTo",
+          populate: {
+            path: "sender",
+            select: "username avatar banner",
+            populate: [{ path: "avatar" }, { path: "banner" }],
+          },
+        },
+        {
+          path: "reactions.userId",
+          select: "username avatar banner",
+          populate: [{ path: "avatar" }, { path: "banner" }],
+        },
+        {
+          path: "seenBy",
+          select: "username avatar banner isOnline",
+          populate: [{ path: "avatar" }, { path: "banner" }],
+        },
+      ]);
   }
-  
+
   async markAsSeen(
     messageId: string,
     userId: string
@@ -176,6 +213,7 @@ export class MessageRepository
       $push: { seenBy: { userId } },
     });
   }
+
   async getMessageById(messageId: string): Promise<MessageIF | null> {
     return this.model.findById(messageId);
   }
@@ -206,6 +244,22 @@ export class MessageRepository
       pollId,
       { isOpen: false },
       { new: true }
+    );
+  }
+
+  async markMessagesAsSeen(
+    conversationId: string,
+    userId: string
+  ): Promise<void> {
+    await this.model.updateMany(
+      {
+        conversationId: new Types.ObjectId(conversationId),
+        sender: { $ne: new Types.ObjectId(userId) },
+        seenBy: { $ne: new Types.ObjectId(userId) },
+      },
+      {
+        $addToSet: { seenBy: new Types.ObjectId(userId) },
+      }
     );
   }
 }

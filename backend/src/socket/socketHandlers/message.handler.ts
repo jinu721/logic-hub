@@ -19,7 +19,10 @@ export class MessageHandler {
     socket.on("react_message", this.handleReactMessage.bind(this, socket));
     socket.on("typing", this.handleTyping.bind(this, socket));
     socket.on("stopTyping", this.handleStopTyping.bind(this, socket));
-    socket.on("mark-all-conv-as-read", this.handleMarkAllConvAsRead.bind(this, socket));
+    socket.on(
+      "mark-all-conv-as-read",
+      this.handleMarkAllConvAsRead.bind(this, socket)
+    );
   }
 
   private async handleSendMessage(
@@ -28,7 +31,7 @@ export class MessageHandler {
   ): Promise<void> {
     console.log(`Message Data`, data);
     try {
-      const msg:any = await AppContainer.messageService.createMessage(
+      const msg: any = await AppContainer.messageService.createMessage(
         data as any,
         accessToken
       );
@@ -37,7 +40,10 @@ export class MessageHandler {
         msg._id
       );
 
-      this.io.to(data.conversationId).emit("recive_message", {conversationId:data.conversationId, message: msg});
+      this.io.to(data.conversationId).emit("recive_message", {
+        conversationId: data.conversationId,
+        message: msg,
+      });
       this.io.to(data.conversationId).emit("update_conversation");
 
       const conversation =
@@ -45,7 +51,7 @@ export class MessageHandler {
           msg.conversationId
         );
 
-      if(!conversation) {
+      if (!conversation) {
         console.log("Conversation not found");
         throw new Error("Conversation not found");
       }
@@ -57,10 +63,11 @@ export class MessageHandler {
         (id) => id !== msg.sender?._id.toString()
       );
 
-      const updatedConv = await AppContainer.conversationService.addUnreadCountsForUsers(
-        msg.conversationId,
-        otherUserIds
-      );
+      const updatedConv =
+        await AppContainer.conversationService.addUnreadCountsForUsers(
+          msg.conversationId,
+          otherUserIds
+        );
 
       if (!updatedConv) {
         console.log("Conversation not found");
@@ -86,12 +93,37 @@ export class MessageHandler {
     }
   }
 
-  private async handleMarkAllConvAsRead(socket: ExtendedSocket,{conversationId,userId}:{conversationId:string,userId:string}): Promise<void> {
+  private async handleMarkAllConvAsRead(
+    socket: ExtendedSocket,
+    { conversationId, userId }: { conversationId: string; userId: string }
+  ): Promise<void> {
     try {
-      const conversations = await AppContainer.conversationService.markAsRead(conversationId,userId);
+      console.log("Marking User started",userId);
+      await AppContainer.messageService.markMessagesAsSeen(
+        conversationId,
+        userId
+      );
+      const conversations = await AppContainer.conversationService.markAsRead(
+        conversationId,
+        userId
+      );
       if (!conversations) {
         throw new Error("Conversation not found");
       }
+      
+
+      console.log("Message Marked as Read");
+
+      const user = await AppContainer.userService.findUserById(userId);
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      this.io.to(conversationId).emit("message_seen", {
+        conversationId,
+        seenBy:user,
+      });
       // const socketId = await redisClient.get(`socket:${userId}`);
       // if (socketId) {
       //   this.io.to(socketId).emit("conversation_updated", {
@@ -190,9 +222,10 @@ export class MessageHandler {
         conversationId,
         userId
       );
-      socket.broadcast
-        .to(conversationId)
-        .emit("typing_users", {conversationId,typingUsers:conversation?.typingUsers});
+      socket.broadcast.to(conversationId).emit("typing_users", {
+        conversationId,
+        typingUsers: conversation?.typingUsers,
+      });
     } catch (err) {
       console.log(`Error in Socket setup : ${err}`);
       socket.emit("send_error", {
@@ -211,9 +244,10 @@ export class MessageHandler {
           conversationId,
           userId
         );
-      socket.broadcast
-        .to(conversationId)
-        .emit("typing_users", {conversationId,typingUsers:conversation?.typingUsers});
+      socket.broadcast.to(conversationId).emit("typing_users", {
+        conversationId,
+        typingUsers: conversation?.typingUsers,
+      });
     } catch (err) {
       console.log(`Error in Socket setup : ${err}`);
       socket.emit("send_error", {

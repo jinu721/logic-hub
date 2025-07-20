@@ -59,27 +59,61 @@ export default function useChat({
     }
   }, [currentUsersChatsList]);
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      socket.emit("user-online", token);
-      socket.emit("register_user", token);
+  // useEffect(() => {
+  //   const token = localStorage.getItem("accessToken");
+  //   if (token) {
+  //     socket.emit("user-online", token);
+  //     socket.emit("register_user", token);
 
-      setCurrentUsersChats((prevChatList: any[]) =>
-        prevChatList.map((chat: any) => {
-          if (chat._id === selectedChatId) {
-            return {
-              ...chat,
-              unreadCounts: {
-                ...(chat.unreadCounts || {}),
-                [conversationData?.currentUserId || "unknown"]: 0,
-              },
-            };
-          }
-          return chat;
-        })
-      );
-    }
+  //     setCurrentUsersChats((prevChatList: any[]) =>
+  //       prevChatList.map((chat: any) => {
+  //         if (chat._id === selectedChatId) {
+  //           return {
+  //             ...chat,
+  //             unreadCounts: {
+  //               ...(chat.unreadCounts || {}),
+  //               [conversationData?.currentUserId || "unknown"]: 0,
+  //             },
+  //           };
+  //         }
+  //         return chat;
+  //       })
+  //     );
+  //   }
+  // }, []);
+
+  useEffect(() => {
+    const handleMessageSeen = ({
+      conversationId,
+      seenBy,
+    }: {
+      conversationId: string;
+      seenBy: UserIF;
+    }) => {
+      console.log("Message seen by", seenBy);
+      if (conversationId === selectedChatIdRef.current) {
+        setMessages((prevMsgs: any) =>
+          prevMsgs.map((msg: MessageIF) => {
+            const alreadySeen = msg.seenBy?.some(
+              (user) => user._id === seenBy._id
+            );
+            if (msg.sender._id !== seenBy._id && !alreadySeen) {
+              return {
+                ...msg,
+                seenBy: [...(msg.seenBy || []), seenBy],
+              };
+            }
+            return msg;
+          })
+        );
+      }
+    };
+
+    socket.on("message_seen", handleMessageSeen);
+
+    return () => {
+      socket.off("message_seen", handleMessageSeen);
+    };
   }, []);
 
   useEffect(() => {
@@ -204,9 +238,22 @@ export default function useChat({
       message: MessageIF;
     }) => {
       console.log("Message Received", message);
+
       if (conversationId === selectedChatId) {
-        setMessages((prev) => [...prev, message]);
+        setMessages((prev) => {
+          const updatedMessage = [...prev, message];
+
+          if (!message.seenBy?.some((u) => u._id === currentUserId)) {
+            socket.emit("mark-all-conv-as-read", {
+              conversationId,
+              userId: currentUserId,
+            });
+          }
+
+          return updatedMessage;
+        });
       }
+
       setCurrentUsersChats((prevChats) =>
         prevChats.map((chat) =>
           chat._id === message.conversationId

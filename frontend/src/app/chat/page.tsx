@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 };
 
 
+
 export default async function ChatPage() {
   return (
     <Chat  />
