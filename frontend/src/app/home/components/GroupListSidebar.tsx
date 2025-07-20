@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Search, Users, Crown, Clock, Plus, ChevronRight } from "lucide-react";
+import { Search, Users, Crown, Clock, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import socket from "@/utils/socket.helper";
 import { useToast } from "@/context/Toast";
 import { getAllGroups } from "@/services/client/clientServices";
@@ -15,11 +15,16 @@ const GroupsSidebar = ({ user }: Params) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [requestedGroups, setRequestedGroups] = useState<string[]>([]);
   const [joinedGroups, setJoinedGroups] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const { showToast } = useToast() as any;
 
   const [isLoading, setIsLoading] = useState(false);
   const [groupData, setGroupData] = useState([]);
+
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const handleUserJoin = async (groupId: string, groupType: string) => {
     if (groupType === "public-approval") {
@@ -42,9 +47,11 @@ const GroupsSidebar = ({ user }: Params) => {
       const data = await getAllGroups({
         search: searchTerm,
         type: selectedCategory,
+        page: currentPage,
+        limit: itemsPerPage,
       });
-      console.log("Group Data", data.data);
       setGroupData(data.data.groups);
+      setTotalItems(data.data.totalItems);
     } catch (error) {
       showToast({
         title: "Error",
@@ -58,8 +65,19 @@ const GroupsSidebar = ({ user }: Params) => {
   };
 
   useEffect(() => {
+    setCurrentPage(1);
     fetchGroupData();
   }, [selectedCategory, searchTerm]);
+
+  useEffect(() => {
+    fetchGroupData();
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   const categories = ["all", "public-approval", "public-open"];
 
@@ -268,6 +286,36 @@ const GroupsSidebar = ({ user }: Params) => {
             </div>
           )}
         </div>
+
+        {totalPages > 1 && !isLoading && groupData.length > 0 && (
+          <div className="px-4 pb-3 border-t border-gray-700/30">
+            <div className="flex items-center justify-between mt-3">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="flex items-center px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft size={14} />
+                <span>Prev</span>
+              </button>
+              
+              <div className="flex items-center space-x-1">
+                <span className="text-xs text-gray-400">
+                  {currentPage} of {totalPages}
+                </span>
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="flex items-center px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <span>Next</span>
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {groupData.length > 0 && (
           <div className="p-4 pt-0">
