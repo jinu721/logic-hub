@@ -185,33 +185,63 @@ export class MessageHandler {
     }
   }
 
+  // private async handleReactMessage(
+  //   socket: ExtendedSocket,
+  //   {
+  //     messageId,
+  //     userId,
+  //     emoji,
+  //   }: { messageId: string; userId: string; emoji: string }
+  // ): Promise<void> {
+  //   try {
+  //     const updated = await AppContainer.messageService.addReaction(
+  //       messageId,
+  //       userId,
+  //       emoji
+  //     );
+  //     if (!updated) {
+  //       throw new Error("Message not found");
+  //     }
+  //     this.io
+  //       .to(updated.conversationId.toString())
+  //       .emit("reaction_updated", updated);
+  //   } catch (err) {
+  //     console.log("Error in react_message:", err);
+  //     socket.emit("send_error", {
+  //       message: err instanceof Error ? err.message : "Failed to react",
+  //     });
+  //   }
+  // }
+
+
   private async handleReactMessage(
-    socket: ExtendedSocket,
-    {
+  socket: ExtendedSocket,
+  {
+    messageId,
+    userId,
+    emoji,
+  }: { messageId: string; userId: string; emoji: string }
+): Promise<void> {
+  try {
+    const updated = await AppContainer.messageService.toggleReaction(
       messageId,
       userId,
-      emoji,
-    }: { messageId: string; userId: string; emoji: string }
-  ): Promise<void> {
-    try {
-      const updated = await AppContainer.messageService.addReaction(
-        messageId,
-        userId,
-        emoji
-      );
-      if (!updated) {
-        throw new Error("Message not found");
-      }
-      this.io
-        .to(updated.conversationId.toString())
-        .emit("reaction_updated", updated);
-    } catch (err) {
-      console.log("Error in react_message:", err);
-      socket.emit("send_error", {
-        message: err instanceof Error ? err.message : "Failed to react",
-      });
+      emoji
+    );
+
+    if (!updated) {
+      throw new Error("Message not found");
     }
+
+    this.io.to(updated.conversationId.toString()).emit("reaction_updated", updated);
+  } catch (err) {
+    console.log("Error in react_message:", err);
+    socket.emit("send_error", {
+      message: err instanceof Error ? err.message : "Failed to react",
+    });
   }
+}
+
 
   private async handleTyping(
     socket: ExtendedSocket,
