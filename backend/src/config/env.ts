@@ -1,5 +1,8 @@
 const isProduction = process.env.NODE_ENV === "production";
 
+console.log("PRODUCTION :- ",isProduction)
+console.log("REDIS_USERNAME :- ",process.env.REDIS_USERNAME)
+
 export const env = {
   MONGO_URL: process.env.MONGO_URL || "mongodb://localhost:27017/CodeMaze",
   PORT: process.env.PORT || 5000,

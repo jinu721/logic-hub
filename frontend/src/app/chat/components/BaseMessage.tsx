@@ -111,7 +111,8 @@ const BaseMessage = ({
 
     return (
       <div
-        className={`w-8 h-8 rounded flex-shrink-0 flex items-center justify-center text-sm font-semibold text-white ${bgColor} shadow-sm`}
+        onClick={() => router.push(`/profile/${message.sender.username}`)}
+        className={`w-8 h-8 rounded flex-shrink-0 cursor-pointer flex items-center justify-center text-sm font-semibold text-white ${bgColor} shadow-sm`}
       >
         {initial}
       </div>
@@ -143,7 +144,7 @@ const BaseMessage = ({
               d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
             />
           </svg>
-          <span className="text-xs font-medium text-blue-400">
+          <span onClick={() => router.push(`/profile/${message.sender.username}`)} className="text-xs font-medium text-blue-400 cursor-pointer">
             {replyMessage.sender?.username || "User"}
           </span>
         </div>

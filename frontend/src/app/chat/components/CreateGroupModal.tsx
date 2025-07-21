@@ -352,7 +352,7 @@ const GroupCreationModal: React.FC<GroupCreationModalProps> = ({ isOpen, onClose
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
-                  href="/chat"
+                  href={`/chat`}
                   className="inline-block bg-purple-600 px-4 py-2 rounded-md text-white text-sm hover:bg-purple-700 transition-colors"
                 >
                   Go to Chat
