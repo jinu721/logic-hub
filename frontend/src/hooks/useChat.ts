@@ -59,28 +59,6 @@ export default function useChat({
     }
   }, [currentUsersChatsList]);
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("accessToken");
-  //   if (token) {
-  //     socket.emit("user-online", token);
-  //     socket.emit("register_user", token);
-
-  //     setCurrentUsersChats((prevChatList: any[]) =>
-  //       prevChatList.map((chat: any) => {
-  //         if (chat._id === selectedChatId) {
-  //           return {
-  //             ...chat,
-  //             unreadCounts: {
-  //               ...(chat.unreadCounts || {}),
-  //               [conversationData?.currentUserId || "unknown"]: 0,
-  //             },
-  //           };
-  //         }
-  //         return chat;
-  //       })
-  //     );
-  //   }
-  // }, []);
 
   useEffect(() => {
     const handleMessageSeen = ({
@@ -346,6 +324,7 @@ export default function useChat({
         if (type === "delete_group") {
           setIsDeleted(true);
         }
+        console.log("Remove Member", removeMember, currentUserId);
         if (type === "remove_member" && removeMember === currentUserId) {
           setIsRemoved(true);
         }

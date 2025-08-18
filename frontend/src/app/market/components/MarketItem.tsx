@@ -66,7 +66,7 @@ const MarketItem: React.FC<MarketItemProps> = ({
   };
 
   return (
-    <div className="group relative bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-700 transition-all hover:border-purple-500 hover:shadow-purple-500/20 hover:shadow-xl">
+    <div className="group relative bg-gradient-to-b  from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-700 transition-all hover:border-purple-500 hover:shadow-purple-500/20 hover:shadow-xl">
       {item.limitedTime && (
         <div className="absolute top-3 left-3 z-10">
           <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center backdrop-blur-sm">

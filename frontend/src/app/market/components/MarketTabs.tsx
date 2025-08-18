@@ -25,7 +25,7 @@ const MarketTabs: React.FC<Props> = ({ filterChange }:Props) => {
 
   return (
     <>
-      <div className="relative z-50 bg-gray-800 bg-opacity-80 backdrop-blur-sm p-6 rounded-b-xl border-x border-b border-gray-700 mb-8">
+      <div  className="relative bg-gray-800 bg-opacity-80 z-10 backdrop-blur-sm p-6 rounded-b-xl border-x border-b border-gray-700 mb-8">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <input
