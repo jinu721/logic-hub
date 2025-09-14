@@ -42,9 +42,9 @@ export async function middleware(request: NextRequest) {
       Authorization: `Bearer ${accessToken}`,
     }});
 
-    console.log("Response ",response)
+    const data = response.data.data;
 
-    if (!response.data.approved) {
+    if (!data.approved) {
       console.log("Not an admin. Redirecting to login...");
       return NextResponse.redirect(new URL("/home", request.url));
     }

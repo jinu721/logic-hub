@@ -5,7 +5,6 @@ export interface IGroupRepository {
   createGroup(data: Partial<GroupIF>): Promise<GroupIF>;
   findByUser(userId: string): Promise<GroupIF[]>;
   getAllGroups(qury: any,skip: number,limit:number): Promise<GroupIF[] | null>;
-  countAllgroups(filter:any): Promise<number>;
   updateGroup(groupId: string, data: Partial<GroupIF>): Promise<GroupIF | null>;
   deleteGroup(groupId: string): Promise<GroupIF | null>;
   addMembers(groupId: string, memberIds: string[]): Promise<GroupIF | null>;

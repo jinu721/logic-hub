@@ -2,6 +2,7 @@ import { Report } from "../../models/report.model";
 import { BaseRepository } from "../base.repository";
 import { IReportRepository } from "../interfaces/report.repository.interface";
 import { ReportIF, ReportStatus } from "../../types/report.types";
+import { toLean, toLeanMany } from "../../utils/database/query.utils";
 
 export class ReportRepository
   extends BaseRepository<ReportIF>
@@ -12,11 +13,12 @@ export class ReportRepository
   }
 
   async createReport(data: ReportIF): Promise<ReportIF> {
-    return await this.model.create(data);
+    const report = new this.model(data);
+    return toLean<ReportIF>(report.save());
   }
 
   async getAllReports(query: any, skip: number, limit: number): Promise<any[]> {
-    return this.model.aggregate([
+    const reports = await this.model.aggregate([
       { $match: query },
 
       {
@@ -24,18 +26,8 @@ export class ReportRepository
           from: "users",
           let: { userId: "$reporter" },
           pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$_id", "$$userId"] },
-              },
-            },
-            {
-              $project: {
-                username: 1,
-                email: 1,
-                _id: 1,
-              },
-            },
+            { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
+            { $project: { username: 1, email: 1, _id: 1 } },
           ],
           as: "reporter",
         },
@@ -47,18 +39,8 @@ export class ReportRepository
           from: "users",
           let: { userId: "$reportedId" },
           pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$_id", "$$userId"] },
-              },
-            },
-            {
-              $project: {
-                username: 1,
-                email: 1,
-                _id: 1,
-              },
-            },
+            { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
+            { $project: { username: 1, email: 1, _id: 1 } },
           ],
           as: "reportedUser",
         },
@@ -78,7 +60,6 @@ export class ReportRepository
           _id: "$reportedId",
           reportedType: { $first: "$reportedType" },
           totalReports: { $sum: 1 },
-
           reports: {
             $push: {
               reason: "$reason",
@@ -87,7 +68,6 @@ export class ReportRepository
               reporter: "$reporter",
             },
           },
-
           userInfo: { $first: { $arrayElemAt: ["$reportedUser", 0] } },
           groupInfo: { $first: { $arrayElemAt: ["$reportedGroup", 0] } },
         },
@@ -96,20 +76,24 @@ export class ReportRepository
       { $skip: skip },
       { $limit: limit },
     ]);
+
+    return reports;
   }
 
   async countAllReports(query: any): Promise<number> {
-    return await this.model.countDocuments(query);
+    return this.model.countDocuments(query);
   }
 
   async getReportById(id: string): Promise<ReportIF | null> {
-    return await this.model.findById(id);
+    return toLean<ReportIF>(this.model.findById(id));
   }
 
   async updateReportStatus(
     id: string,
     status: ReportStatus
   ): Promise<ReportIF | null> {
-    return await this.model.findByIdAndUpdate(id, { status }, { new: true });
+    return toLean<ReportIF>(
+      this.model.findByIdAndUpdate(id, { status }, { new: true })
+    );
   }
 }

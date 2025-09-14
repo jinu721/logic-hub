@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 import { HttpStatus } from "../../constants/http.status";
 
 export class ReportController implements IReportController {
-  constructor(private reportService: IReportService) {}
+  constructor(private readonly _reportSvc: IReportService) {}
 
   async createReport(req: Request, res: Response): Promise<void> {
     try {
@@ -15,7 +15,7 @@ export class ReportController implements IReportController {
         return;
       }
 
-      const report = await this.reportService.createReport({
+      const report = await this._reportSvc.createReport({
         reporter: userId,
         ...req.body,
       });
@@ -31,7 +31,7 @@ export class ReportController implements IReportController {
       const filter = {reportedType: req.query.reportedType, status: req.query.status};
       const page = req.query.page;
       const limit = req.query.limit;
-      const reports = await this.reportService.getAllReports(filter as any,Number(page),Number(limit));
+      const reports = await this._reportSvc.getAllReports(filter as any,Number(page),Number(limit));
       res.status(HttpStatus.OK).json(reports);
     } catch (err) {
         console.log(err);
@@ -41,7 +41,7 @@ export class ReportController implements IReportController {
 
   async getReportById(req: Request, res: Response): Promise<void> {
     try {
-      const report = await this.reportService.getReportById(req.params.id);
+      const report = await this._reportSvc.getReportById(req.params.id);
       if (!report) {
         res.status(HttpStatus.NOT_FOUND).json({ message: "Report not found" });
         return;
@@ -55,7 +55,7 @@ export class ReportController implements IReportController {
   async updateReportStatus(req: Request, res: Response): Promise<void> {
     try {
       const { status } = req.body;
-      const updatedReport = await this.reportService.updateReportStatus(req.params.id, status);
+      const updatedReport = await this._reportSvc.updateReportStatus(req.params.id, status);
       if (!updatedReport) {
         res.status(HttpStatus.NOT_FOUND).json({ message: "Report not found" });
         return;

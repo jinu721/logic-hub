@@ -4,11 +4,11 @@ import { IMembershipController } from "../interfaces/membership.controller.inter
 import { HttpStatus } from "../../constants/http.status"; 
 
 export class MembershipController implements IMembershipController {
-  constructor(private membershipService: IMembershipService) {}
+  constructor(private readonly _membershipSvc: IMembershipService) {}
 
   async createMembership(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.membershipService.createPlan(req.body);
+      const result = await this._membershipSvc.createPlan(req.body);
       res.status(HttpStatus.CREATED).json({ success: true, data: result });
     } catch (error) {
       console.log(error);
@@ -23,7 +23,7 @@ export class MembershipController implements IMembershipController {
       const search = req.query.search;
       const page = req.query.page;
       const limit = req.query.limit;
-      const result = await this.membershipService.getAllPlans(search as string,Number(page),Number(limit));
+      const result = await this._membershipSvc.getAllPlans(search as string,Number(page),Number(limit));
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (error) {
       console.log(error);
@@ -35,7 +35,7 @@ export class MembershipController implements IMembershipController {
 
   async getTwoActiveMemberships(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.membershipService.getTwoActivePlans();
+      const result = await this._membershipSvc.getTwoActivePlans();
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (error) {
       console.log(error);
@@ -47,7 +47,7 @@ export class MembershipController implements IMembershipController {
 
   async getMembershipById(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.membershipService.getPlanById(req.params.id);
+      const result = await this._membershipSvc.getPlanById(req.params.id);
       if (!result) {
          res
           .status(HttpStatus.NOT_FOUND)
@@ -65,7 +65,7 @@ export class MembershipController implements IMembershipController {
 
   async updateMembership(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.membershipService.updatePlan(req.params.id, req.body);
+      const result = await this._membershipSvc.updatePlan(req.params.id, req.body);
       if (!result) {
         res
           .status(HttpStatus.NOT_FOUND)
@@ -81,7 +81,7 @@ export class MembershipController implements IMembershipController {
 
   async deleteMembership(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.membershipService.deletePlan(req.params.id);
+      const result = await this._membershipSvc.deletePlan(req.params.id);
       if (!result) {
         res
           .status(HttpStatus.NOT_FOUND)

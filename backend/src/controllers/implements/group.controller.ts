@@ -3,9 +3,10 @@ import { HttpStatus } from "../../constants/http.status";
 import { IGroupController } from "../interfaces/group.controller.interface";
 import { GroupService } from "../../services/implements/group.service";
 import cloudinary from "../../config/cloudinary.config";
+import { IGroupService } from "../../services/interfaces/group.service.interface";
 
 export class GroupController implements IGroupController {
-  constructor(private groupService: GroupService) {}
+  constructor(private readonly _groupSvc: IGroupService) {}
 
   createGroup = async (req: Request, res: Response) => {
     try {
@@ -21,7 +22,7 @@ export class GroupController implements IGroupController {
       }
       const imageBuffer = req.file ? req.file.buffer : null;
 
-      const result = await this.groupService.createGroup(
+      const result = await this._groupSvc.createGroup(
         req.body,
         imageBuffer as Buffer,
         userId
@@ -41,7 +42,7 @@ export class GroupController implements IGroupController {
   findByUser = async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
-      const result = await this.groupService.findByUser(userId);
+      const result = await this._groupSvc.findByUser(userId);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (err) {
       console.log(err);
@@ -56,7 +57,7 @@ export class GroupController implements IGroupController {
       const search = req.query.search;
       const page = req.query.page;
       const limit = req.query.limit;
-      const result = await this.groupService.getAllGroups(req.query);
+      const result = await this._groupSvc.getAllGroups(req.query);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (err) {
       console.log(err);
@@ -69,7 +70,7 @@ export class GroupController implements IGroupController {
   updateGroup = async (req: Request, res: Response) => {
     try {
       const { groupId } = req.params;
-      const result = await this.groupService.updateGroup(groupId, req.body);
+      const result = await this._groupSvc.updateGroup(groupId, req.body);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (err) {
       console.log(err);
@@ -82,7 +83,7 @@ export class GroupController implements IGroupController {
   deleteGroup = async (req: Request, res: Response) => {
     try {
       const { groupId } = req.params;
-      const result = await this.groupService.deleteGroup(groupId);
+      const result = await this._groupSvc.deleteGroup(groupId);
       res.status(HttpStatus.OK).json({ success: result });
     } catch (err) {
       console.log(err);
@@ -104,7 +105,7 @@ export class GroupController implements IGroupController {
 
     
     try {
-      const updatedGroup = await this.groupService.sendJoinRequest(
+      const updatedGroup = await this._groupSvc.sendJoinRequest(
         groupId,
         userId
       );

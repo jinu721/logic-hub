@@ -32,8 +32,8 @@ const DomainHeader: React.FC<DomainHeaderProps> = ({
   const successRate = challenge?.successRate ?? 0;
 
   return (
-    <header className="bg-slate-900/90 backdrop-blur-xl border-b border-slate-700/50 shadow-lg flex-shrink-0 relative">
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-cyan-600/5" />
+    <header className="bg-[#0e1117] border-b border-[#1c1f26] backdrop-blur-xl shadow-lg flex-shrink-0 relative">
+      <div className="absolute inset-0" />
       <div className="relative px-3 py-2 sm:px-4 sm:py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">

@@ -2,7 +2,7 @@ import passport from 'passport';
 import {Strategy as GoogleStrategy,Profile as GoogleProfile, VerifyCallback} from 'passport-google-oauth20';
 import {Strategy as GithubStrategy,Profile as GithubProfile} from 'passport-github2';
 import User from '../models/user.model';
-import { generateUsername } from '../utils/generate.username';
+import { generateUsername } from '../utils/application/generate.username';
 import { env } from './env';
 
 

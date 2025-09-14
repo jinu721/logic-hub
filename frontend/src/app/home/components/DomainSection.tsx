@@ -3,6 +3,7 @@ import { getChallenges } from "@/services/client/clientServices";
 import DomainListing from "./DomainListing";
 import { UserIF } from "@/types/user.types";
 import { ChallengeDomainIF } from "@/types/domain.types";
+import { mockChallenges } from "@/utils/mock.data";
 
 interface Filters {
   category?: string;

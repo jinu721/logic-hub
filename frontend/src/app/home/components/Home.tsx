@@ -27,6 +27,7 @@ import { useToast } from "@/context/Toast";
 import { debounce } from "lodash";
 import Spinner from "@/components/shared/CustomLoader";
 import { UserIF } from "@/types/user.types";
+import GeometricBackground from "@/components/common/GeometricBackground";
 
 const hasClaimedToday = (lastRewardClaimDate: Date | null) => {
   if (!lastRewardClaimDate) return false;
@@ -224,7 +225,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-950 text-gray-100">
+      <div className="min-h-screen bg-[var(--logichub-primary-bg)] text-gray-100">
         <main className="container mx-auto px-4 py-6">
           {highlightedDomain && (
             <div className="w-full">
@@ -357,7 +358,8 @@ const Home = () => {
             </div>
           ) : (
             <>
-              <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950">
+              <div className="min-h-screen ">
+                <GeometricBackground/>
                 <div className="container mx-auto px-4 py-8">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div className="lg:col-span-3 xl:col-span-2">
@@ -401,7 +403,7 @@ const Home = () => {
         />
       )}
       {showGiftRecive && <GiftReceivedModal />}
-      {showDailyReward && <DailyReward user={user} />}
+      {/* {showDailyReward && <DailyReward user={user} />} */}
     </>
   );
 };

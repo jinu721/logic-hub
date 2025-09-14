@@ -1,23 +1,19 @@
 import express from "express";
-import { MarketController } from "../controllers/implements/market.controller";
-import { MarketService } from "../services/implements/market.service";
-import { MarketRepository } from "../repository/implements/market.repository";
-import { UserRepository } from "../repository/implements/user.repository";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { container } from "../di/container";
+import { MARKET_ROUTES } from "../constants/ROUTES/market.constants";
 
 const router = express.Router();
 
-const marketController = new MarketController(
-  new MarketService(new MarketRepository(), new UserRepository())
-);
+const marketController = container.marketCtrl;
 
 router.use(authMiddleware);
 
-router.post("/", marketController.createItem.bind(marketController));
-router.put("/:id", marketController.updateItem.bind(marketController));
-router.delete("/:id", marketController.deleteItem.bind(marketController));
-router.post("/:id/purchase", marketController.purchaseMarketItem.bind(marketController));
-router.get("/", marketController.getAllItems.bind(marketController));
-router.get("/:id", marketController.getItemById.bind(marketController));
+router.post(MARKET_ROUTES.CREATE, marketController.createItem.bind(marketController));
+router.put(MARKET_ROUTES.UPDATE, marketController.updateItem.bind(marketController));
+router.delete(MARKET_ROUTES.DELETE, marketController.deleteItem.bind(marketController));
+router.post(MARKET_ROUTES.PURCHASE, marketController.purchaseMarketItem.bind(marketController));
+router.get(MARKET_ROUTES.GET_ALL, marketController.getAllItems.bind(marketController));
+router.get(MARKET_ROUTES.GET_BY_ID, marketController.getItemById.bind(marketController));
 
 export default router;

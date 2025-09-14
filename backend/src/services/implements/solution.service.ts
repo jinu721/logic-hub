@@ -1,13 +1,13 @@
 import { ISolutionService } from "../interfaces/solution.service.interface";
 import { SolutionIF } from "../../types/solutions.types";
-import { SolutionRepository } from "../../repository/implements/solution.repository";
 import { PublicSolutionDTO, toPublicSolutionDTO, toPublicSolutionDTOs } from "../../mappers/solution.dto";
+import { ISolutionRepository } from "../../repository/interfaces/solution.repository.interface";
 
 export class SolutionService implements ISolutionService {
-  constructor(private repo: SolutionRepository) {}
+  constructor(private readonly _solutionRepo: ISolutionRepository) {}
 
   async addSolution(data: Partial<SolutionIF>): Promise<PublicSolutionDTO> {
-    const newSolution = await this.repo.create(data);
+    const newSolution = await this._solutionRepo.create(data);
 
     return  toPublicSolutionDTO(newSolution);
   }
@@ -33,24 +33,24 @@ async getSolutionsByChallenge(
   else if (sortBy === "newest") sortOption = { createdAt: -1 };
   else if (sortBy === "comments") sortOption = { commentsCount: -1 };
 
-  const solutions = await this.repo.findByChallenge(query, sortOption, page, limit);
+  const solutions = await this._solutionRepo.findByChallenge(query, sortOption, page, limit);
   return toPublicSolutionDTOs(solutions);
 }
 
 
   async getSolutionsByUser(userId: string): Promise<PublicSolutionDTO[]> {
-    const solution = await this.repo.findByUser(userId);
+    const solution = await this._solutionRepo.findByUser(userId);
     console.log("Solution : ", solution);
     return toPublicSolutionDTOs(solution);
   }
 
   async like(solutionId: string, userId: string): Promise<PublicSolutionDTO | null> {
-    const isLiked = await this.repo.checkUserLikedSolution(solutionId, userId);
+    const isLiked = await this._solutionRepo.checkUserLikedSolution(solutionId, userId);
     if (isLiked) {
-      const unliked = await this.repo.unlikeSolution(solutionId, userId);
+      const unliked = await this._solutionRepo.unlikeSolution(solutionId, userId);
       return toPublicSolutionDTO(unliked as SolutionIF);
     }
-    const liked = await this.repo.likeSolution(solutionId, userId);
+    const liked = await this._solutionRepo.likeSolution(solutionId, userId);
     return toPublicSolutionDTO(liked as SolutionIF);
   }
 
@@ -59,7 +59,7 @@ async getSolutionsByChallenge(
     data: { solutionId: string; content: string }
   ): Promise<PublicSolutionDTO | null> {
     const { solutionId, content } = data;
-    const commented = await this.repo.commentSolution(solutionId, {
+    const commented = await this._solutionRepo.commentSolution(solutionId, {
       user: userId,
       content,
     });
@@ -67,16 +67,16 @@ async getSolutionsByChallenge(
   }
 
   async deleteComment(solutionId: string, commentId: string): Promise<PublicSolutionDTO | null> {
-    const deleted = await this.repo.deleteComment(solutionId, commentId);
+    const deleted = await this._solutionRepo.deleteComment(solutionId, commentId);
     return toPublicSolutionDTO(deleted as SolutionIF);
   }
 
   async update(solutionId: string, data: Partial<SolutionIF>): Promise<PublicSolutionDTO | null> {
-    const updated = await this.repo.updateSolution(solutionId, data);
+    const updated = await this._solutionRepo.updateSolution(solutionId, data);
     return toPublicSolutionDTO(updated as SolutionIF);
   }
 
   async delete(solutionId: string): Promise<void> {
-    await this.repo.deleteSolution(solutionId);
+    await this._solutionRepo.deleteSolution(solutionId);
   }
 }

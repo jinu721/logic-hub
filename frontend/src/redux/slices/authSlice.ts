@@ -41,9 +41,8 @@ export const userLogin = createAsyncThunk<
   try {
     const response = await login(userData);
 
-    console.log('Response',response);
 
-    if (response.message === "2FA required") {
+    if (response.security) {
       return { security: true, message: response.message };
     }
 

@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { PurchaseService } from "../../services/implements/purchase.service"; 
 import { HttpStatus } from "../../constants/http.status";
 import { IPurchaseController } from "../interfaces/purchase.controller.interface";
 import { razorpay } from "../../config/razorpay.config";
 import { env } from "../../config/env";
+import { IPurchaseService } from "../../services/interfaces/purchase.service.interface";
 
 export class PurchaseController implements IPurchaseController {
-  constructor(private purchaseService: PurchaseService) {}
+  constructor(private _purchaseSvc: IPurchaseService) {}
 
   async createOrder(req: Request, res: Response): Promise<void> {
     try {
@@ -59,7 +59,7 @@ export class PurchaseController implements IPurchaseController {
         return;
       }
 
-      const purchase = await this.purchaseService.createPlanPurchase({
+      const purchase = await this._purchaseSvc.createPlanPurchase({
         userId,
         planId,
         razorpayOrderId,
@@ -87,7 +87,7 @@ export class PurchaseController implements IPurchaseController {
     try {
       const userId = req.params.userId;
 
-      const purchases = await this.purchaseService.getUserPurchases(userId);
+      const purchases = await this._purchaseSvc.getUserPurchases(userId);
 
       res.status(HttpStatus.OK).json({
         success: true,
@@ -105,7 +105,7 @@ export class PurchaseController implements IPurchaseController {
     try {
         const {id} = req.params;
   
-        const purchase = await this.purchaseService.getPlanHistoryById(id);
+        const purchase = await this._purchaseSvc.getPlanHistoryById(id);
   
         res.status(HttpStatus.OK).json({
           success: true,
@@ -122,7 +122,7 @@ export class PurchaseController implements IPurchaseController {
     try {
        const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 10;
-        const purchases = await this.purchaseService.getPlanHistory(page,limit);
+        const purchases = await this._purchaseSvc.getPlanHistory(page,limit);
   
         res.status(HttpStatus.OK).json({
           success: true,

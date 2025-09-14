@@ -9,10 +9,10 @@ import {
 } from "../../mappers/report.dto";
 
 export class ReportService implements IReportService {
-  constructor(private reportRepo: IReportRepository) {}
+  constructor(private readonly _reportRepo: IReportRepository) {}
 
   async createReport(data: ReportIF): Promise<PublicReportDTO> {
-    const report = await this.reportRepo.createReport(data);
+    const report = await this._reportRepo.createReport(data);
     return toPublicReportDTO(report as ReportIF);
   }
 
@@ -31,7 +31,7 @@ async getAllReports(
 
   const skip = (page - 1) * limit;
 
-  const groupedReports = await this.reportRepo.getAllReports(query, skip, limit);
+  const groupedReports = await this._reportRepo.getAllReports(query, skip, limit);
 
 
   const result = groupedReports.map(group => {
@@ -45,7 +45,7 @@ async getAllReports(
     };
   });
 
-  const totalItems = await this.reportRepo.countAllReports(query);
+  const totalItems = await this._reportRepo.countAllReports(query);
 
 
   console.log("Total Counts",totalItems);
@@ -56,7 +56,7 @@ async getAllReports(
 
 
   async getReportById(id: string): Promise<PublicReportDTO | null> {
-    const report = await this.reportRepo.getReportById(id);
+    const report = await this._reportRepo.getReportById(id);
     return toPublicReportDTO(report as ReportIF);
   }
 
@@ -64,7 +64,7 @@ async getAllReports(
     id: string,
     status: ReportStatus
   ): Promise<PublicReportDTO | null> {
-    const report = await this.reportRepo.updateReportStatus(id, status);
+    const report = await this._reportRepo.updateReportStatus(id, status);
     return toPublicReportDTO(report as ReportIF);
   }
 }

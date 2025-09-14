@@ -4,49 +4,36 @@ import {
 } from "../interfaces/challange.service.interface";
 import { ChallengeDomainIF, ChallengeType } from "../../types/challenge.types";
 import { Types } from "mongoose";
-import { ChallengeRepository } from "../../repository/implements/challange.repository";
-import { LevelRepository } from "../../repository/implements/level.repository";
-import { UserRepository } from "../../repository/implements/user.repository";
-import { ChallengeProgressRepository } from "../../repository/implements/progress.repository";
 import { runInWorkerThread } from "../../worker/run.worker";
-import { generateExecutableCode } from "../../utils/generate.executable.code";
-import { sleep } from "../../utils/sleep.helper";
-import { isEqual } from "../../utils/compare.helper";
+import { generateExecutableCode } from "../../utils/execution/generate.executable.code";
+import { isEqual } from "../../utils/execution/compare.helper";
 import {
   PublicChallengeDTO,
   toPublicChallengeDTO,
   toPublicChallengeDTOs,
 } from "../../mappers/challenge.dto";
+import { IChallengeRepository } from "../../repository/interfaces/challange.repository.interface";
+import { ILevelRepository } from "../../repository/interfaces/level.repository.interface";
+import { IUserRepository } from "../../repository/interfaces/user.repository.interface";
+import { IChallengeProgressRepository } from "../../repository/interfaces/progress.repository.interface";
 
 export class ChallengeService implements IChallengeService {
-  private challengeRepository: ChallengeRepository;
-  private levelRepository: LevelRepository;
-  private userRepository: UserRepository;
-  private challengeProgressRepository: ChallengeProgressRepository;
-
   constructor(
-    challengeRepository: ChallengeRepository,
-    levelRepository: LevelRepository,
-    userRepository: UserRepository,
-    challengeProgressRepository: ChallengeProgressRepository
-  ) {
-    this.challengeRepository = challengeRepository;
-    this.levelRepository = levelRepository;
-    this.userRepository = userRepository;
-    this.challengeProgressRepository = challengeProgressRepository;
-  }
+    private readonly _challengeRepo: IChallengeRepository,
+    private readonly _levelRepo: ILevelRepository,
+    private readonly _userRepo: IUserRepository,
+    private readonly _progressRepo: IChallengeProgressRepository
+  ) {}
 
   async createChallenge(
     challengeData: Omit<ChallengeDomainIF, "_id">
   ): Promise<PublicChallengeDTO> {
-    const challenge = await this.challengeRepository.createChallenge(
-      challengeData
-    );
+    const challenge = await this._challengeRepo.createChallenge(challengeData);
     return toPublicChallengeDTO(challenge);
   }
 
   async getChallengeById(id: string, userId?: string): Promise<any> {
-    const challenge = await this.challengeRepository.getChallengeById(id);
+    const challenge = await this._challengeRepo.getChallengeById(id);
     if (!challenge) return null;
 
     let recentSubmission: any = null;
@@ -57,8 +44,7 @@ export class ChallengeService implements IChallengeService {
     let completedUsers = 0;
     let successRate = 0;
 
-    const allProgress =
-      await this.challengeProgressRepository.getAllProgressByChallenge(id);
+    const allProgress = await this._progressRepo.getAllProgressByChallenge(id);
     totalAttempts = allProgress.length;
     completedUsers = allProgress.filter((p) => p.status === "completed").length;
     successRate =
@@ -72,12 +58,12 @@ export class ChallengeService implements IChallengeService {
 
     if (userId) {
       recentSubmission =
-        await this.challengeProgressRepository.getLatestSubmissionByUserAndChallenge(
+        await this._progressRepo.getLatestSubmissionByUserAndChallenge(
           userId,
           id
         );
       submisionHistory =
-        await this.challengeProgressRepository.getAllSubmissionsByUserAndChallenge(
+        await this._progressRepo.getAllSubmissionsByUserAndChallenge(
           userId,
           id
         );
@@ -127,11 +113,9 @@ export class ChallengeService implements IChallengeService {
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
     const popularChallangeId =
-      await this.challengeProgressRepository.getMostCompletedChallengeOfWeek(
-        oneWeekAgo
-      );
+      await this._progressRepo.getMostCompletedChallengeOfWeek(oneWeekAgo);
 
-    let popularChallange = await this.challengeRepository.getChallengeById(
+    let popularChallange = await this._challengeRepo.getChallengeById(
       popularChallangeId as string
     );
 
@@ -144,19 +128,18 @@ export class ChallengeService implements IChallengeService {
         totalItems: 0,
       };
 
-    const challenges = await this.challengeRepository.getChallenges(
+    const challenges = await this._challengeRepo.getChallenges(
       query,
       skip,
       limit
     );
 
+    const totalItems = await this._challengeRepo.countAllChallenges("");
 
-    const totalItems = await this.challengeRepository.countAllChallenges("");
-
-    const progressList =
-      await this.challengeProgressRepository.getAllProgress();
-    const userProgressList =
-      await this.challengeProgressRepository.getAllProgressByUser(userId);
+    const progressList = await this._progressRepo.getAllProgress();
+    const userProgressList = await this._progressRepo.getAllProgressByUser(
+      userId
+    );
 
     const userProgressMap = new Map();
     userProgressList.forEach((p) =>
@@ -235,14 +218,12 @@ export class ChallengeService implements IChallengeService {
     limit: number
   ): Promise<{ challenges: PublicChallengeDTO[]; totalItems: number }> {
     const skip = (page - 1) * limit;
-    const challenges = await this.challengeRepository.getAllChallenges(
+    const challenges = await this._challengeRepo.getAllChallenges(
       search,
       skip,
       limit
     );
-    const totalItems = await this.challengeRepository.countAllChallenges(
-      search
-    );
+    const totalItems = await this._challengeRepo.countAllChallenges(search);
     return { challenges: toPublicChallengeDTOs(challenges), totalItems };
   }
 
@@ -250,44 +231,38 @@ export class ChallengeService implements IChallengeService {
     id: Types.ObjectId,
     updateData: Partial<ChallengeDomainIF>
   ): Promise<PublicChallengeDTO | null> {
-    const challenge = await this.challengeRepository.updateChallenge(
-      id,
-      updateData
-    );
+    const challenge = await this._challengeRepo.updateChallenge(id, updateData);
     return toPublicChallengeDTO(challenge as ChallengeDomainIF);
   }
 
   async deleteChallenge(id: Types.ObjectId): Promise<boolean> {
-    return await this.challengeRepository.deleteChallenge(id);
+    return await this._challengeRepo.deleteChallenge(id);
   }
 
   async getChallengesByStatus(
     status: "active" | "inactive" | "draft" | "archived"
   ): Promise<PublicChallengeDTO[]> {
-    const challenges = await this.challengeRepository.getChallengesByStatus(
-      status
-    );
+    const challenges = await this._challengeRepo.getChallengesByStatus(status);
     return toPublicChallengeDTOs(challenges);
   }
 
   async getChallengesByTags(tags: string[]): Promise<PublicChallengeDTO[]> {
-    const challenges = await this.challengeRepository.getChallengesByTags(tags);
+    const challenges = await this._challengeRepo.getChallengesByTags(tags);
     return toPublicChallengeDTOs(challenges);
   }
 
   async findChallengeById(id: string): Promise<ChallengeDomainIF | null> {
-    return await this.challengeRepository.getChallengeById(id);
+    return await this._challengeRepo.getChallengeById(id);
   }
 
   async getChallengesByDifficulty(
     difficulty: "novice" | "adept" | "master"
   ): Promise<PublicChallengeDTO[]> {
-    const challenges = await this.challengeRepository.getChallengesByDifficulty(
+    const challenges = await this._challengeRepo.getChallengesByDifficulty(
       difficulty
     );
     return toPublicChallengeDTOs(challenges);
   }
-
   async runChallengeCode(
     challengeId: string,
     language: string,
@@ -295,101 +270,167 @@ export class ChallengeService implements IChallengeService {
     input: string,
     userId: string
   ): Promise<any> {
-    console.log({ challengeId, language, sourceCode, input, userId });
+    try {
+      console.log({ challengeId, language, sourceCode, input, userId });
 
-    const challenge = await this.challengeRepository.getChallengeById(
-      challengeId
-    );
+      const challenge = await this._challengeRepo.getChallengeById(challengeId);
 
-    if (!challenge || challenge.type !== "code") {
-      throw new Error("Only for code type");
-    }
+      if (!challenge) {
+        throw new Error("Challenge not found");
+      }
 
-    if (!challenge.functionSignature) {
-      throw new Error("Function signature missing in challenge");
-    }
+      if (challenge.type !== "code") {
+        throw new Error("Only for code type");
+      }
 
-    const testCases = challenge.testCases.slice(0, 3);
+      if (!challenge.functionSignature) {
+        throw new Error("Function signature missing in challenge");
+      }
 
-    const results: any = [];
+      if (!challenge.testCases || challenge.testCases.length === 0) {
+        throw new Error("No test cases found for this challenge");
+      }
 
-    for (let i = 0; i < testCases.length; i++) {
-      await sleep(i * 300);
-
-      const testCase: any = testCases[i];
-
+      const testCases = challenge.testCases.slice(0, 3);
       const funcName = challenge.functionSignature?.split("(")[0];
+
+      console.log("Function name extracted:", funcName);
+      console.log("Test cases to run:", testCases);
 
       const fullSource = generateExecutableCode(
         language,
         sourceCode,
         funcName,
-        testCase.input
+        testCases
       );
+
+      console.log("Generated executable code:", fullSource);
 
       const executionResult = await runInWorkerThread(
         language,
         fullSource,
-        input
+        input || ""
       );
 
-      const expectedOutput = String(testCase.output).trim();
-      const userOutput = executionResult.run.stdout.trim();
+      console.log("Execution result:", executionResult);
 
-      const passedTest = isEqual(expectedOutput, userOutput);
+      let batchResults: any[] = [];
 
-      results.push({
-        input: testCase.input,
-        name: testCase.isHidden ? `Hidden Test ${i + 1}` : `Test ${i + 1}`,
-        expectedOutput: testCase.isHidden ? "[hidden]" : expectedOutput,
-        actualOutput: testCase.isHidden
-          ? passedTest
-            ? "[matches]"
-            : "[doesn't match]"
-          : userOutput,
-        passed: passedTest,
+      try {
+        const stdout = executionResult.run?.stdout || "";
+        console.log("Raw stdout:", stdout);
+
+        if (!stdout.trim()) {
+          throw new Error("No output received from execution");
+        }
+
+        batchResults = JSON.parse(stdout.trim());
+        console.log("Parsed batch results:", batchResults);
+      } catch (parseError) {
+        console.error("Failed to parse batch execution results:", parseError);
+        console.error("Raw stdout was:", executionResult.run?.stdout);
+        console.error("Stderr:", executionResult.run?.stderr);
+
+        batchResults = testCases.map((_, index) => ({
+          success: false,
+          error: `Failed to execute test case ${index + 1}: ${
+            parseError.message
+          }`,
+        }));
+      }
+
+      const results = testCases.map((testCase, index) => {
+        const batchResult = batchResults[index] || {
+          success: false,
+          error: "No result available",
+        };
+
+        let passedTest = false;
+        let userOutput = "";
+
+        if (batchResult.success) {
+          const expectedOutput = String(testCase.output).trim();
+          userOutput = String(batchResult.result || "").trim();
+          passedTest = isEqual(expectedOutput, userOutput);
+        } else {
+          userOutput = batchResult.error || "Execution failed";
+        }
+
+        return {
+          input: testCase.input,
+          name: testCase.isHidden
+            ? `Hidden Test ${index + 1}`
+            : `Test ${index + 1}`,
+          expectedOutput: testCase.isHidden
+            ? "[hidden]"
+            : String(testCase.output).trim(),
+          actualOutput: testCase.isHidden
+            ? passedTest
+              ? "[matches]"
+              : "[doesn't match]"
+            : userOutput,
+          stdout: batchResult.logs || "",
+          passed: passedTest,
+        };
       });
-    }
 
-    return {
-      userId,
-      challengeId,
-      language,
-      results,
-    };
+      console.log("Final results:", results);
+
+      return {
+        userId,
+        challengeId,
+        language,
+        results,
+      };
+    } catch (error) {
+      console.error("Error in runChallengeCode:", error);
+      throw error;
+    }
   }
 
   async submitChallange(data: SubmitPayload, userId: string): Promise<any> {
-    const { challengeId, userCode, language } = data;
+    try {
+      const { challengeId, userCode, language } = data;
 
-    console.log("Data", data);
-    const challenge = await this.challengeRepository.getChallengeById(
-      challengeId
-    );
-    if (!challenge) throw new Error("Challenge not found");
+      console.log("Submit challenge data:", data);
 
-    let testResults: any[] = [];
-    let passed = false;
+      const challenge = await this._challengeRepo.getChallengeById(challengeId);
 
-    const compare = (a: any, b: any) =>
-      JSON.stringify(a).trim().toLowerCase() ===
-      JSON.stringify(b).trim().toLowerCase();
+      if (!challenge) {
+        throw new Error("Challenge not found");
+      }
 
-    switch (challenge.type as ChallengeType) {
-      case "code":
-        if (!challenge.functionSignature) {
-          throw new Error("Function signature missing");
-        }
+      console.log("Challenge found:", challenge._id, challenge.type);
 
-        for (let index = 0; index < challenge.testCases.length; index++) {
-          const testCase = challenge.testCases[index];
+      if (!challenge.testCases || challenge.testCases.length === 0) {
+        throw new Error("No test cases found for this challenge");
+      }
+
+      let testResults: any[] = [];
+      let passed = false;
+
+      const compare = (a: any, b: any) =>
+        JSON.stringify(a).trim().toLowerCase() ===
+        JSON.stringify(b).trim().toLowerCase();
+
+      switch (challenge.type as ChallengeType) {
+        case "code":
+          if (!challenge.functionSignature) {
+            throw new Error("Function signature missing");
+          }
+
           const funcName = challenge.functionSignature?.split("(")[0];
+          console.log("Function name extracted:", funcName);
+
+          // ✅ This is correct - passing the full testCases array for batch execution
           const fullSource = generateExecutableCode(
             language,
-            userCode as string,
+            userCode,
             funcName,
-            testCase.input
+            challenge.testCases
           );
+
+          console.log("Generated executable code length:", fullSource.length);
 
           const executionResult = await runInWorkerThread(
             language,
@@ -397,158 +438,220 @@ export class ChallengeService implements IChallengeService {
             ""
           );
 
-          const expectedOutput = String(testCase.output).trim();
-          const userOutput = (executionResult.run?.stdout || "").trim();
-          const passedTest = isEqual(expectedOutput, userOutput);
+          console.log("Execution result:", executionResult);
 
-          testResults.push({
-            name: testCase.isHidden
-              ? `Hidden Test ${index + 1}`
-              : `Test ${index + 1}`,
-            input: testCase.input,
-            passed: passedTest,
-            expectedOutput: testCase.isHidden ? "[hidden]" : expectedOutput,
-            actualOutput: testCase.isHidden
-              ? passedTest
-                ? "[matches]"
-                : "[doesn't match]"
-              : userOutput,
+          let batchResults: any[] = [];
+
+          try {
+            const stdout = executionResult.run?.stdout || "";
+            console.log("Raw stdout:", stdout);
+
+            if (!stdout.trim()) {
+              throw new Error("No output received from execution");
+            }
+
+            batchResults = JSON.parse(stdout.trim());
+            console.log("Parsed batch results length:", batchResults.length);
+          } catch (parseError) {
+            console.error(
+              "Failed to parse batch execution results:",
+              parseError
+            );
+            console.error("Raw stdout was:", executionResult.run?.stdout);
+            console.error("Stderr:", executionResult.run?.stderr);
+
+            batchResults = challenge.testCases.map((_, index) => ({
+              success: false,
+              error: `Failed to execute test case ${index + 1}: ${
+                parseError.message
+              }`,
+            }));
+          }
+
+          testResults = challenge.testCases.map((testCase, index) => {
+            const batchResult = batchResults[index] || {
+              success: false,
+              error: "No result available",
+            };
+
+            let passedTest = false;
+            let userOutput = "";
+
+            if (batchResult.success) {
+              const expectedOutput = String(testCase.output).trim();
+              userOutput = String(batchResult.result || "").trim();
+              passedTest = isEqual(expectedOutput, userOutput);
+            } else {
+              userOutput = batchResult.error || "Execution failed";
+            }
+
+            return {
+              name: testCase.isHidden
+                ? `Hidden Test ${index + 1}`
+                : `Test ${index + 1}`,
+              input: testCase.input,
+              passed: passedTest,
+              expectedOutput: testCase.isHidden
+                ? "[hidden]"
+                : String(testCase.output).trim(),
+              actualOutput: testCase.isHidden
+                ? passedTest
+                  ? "[matches]"
+                  : "[doesn't match]"
+                : userOutput,
+            };
           });
 
-          await sleep(200);
+          passed = testResults.every((r) => r.passed === true);
+          console.log("All tests passed:", passed);
+          break;
+
+        case "cipher":
+          passed = compare(userCode, challenge.solutionCode);
+          testResults = [
+            {
+              id: 1,
+              name: "Decryption Match",
+              status: passed ? "passed" : "failed",
+              expected: challenge.solutionCode,
+              actual: userCode,
+            },
+          ];
+          console.log("Cipher challenge passed:", passed);
+          break;
+
+        default:
+          throw new Error(`Unsupported challenge type: ${challenge.type}`);
+      }
+
+      const user = await this._userRepo.getUserById(userId as string);
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      console.log("User found:", user._id);
+
+      const existingProgress = await this._progressRepo.findOne({
+        challengeId: challenge._id,
+        userId: user._id,
+        passed: true,
+      });
+
+      const alreadyCompleted = !!existingProgress;
+      console.log("Already completed:", alreadyCompleted);
+
+      const earnedXP = challenge.xpRewards || 0;
+
+      let currentXP = user.stats.xpPoints || 0;
+      let currentLevel = user.stats.level || 1;
+
+      let newXP = currentXP;
+      let newLevel = currentLevel;
+
+      if (passed && !alreadyCompleted) {
+        user.stats.totalXpPoints = (user.stats.totalXpPoints || 0) + earnedXP;
+        newXP = currentXP + earnedXP;
+
+        while (true) {
+          const nextLevel = await this._levelRepo.getLevelByLevel(newLevel + 1);
+          if (!nextLevel || newXP < nextLevel.requiredXP) break;
+
+          newXP -= nextLevel.requiredXP;
+          newLevel = nextLevel.levelNumber;
         }
 
-        passed = testResults.every((r) => r.passed === true);
-        break;
+        user.stats.xpPoints = newXP;
+        user.stats.level = newLevel;
 
-      case "cipher":
-        passed = compare(userCode, challenge.solutionCode);
-        testResults = [
-          {
-            id: 1,
-            name: "Decryption Match",
-            status: passed ? "passed" : "failed",
-            expected: challenge.solutionCode,
-            actual: userCode,
-          },
-        ];
-        console.log("PASSED", passed);
-        break;
-
-      default:
-        throw new Error("Unsupported challenge type");
-    }
-    const user = await this.userRepository.getUserById(userId as string);
-
-    if (!user) throw new Error("User not found");
-
-    const existingProgress = await this.challengeProgressRepository.findOne({
-      challengeId: challenge._id,
-      userId: user._id,
-      passed: true,
-    });
-
-    const alreadyCompleted = !!existingProgress;
-
-    const earnedXP = challenge.xpRewards || 0;
-
-    let currentXP = user.stats.xpPoints || 0;
-    let currentLevel = user.stats.level || 1;
-
-    let newXP = currentXP + earnedXP;
-    let newLevel = currentLevel;
-    if (passed && !alreadyCompleted) {
-      user.stats.totalXpPoints = (user.stats.totalXpPoints || 0) + earnedXP;
-
-      while (true) {
-        const nextLevel = await this.levelRepository.getLevelByLevel(
-          newLevel + 1
-        );
-        if (!nextLevel || newXP < nextLevel.requiredXP) break;
-
-        newXP -= nextLevel.requiredXP;
-        newLevel = nextLevel.levelNumber;
+        await this._userRepo.save(user);
+        console.log("User stats updated");
       }
 
-      user.stats.xpPoints = newXP;
-      user.stats.level = newLevel;
+      // ✅ Add null check for finishTime
+      const challengeTimeLimitSeconds = (challenge.timeLimit || 0) * 60;
+      const timeTakenSeconds =
+        challengeTimeLimitSeconds - (data.finishTime || 0);
+      let status;
 
-      await this.userRepository.save(user);
-    }
-
-    const challengeTimeLimitSeconds = challenge.timeLimit * 60;
-    const timeTakenSeconds = challengeTimeLimitSeconds - data.finishTime;
-    let status;
-
-    if (passed) {
-      status = "completed";
-    } else if (!passed && data.isTimeLimitedSubmission) {
-      status = "failed-timeout";
-    } else if (!passed && !data.isTimeLimitedSubmission) {
-      status = "failed-output";
-    }
-
-    console.log("Test Results:::_: ", testResults);
-
-    const progressData: any = {
-      challengeId: challenge._id,
-      userId: user._id,
-      passed,
-      xpGained: passed && !alreadyCompleted ? earnedXP : 0,
-      timeTaken: timeTakenSeconds,
-      level: challenge.level,
-      type: challenge.type,
-      tags: challenge.tags || [],
-      submittedAt: new Date(),
-      status: status,
-      execution: {
-        language: data.language,
-        codeSubmitted: userCode,
-        resultOutput: testResults,
-        testCasesPassed: testResults.filter((r) => r.passed === true).length,
-        totalTestCases: testResults.length,
-      },
-    };
-
-    await this.challengeProgressRepository.createProgress(progressData);
-
-    if (passed && !alreadyCompleted) {
-      const today = new Date().toDateString();
-      const yesterday = new Date(Date.now() - 86400000).toDateString();
-      const lastSolvedDate = new Date(user.stats.lastSolvedDate).toDateString();
-
-      let currentStreak = user.stats.currentStreak || 0;
-      let longestStreak = user.stats.longestStreak || 0;
-
-      if (lastSolvedDate === today) {
-      } else if (lastSolvedDate === yesterday) {
-        currentStreak += 1;
-      } else {
-        currentStreak = 1;
+      if (passed) {
+        status = "completed";
+      } else if (!passed && data.isTimeLimitedSubmission) {
+        status = "failed-timeout";
+      } else if (!passed && !data.isTimeLimitedSubmission) {
+        status = "failed-output";
       }
 
-      if (currentStreak > longestStreak) {
-        longestStreak = currentStreak;
+      console.log("Challenge status:", status);
+
+      const progressData: any = {
+        challengeId: challenge._id,
+        userId: user._id,
+        passed,
+        xpGained: passed && !alreadyCompleted ? earnedXP : 0,
+        timeTaken: timeTakenSeconds,
+        level: challenge.level,
+        type: challenge.type,
+        tags: challenge.tags || [],
+        submittedAt: new Date(),
+        status: status,
+        execution: {
+          language: data.language,
+          codeSubmitted: userCode,
+          resultOutput: testResults,
+          testCasesPassed: testResults.filter((r) => r.passed === true).length,
+          totalTestCases: testResults.length,
+        },
+      };
+
+      await this._progressRepo.createProgress(progressData);
+      console.log("Progress saved");
+
+      if (passed && !alreadyCompleted) {
+        const today = new Date().toDateString();
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+        const lastSolvedDate = user.stats.lastSolvedDate
+          ? new Date(user.stats.lastSolvedDate).toDateString()
+          : "";
+
+        let currentStreak = user.stats.currentStreak || 0;
+        let longestStreak = user.stats.longestStreak || 0;
+
+        if (lastSolvedDate === today) {
+        } else if (lastSolvedDate === yesterday) {
+          currentStreak += 1;
+        } else {
+          currentStreak = 1;
+        }
+
+        if (currentStreak > longestStreak) {
+          longestStreak = currentStreak;
+        }
+
+        user.stats.lastSolvedDate = new Date();
+        user.stats.currentStreak = currentStreak;
+        user.stats.longestStreak = longestStreak;
+
+        await this._userRepo.save(user);
+        console.log("Streak updated");
       }
 
-      user.stats.lastSolvedDate = new Date();
-      user.stats.currentStreak = currentStreak;
-      user.stats.longestStreak = longestStreak;
+      const resData: any = {
+        passed,
+        testResults,
+        xpGained: passed && !alreadyCompleted ? earnedXP : 0,
+        remainingXP: newXP,
+      };
 
-      await this.userRepository.save(user);
+      if (newLevel > currentLevel) {
+        resData.newLevel = newLevel;
+      }
+
+      console.log("Final response data:", resData);
+      return resData;
+    } catch (error) {
+      console.error("Error in submitChallenge:", error);
+      throw error;
     }
-
-    const resData: any = {
-      passed,
-      testResults,
-      xpGained: passed && !alreadyCompleted ? earnedXP : 0,
-      remainingXP: newXP,
-    };
-
-    if (newLevel > currentLevel) {
-      resData.newLevel = newLevel;
-    }
-
-    return resData;
   }
 }

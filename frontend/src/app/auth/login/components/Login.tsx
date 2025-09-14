@@ -15,12 +15,13 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { useToast } from "@/context/Toast";
 import { LoginIF } from "@/types/auth.types";
 import Link from "next/link";
-import { Github, Terminal } from "lucide-react";
+import { Github } from "lucide-react";
 import VerificationToast from "./VerificationToast";
 import LoginForm from "./LoginForm";
+import GeometricBackground from "@/components/common/GeometricBackground";
 
 interface ErrorState {
-  email: string;
+  emailOrUsername: string;
   password: string;
 }
 
@@ -38,12 +39,12 @@ const Login: React.FC = () => {
   const auth = useSelector((state: RootState) => state.auth);
 
   const [form, setForm] = useState<LoginIF>({
-    email: "",
+    emailOrUsername: "",
     password: "",
   });
 
   const [errors, setErrors] = useState<ErrorState>({
-    email: "",
+    emailOrUsername: "",
     password: "",
   });
 
@@ -51,6 +52,7 @@ const Login: React.FC = () => {
     const isBanned = searchParams.get("banned");
 
     if (isBanned) {
+      console.log("User is banned");
       showToast({
         type: "error",
         message: "Your Account banned",
@@ -100,6 +102,7 @@ const Login: React.FC = () => {
       setIsLoading(true);
       const response = await dispatch(userLogin(form)).unwrap();
 
+
       if (response.isBanned) {
         showToast({
           type: "error",
@@ -134,6 +137,7 @@ const Login: React.FC = () => {
         router.push("/home");
       }
     } catch (err: any) {
+      console.log(err);
       showToast({
         type: "error",
         message: err?.message || "Invalid Credentials",
@@ -146,20 +150,17 @@ const Login: React.FC = () => {
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-950 to-black p-4">
-        <div className="w-4/5 max-w-sm bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-700/50 pr-6 pl-6 pb-4 pt-4 relative overflow-hidden">
-          <div className="absolute -top-16 -left-16 w-60 h-60 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -bottom-16 -right-16 w-60 h-60 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
-
+      <div className="min-h-screen flex items-center justify-center bg-[var(--logichub-primary-bg)] p-4">
+        <GeometricBackground />
+        <div className="w-4/5 max-w-sm bg-[var(--logichub-card-bg)] backdrop-blur-lg rounded-2xl shadow-2xl border border-[var(--logichub-border)] pr-6 pl-6 pb-4 pt-4 relative overflow-hidden">
           <div className="relative z-10">
             <div className="text-center mb-8">
-              <div className="flex justify-center mb-3">
-                <Terminal className="h-8 w-8 text-cyan-400" />
-              </div>
-              <h1 className="text-xl font-bold text-white mb-1">
+              <h1 className="text-xl font-bold text-[var(--logichub-primary-text)] mb-1 mt-3">
                 Welcome Back
               </h1>
-              <p className="text-gray-400 text-sm">Sign in to your account</p>
+              <p className="text-[var(--logichub-muted-text)] text-sm">
+                Sign in to your account
+              </p>
             </div>
 
             <LoginForm
@@ -173,29 +174,28 @@ const Login: React.FC = () => {
             />
 
             <div className="my-5 flex items-center justify-center relative">
-              <div className="w-full border-t border-gray-700"></div>
-              <span className="px-2 bg-gray-800 text-gray-400 text-xs absolute bg-gray-800/60 backdrop-blur-sm">
+              <div className="w-full border-t border-[var(--logichub-border)]"></div>
+              <span className="px-2 bg-[var(--logichub-card-bg)] text-[var(--logichub-muted-text)] text-xs absolute backdrop-blur-sm">
                 OR
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-5">
               <Link
-                // href="http://localhost:5000/auth/github"
                 href={`https://api.jinu.site/auth/github`}
-                className="flex items-center justify-center text-white py-2.5 bg-gray-900/50 
-                border border-gray-700 rounded-lg hover:bg-gray-800/50 transition-colors duration-200
-                focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50"
+                className="flex items-center justify-center text-[var(--logichub-primary-text)] py-2.5 bg-[var(--logichub-secondary-bg)] 
+            border border-[var(--logichub-border)] rounded-lg hover:bg-[var(--logichub-card-bg)] transition-colors duration-200
+            focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] focus:ring-opacity-50"
               >
-                <Github className="w-4 h-4 text-white mr-2" />
+                <Github className="w-4 h-4 text-[var(--logichub-primary-text)] mr-2" />
                 <span>GitHub</span>
               </Link>
 
               <Link
                 href={`https://api.jinu.site/auth/google`}
-                className="flex items-center justify-center text-white py-2.5 bg-gray-900/50 
-                border border-gray-700 rounded-lg hover:bg-gray-800/50 transition-colors duration-200
-                focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50"
+                className="flex items-center justify-center text-[var(--logichub-primary-text)] py-2.5 bg-[var(--logichub-secondary-bg)] 
+            border border-[var(--logichub-border)] rounded-lg hover:bg-[var(--logichub-card-bg)] transition-colors duration-200
+            focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] focus:ring-opacity-50"
               >
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                   <path
@@ -219,11 +219,11 @@ const Login: React.FC = () => {
               </Link>
             </div>
 
-            <div className="text-center text-sm text-gray-400 mb-3">
+            <div className="text-center text-sm text-[var(--logichub-muted-text)] mb-3">
               Don`t have an account?{" "}
               <Link
                 href="/auth/register"
-                className="text-cyan-400 hover:text-cyan-300 transition-colors duration-200 inline-block"
+                className="text-[var(--logichub-primary-text)] hover:text-[var(--logichub-secondary-text)] transition-colors duration-200 inline-block"
               >
                 Create Account
               </Link>
@@ -232,7 +232,7 @@ const Login: React.FC = () => {
             <div className="text-center text-sm">
               <Link
                 href="/auth/forgot"
-                className="text-gray-400 hover:text-cyan-300 transition-colors duration-200 inline-block"
+                className="text-[var(--logichub-muted-text)] hover:text-[var(--logichub-accent-text)] transition-colors duration-200 inline-block"
               >
                 Forgot password?
               </Link>
@@ -242,10 +242,7 @@ const Login: React.FC = () => {
       </div>
 
       {showVerificationToast && (
-        <VerificationToast
-          onClose={() => setShowVerificationToast(false)}
-          onAction={() => setShowVerificationToast(false)}
-        />
+        <VerificationToast onClose={() => setShowVerificationToast(false)} />
       )}
 
       <style jsx>{`

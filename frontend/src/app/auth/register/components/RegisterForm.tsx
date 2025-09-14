@@ -9,37 +9,47 @@ interface FormData extends RegisterIF {
 }
 
 interface RegisterFormProps {
-    form: FormData;
-    errors: ErrorData;
-    availability: AvailabilityData;
-    isLoading: boolean;
-    handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
-    handleSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  form: FormData;
+  errors: ErrorData;
+  availability: AvailabilityData;
+  isLoading: boolean;
+  handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleSubmit: (e: FormEvent<HTMLFormElement>) => void;
 }
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ form, errors, availability,isLoading, handleChange, handleSubmit }) => {
-
- const [showPassword, setShowPassword] = useState(false);
- const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const RegisterForm: React.FC<RegisterFormProps> = ({
+  form,
+  errors,
+  availability,
+  isLoading,
+  handleChange,
+  handleSubmit,
+}) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
+        <label className="block text-sm font-medium text-[var(--logichub-secondary-text)] mb-2">
+          Username
+        </label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg">@</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--logichub-muted-text)] text-lg">
+            @
+          </span>
           <input
             type="text"
             name="username"
             value={form.username}
             onChange={handleChange}
-            className={`w-full pl-10 pr-12 py-2.5 bg-gray-900/60 border rounded-lg ${
+            className={`w-full pl-10 pr-12 py-2.5 bg-[var(--logichub-secondary-bg)] border rounded-lg ${
               errors.username
                 ? "border-red-500"
                 : form.username && availability.username
                 ? "border-green-500"
-                : "border-gray-700"
-            } focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white`}
+                : "border-[var(--logichub-border)]"
+            } focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] text-[var(--logichub-primary-text)]`}
             placeholder="Choose a username"
           />
           {form.username && (
@@ -54,7 +64,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ form, errors, availability,
                   <path d="M11,16c-.256,0-.512-.098-.707-.293l-3-3c-.391-.391-.391-1.023,0-1.414s1.023-.391,1.414,0L11,13.586l4.293-4.293c.391-.391,1.023-.391,1.414,0s.391,1.023,0,1.414l-5,5C11.512,15.902,11.256,16,11,16z" />
                 </svg>
               ) : (
-                <div className="w-5 h-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-[var(--logichub-border)] border-t-transparent rounded-full animate-spin" />
               )}
             </div>
           )}
@@ -78,11 +88,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ form, errors, availability,
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+        <label className="block text-sm font-medium text-[var(--logichub-secondary-text)] mb-2">
+          Email
+        </label>
         <div className="relative">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--logichub-muted-text)] w-5 h-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -95,13 +107,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ form, errors, availability,
             name="email"
             value={form.email}
             onChange={handleChange}
-            className={`w-full pl-10 pr-12 py-2.5 bg-gray-900/60 border rounded-lg ${
+            className={`w-full pl-10 pr-12 py-2.5 bg-[var(--logichub-secondary-bg)] border rounded-lg ${
               errors.email
                 ? "border-red-500"
                 : form.email && availability.email
                 ? "border-green-500"
-                : "border-gray-700"
-            } focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white`}
+                : "border-[var(--logichub-border)]"
+            } focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] text-[var(--logichub-primary-text)]`}
             placeholder="Enter your email"
           />
           {form.email && (
@@ -116,7 +128,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ form, errors, availability,
                   <path d="M11,16c-.256,0-.512-.098-.707-.293l-3-3c-.391-.391-.391-1.023,0-1.414s1.023-.391,1.414,0L11,13.586l4.293-4.293c.391-.391,1.023-.391,1.414,0s.391,1.023,0,1.414l-5,5C11.512,15.902,11.256,16,11,16z" />
                 </svg>
               ) : (
-                <div className="w-5 h-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-[var(--logichub-border)] border-t-transparent rounded-full animate-spin" />
               )}
             </div>
           )}
@@ -140,11 +152,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ form, errors, availability,
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+        <label className="block text-sm font-medium text-[var(--logichub-secondary-text)] mb-2">
+          Password
+        </label>
         <div className="relative">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--logichub-muted-text)] w-5 h-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -157,15 +171,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ form, errors, availability,
             name="password"
             value={form.password}
             onChange={handleChange}
-            className={`w-full pl-10 pr-12 py-2.5 bg-gray-900/60 border rounded-lg ${
-              errors.password ? "border-red-500" : "border-gray-700"
-            } focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white`}
+            className={`w-full pl-10 pr-12 py-2.5 bg-[var(--logichub-secondary-bg)] border rounded-lg ${
+              errors.password
+                ? "border-red-500"
+                : "border-[var(--logichub-border)]"
+            } focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] text-[var(--logichub-primary-text)]`}
             placeholder="Create a password"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--logichub-muted-text)] hover:text-[var(--logichub-primary-text)]"
           >
             {showPassword ? (
               <svg
@@ -212,11 +228,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ form, errors, availability,
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+        <label className="block text-sm font-medium text-[var(--logichub-secondary-text)] mb-2">
+          Confirm Password
+        </label>
         <div className="relative">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--logichub-muted-text)] w-5 h-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -229,16 +247,19 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ form, errors, availability,
             name="confirmPassword"
             value={form.confirmPassword}
             onChange={handleChange}
-            className={`w-full pl-10 pr-12 py-2.5 bg-gray-900/60 border rounded-lg ${
-              errors.confirmPassword ? "border-red-500" : 
-              form.confirmPassword && form.password === form.confirmPassword ? "border-green-500" : "border-gray-700"
-            } focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white`}
+            className={`w-full pl-10 pr-12 py-2.5 bg-[var(--logichub-secondary-bg)] border rounded-lg ${
+              errors.confirmPassword
+                ? "border-red-500"
+                : form.confirmPassword && form.password === form.confirmPassword
+                ? "border-green-500"
+                : "border-[var(--logichub-border)]"
+            } focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] text-[var(--logichub-primary-text)]`}
             placeholder="Confirm your password"
           />
           <button
             type="button"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--logichub-muted-text)] hover:text-[var(--logichub-primary-text)]"
           >
             {showConfirmPassword ? (
               <svg
@@ -287,11 +308,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ form, errors, availability,
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full cursor-pointer py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 
-    hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg 
-    font-semibold transition-all duration-300 
-    disabled:opacity-50 disabled:cursor-not-allowed 
-    flex items-center justify-center space-x-2"
+        className="w-full cursor-pointer py-2.5 bg-[var(--logichub-btn)] text-[var(--logichub-btn-text)] rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
       >
         {isLoading ? (
           <span className="animate-pulse">Creating Account...</span>

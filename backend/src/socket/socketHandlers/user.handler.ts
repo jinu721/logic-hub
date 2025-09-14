@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { ExtendedSocket, ChallengeData } from "../../types/socket.types";
-import { AppContainer } from "../../utils/app.container";
-import { verifyAccessToken } from "../../utils/verify.token";
+import { AppContainer } from "../../utils/socket/app.container";
+import { verifyAccessToken } from "../../utils/token/verify.token";
 import redisClient from "../../config/redis.config";
 
 export class UserHandler {

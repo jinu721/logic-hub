@@ -11,28 +11,27 @@ import {
   Clock,
   Users,
   Zap,
-  Lock,
-  X,
   Play,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ChallengeDomainIF } from "@/types/domain.types";
+
 type Props = {
   domain: ChallengeDomainIF;
 };
 
 const levelStyles = {
   novice: {
-    badge: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    hover: "hover:border-emerald-500/50 hover:shadow-emerald-500/10",
+    badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    accent: "text-emerald-400",
   },
   adept: {
-    badge: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    hover: "hover:border-blue-500/50 hover:shadow-blue-500/10",
+    badge: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    accent: "text-blue-400",
   },
   master: {
-    badge: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    hover: "hover:border-purple-500/50 hover:shadow-purple-500/10",
+    badge: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+    accent: "text-purple-400",
   },
 };
 
@@ -56,108 +55,139 @@ const getDomainIcon = (type: string) => {
   }
 };
 
-const DomainCard: React.FC<Props> = ({ domain }:Props) => {
+const DomainCard: React.FC<Props> = ({ domain }: Props) => {
   const router = useRouter();
-
   const style = levelStyles[domain.level] || levelStyles.novice;
-
   const isExpired = domain.endTime && new Date(domain.endTime) < new Date();
-//   const isNotStarted = domain.startTime && new Date(domain.startTime) > new Date();
 
-  const getStatusColor = () => {
+  const getCardStatus = () => {
     if (domain.userStatus === "completed")
-      return "border-emerald-500/50 bg-emerald-500/5";
-    if (
-      domain.userStatus === "failed-timeout" ||
-      domain.userStatus === "failed-output"
-    )
-      return "border-rose-500/50 bg-rose-500/5";
-    if (isExpired) return "border-gray-700 bg-gray-900/50 opacity-60";
-    return `border-gray-700 ${style.hover} bg-gray-900/50`;
+      return "border-emerald-500/30 bg-emerald-500/5";
+    if (domain.userStatus === "failed-timeout" || domain.userStatus === "failed-output")
+      return "border-red-500/30 bg-red-500/5";
+    if (isExpired) 
+      return "border-[var(--logichub-border)] bg-[var(--logichub-secondary-bg)]/30 opacity-60";
+    return "border-[var(--logichub-border)] bg-[var(--logichub-card-bg)] hover:border-[var(--logichub-ring)]/50";
+  };
+
+  const getButtonConfig = () => {
+    if (isExpired) {
+      return {
+        text: "Expired",
+        className: "bg-[var(--logichub-secondary-bg)] text-[var(--logichub-muted-text)] cursor-not-allowed border border-[var(--logichub-border)]",
+        disabled: true
+      };
+    }
+    
+    if (domain.userStatus === "completed") {
+      return {
+        text: "Review",
+        className: "bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30",
+        disabled: false
+      };
+    }
+
+    if (domain.userStatus === "failed-timeout" || domain.userStatus === "failed-output") {
+      return {
+        text: "Retry",
+        className: "bg-red-600/20 text-red-400 hover:bg-red-600/30 border border-red-500/30",
+        disabled: false
+      };
+    }
+
+    return {
+      text: "Start",
+      className: "bg-[var(--logichub-accent)] text-[var(--logichub-accent-text)] hover:bg-[var(--logichub-btn-hover)] font-medium",
+      disabled: false
+    };
+  };
+
+  const buttonConfig = getButtonConfig();
+
+  const handleClick = () => {
+    if (!buttonConfig.disabled) {
+      router.push(`/domain/${domain._id}`);
+    }
   };
 
   return (
     <div
-      key={domain._id}
-      className={`relative group bg-gray-950/80 backdrop-blur-sm rounded-xl border transition-all duration-300 hover:shadow-lg ${getStatusColor()} ${
-        !isExpired
-          ? "hover:-translate-y-0.5 cursor-pointer"
-          : "cursor-not-allowed"
-      } flex flex-col h-full`}
+      className={`
+        relative group rounded-lg border transition-all duration-200
+        ${getCardStatus()}
+        ${!isExpired ? "hover:-translate-y-0.5 cursor-pointer" : "cursor-not-allowed"}
+      `}
+      onClick={handleClick}
     >
+      {/* Status Badge */}
       {domain.userStatus === "completed" && (
-        <div className="absolute -top-2 -right-2 z-10 bg-emerald-600 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+        <div className="absolute -top-1 -right-1 z-10 bg-emerald-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
           ✓
         </div>
       )}
-      {(domain.userStatus === "failed-timeout" ||
-        domain.userStatus === "failed-output") && (
-        <div className="absolute -top-2 -right-2 z-10 bg-rose-600 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+      {(domain.userStatus === "failed-timeout" || domain.userStatus === "failed-output") && (
+        <div className="absolute -top-1 -right-1 z-10 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
           ✗
         </div>
       )}
 
-      <div className="p-4 flex flex-col h-full">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center space-x-2 min-w-0 flex-1">
-            <div
-              className={`p-1.5 rounded-lg ${
-                domain.userStatus === "completed"
-                  ? "bg-emerald-500/20 text-emerald-400"
-                  : domain.userStatus === "failed-timeout" ||
-                    domain.userStatus === "failed-output"
-                  ? "bg-rose-500/20 text-rose-400"
-                  : isExpired
-                  ? "bg-gray-700 text-gray-500"
-                  : "bg-gray-800 text-gray-300"
-              }`}
-            >
+      <div className="p-4">
+        {/* Header Row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <div className={`p-1.5 rounded ${
+              domain.userStatus === "completed" ? "bg-emerald-500/20 text-emerald-400" :
+              domain.userStatus === "failed-timeout" || domain.userStatus === "failed-output" ? "bg-red-500/20 text-red-400" :
+              "bg-[var(--logichub-secondary-bg)] text-[var(--logichub-secondary-text)]"
+            }`}>
               {getDomainIcon(domain.type)}
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center space-x-2 mb-1">
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full border font-medium ${style.badge}`}
-                >
-                  {domain.level.charAt(0).toUpperCase() + domain.level.slice(1)}
-                </span>
-                {domain.isPremium && (
-                  <Crown className="h-3 w-3 text-amber-400" />
-                )}
-              </div>
+            <div className="flex items-center space-x-1">
+              <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${style.badge}`}>
+                {domain.level.charAt(0).toUpperCase() + domain.level.slice(1)}
+              </span>
+              {domain.isPremium && (
+                <Crown className="h-3 w-3 text-amber-400" />
+              )}
             </div>
           </div>
-          <div className="flex items-center space-x-1 text-xs text-gray-400">
+          
+          <div className="flex items-center space-x-1 text-xs text-[var(--logichub-muted-text)]">
             <Clock className="h-3 w-3" />
             <span>{domain.timeLimit}m</span>
           </div>
         </div>
 
-        <h3 className="font-semibold text-white text-sm line-clamp-2 mb-2 leading-tight">
+        {/* Title */}
+        <h3 className="font-semibold text-[var(--logichub-primary-text)] text-sm mb-2 line-clamp-1">
           {domain.title}
         </h3>
-        <p className="text-xs text-gray-400 line-clamp-2 mb-3 leading-relaxed">
+
+        {/* Description */}
+        <p className="text-xs text-[var(--logichub-muted-text)] line-clamp-2 mb-3 leading-relaxed">
           {domain.description}
         </p>
 
-        <div className="flex flex-wrap gap-1 h-6 mb-3">
-          {domain.tags.slice(0, 2).map((tag, i) => (
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1 mb-3">
+          {domain.tags.slice(0, 3).map((tag, i) => (
             <span
               key={i}
-              className="text-xs bg-gray-800 text-gray-300 px-2 py-0.5 rounded-full"
+              className="text-xs bg-[var(--logichub-secondary-bg)] text-[var(--logichub-secondary-text)] px-2 py-0.5 rounded border border-[var(--logichub-border)]"
             >
               {tag}
             </span>
           ))}
-          {domain.tags.length > 2 && (
-            <span className="text-xs bg-gray-800 text-gray-300 px-2 py-0.5 rounded-full">
-              +{domain.tags.length - 2}
+          {domain.tags.length > 3 && (
+            <span className="text-xs bg-[var(--logichub-secondary-bg)] text-[var(--logichub-muted-text)] px-2 py-0.5 rounded border border-[var(--logichub-border)]">
+              +{domain.tags.length - 3}
             </span>
           )}
         </div>
 
-        <div className="flex items-center justify-between mb-3 text-xs">
-          <div className="flex items-center space-x-3 text-gray-400">
+        {/* Stats Row */}
+        <div className="flex items-center justify-between mb-4 text-xs text-[var(--logichub-muted-text)]">
+          <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-1">
               <Users className="h-3 w-3" />
               <span>{domain.completedUsers || 0}</span>
@@ -167,77 +197,37 @@ const DomainCard: React.FC<Props> = ({ domain }:Props) => {
               <span>{domain.xpRewards} XP</span>
             </div>
           </div>
+          
           <div className="flex items-center space-x-2">
-            <span className="text-gray-400">{domain.successRate || 0}%</span>
-            <div className="w-8 bg-gray-800 rounded-full h-1">
+            <span className="text-[var(--logichub-secondary-text)]">{domain.successRate || 0}%</span>
+            <div className="w-8 bg-[var(--logichub-secondary-bg)] rounded-full h-1 border border-[var(--logichub-border)]">
               <div
-                className={`h-1 rounded-full ${
-                  domain.successRate && domain.successRate > 70
-                    ? "bg-emerald-500"
-                    : domain.successRate && domain.successRate > 40
-                    ? "bg-amber-500"
-                    : "bg-rose-500"
+                className={`h-full rounded-full ${
+                  domain.successRate && domain.successRate > 70 ? "bg-emerald-500" :
+                  domain.successRate && domain.successRate > 40 ? "bg-amber-500" : "bg-red-500"
                 }`}
-                style={{ width: `${domain.successRate}%` }}
+                style={{ width: `${Math.min(domain.successRate || 0, 100)}%` }}
               />
             </div>
           </div>
         </div>
 
-        <div className="flex-grow mb-3">
-          {domain.userStatus === "completed" && (
-            <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs text-emerald-400 flex items-center">
-              <CheckCircle className="h-3 w-3 mr-1.5" />
-              <span>Completed successfully!</span>
-            </div>
-          )}
-          {domain.userStatus === "failed-timeout" && (
-            <div className="p-2 bg-rose-500/10 border border-rose-500/20 rounded-lg text-xs text-rose-400 flex items-center">
-              <Clock className="h-3 w-3 mr-1.5" />
-              <span>Timeout - Try again!</span>
-            </div>
-          )}
-          {domain.userStatus === "failed-output" && (
-            <div className="p-2 bg-rose-500/10 border border-rose-500/20 rounded-lg text-xs text-rose-400 flex items-center">
-              <X className="h-3 w-3 mr-1.5" />
-              <span>Failed - Try again!</span>
-            </div>
-          )}
-        </div>
-
+        {/* Action Button */}
         <button
-          className={`w-full cursor-pointer py-2.5 px-3 rounded-lg text-xs font-medium flex items-center justify-center space-x-1.5 transition-all duration-200 ${
-            isExpired
-              ? "bg-gray-800 text-gray-500 cursor-not-allowed"
-              : domain.userStatus === "completed"
-              ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-              : domain.userStatus === "failed-timeout" ||
-                domain.userStatus === "failed-output"
-              ? "bg-rose-600 hover:bg-rose-700 text-white"
-              : domain.isPremium
-              ? "bg-yellow-600 hover:bg-yellow-700 text-white"
-              : "bg-indigo-600 hover:bg-indigo-700 text-white"
-          }`}
-          onClick={() => {
-            if (!isExpired) router.push(`/domain/${domain._id}`);
+          className={`
+            w-full py-2 px-3 rounded text-xs font-medium 
+            flex items-center justify-center space-x-1.5 
+            transition-all duration-200
+            ${buttonConfig.className}
+          `}
+          disabled={buttonConfig.disabled}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleClick();
           }}
         >
-          {isExpired ? (
-            <>
-              <Lock className="h-3 w-3" />
-              <span>Expired</span>
-            </>
-          ) : domain.userStatus === "completed" ? (
-            <>
-              <CheckCircle className="h-3 w-3" />
-              <span>Revisit</span>
-            </>
-          ) : (
-            <>
-              <Play className="h-3 w-3" />
-              <span>Start</span>
-            </>
-          )}
+          <Play className="h-3 w-3" />
+          <span>{buttonConfig.text}</span>
         </button>
       </div>
     </div>

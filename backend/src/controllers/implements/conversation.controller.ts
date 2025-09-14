@@ -4,7 +4,7 @@ import { HttpStatus } from "../../constants/http.status";
 import { IConversationController } from "../interfaces/conversation.controller.interface";
 
 export class ConversationController implements IConversationController {
-  constructor(private conversationService: IConversationService) {}
+  constructor(private readonly _conversationSvc: IConversationService) {}
 
   createOneToOne = async (req: Request, res: Response) => {
     try {
@@ -22,7 +22,7 @@ export class ConversationController implements IConversationController {
         res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
         return;
       }
-      const conversation = await this.conversationService.createOneToOne(
+      const conversation = await this._conversationSvc.createOneToOne(
         userId,
         currentUserId
       );
@@ -40,7 +40,7 @@ export class ConversationController implements IConversationController {
   findOneToOne = async (req: Request, res: Response) => {
     try {
       const { userA, userB } = req.params;
-      const conversation = await this.conversationService.findOneToOne(
+      const conversation = await this._conversationSvc.findOneToOne(
         userA,
         userB
       );
@@ -63,7 +63,7 @@ export class ConversationController implements IConversationController {
         return;
       }
 
-      const conversation = await this.conversationService.findConversation(
+      const conversation = await this._conversationSvc.findConversation(
         conversationId,
         userId
       );
@@ -92,7 +92,7 @@ export class ConversationController implements IConversationController {
           .json({ success: false, message: "UserId Not Provided" });
         return;
       }
-      const conversation = await this.conversationService.findConversations(userId,req.query);
+      const conversation = await this._conversationSvc.findConversations(userId,req.query);
       res.status(HttpStatus.OK).json({ success: true, data: conversation });
     } catch (err) {
       console.log(`Err in findConversationByUser : ${err}`);
@@ -112,7 +112,7 @@ export class ConversationController implements IConversationController {
         return;
       }
       const conversation =
-        await this.conversationService.findConversationByGroup(groupId);
+        await this._conversationSvc.findConversationByGroup(groupId);
       res.status(HttpStatus.OK).json({ success: true, data: conversation });
     } catch (err) {
       console.log(`Err in findConversation Group : ${err}`);
@@ -125,7 +125,7 @@ export class ConversationController implements IConversationController {
   setTypingUser = async (req: Request, res: Response) => {
     try {
       const { conversationId, userId } = req.body;
-      const updated = await this.conversationService.setTypingUser(
+      const updated = await this._conversationSvc.setTypingUser(
         conversationId,
         userId
       );
@@ -140,7 +140,7 @@ export class ConversationController implements IConversationController {
   removeTypingUser = async (req: Request, res: Response) => {
     try {
       const { conversationId, userId } = req.body;
-      const updated = await this.conversationService.removeTypingUser(
+      const updated = await this._conversationSvc.removeTypingUser(
         conversationId,
         userId
       );
@@ -155,7 +155,7 @@ export class ConversationController implements IConversationController {
   getTypingUsers = async (req: Request, res: Response) => {
     try {
       const { conversationId } = req.params;
-      const users = await this.conversationService.getTypingUsers(
+      const users = await this._conversationSvc.getTypingUsers(
         conversationId
       );
       res.status(HttpStatus.OK).json({ success: true, data: users });

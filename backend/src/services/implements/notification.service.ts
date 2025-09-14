@@ -1,45 +1,62 @@
 import { INotificationService } from "../interfaces/notification.service.interface";
 import { NotificationIF } from "../../types/notification.type";
-import { NotificationRepository } from "../../repository/implements/notification.repository";
-import { PublicNotificationDTO, toPublicNotificationDTO, toPublicNotificationDTOs } from "../../mappers/notification.dto";
+import {
+  PublicNotificationDTO,
+  toPublicNotificationDTO,
+  toPublicNotificationDTOs,
+} from "../../mappers/notification.dto";
+import { INotificationRepository } from "../../repository/interfaces/notification.repository.interface";
 
 export class NotificationService implements INotificationService {
-  constructor(private notificationRepo: NotificationRepository) {}
+  constructor(private readonly _notifyRep: INotificationRepository) {}
 
-  async create(data: Partial<NotificationIF>): Promise<PublicNotificationDTO> {
-    const notification = await this.notificationRepo.createNotification(data);
-    return toPublicNotificationDTO(notification)
+  private toDTO(notification: NotificationIF): PublicNotificationDTO {
+    return toPublicNotificationDTO(notification);
   }
 
-  async getAll(): Promise<PublicNotificationDTO[]> {
-    const notifications = await this.notificationRepo.getAllNotifications();
+  private toDTOs(notifications: NotificationIF[]): PublicNotificationDTO[] {
     return toPublicNotificationDTOs(notifications);
   }
 
-  async getById(id: string): Promise<PublicNotificationDTO | null> {
-    const notification = await this.notificationRepo.getNotificationById(id);
-    return toPublicNotificationDTO(notification as NotificationIF);
+  async create(data: Partial<NotificationIF>): Promise<PublicNotificationDTO> {
+    const notification = await this._notifyRep.createNotification(data);
+    return this.toDTO(notification);
   }
 
-  async update(id: string, data: Partial<PublicNotificationDTO>): Promise<PublicNotificationDTO | null> {
-    const updated = await this.notificationRepo.updateNotification(id, data);
-    return toPublicNotificationDTO(updated as NotificationIF);
+  async getAll(): Promise<PublicNotificationDTO[]> {
+    const notifications = await this._notifyRep.getAllNotifications();
+    return this.toDTOs(notifications);
+  }
+
+  async getById(id: string): Promise<PublicNotificationDTO | null> {
+    const notification = await this._notifyRep.getNotificationById(id);
+    return notification ? this.toDTO(notification) : null;
+  }
+
+  async update(
+    id: string,
+    data: Partial<NotificationIF>
+  ): Promise<PublicNotificationDTO | null> {
+    const updated = await this._notifyRep.updateNotification(id, data);
+    return updated ? this.toDTO(updated) : null;
   }
 
   async markAllAsRead(userId: string): Promise<boolean> {
-    return await this.notificationRepo.markAllAsRead(userId);
+    return await this._notifyRep.markAllAsRead(userId);
   }
 
-  deleteAll(userId: string): Promise<boolean> { 
-    return this.notificationRepo.deleteAllNotifications(userId);
+  async deleteAll(userId: string): Promise<boolean> {
+    return this._notifyRep.deleteAllNotifications(userId);
   }
 
   async delete(id: string): Promise<boolean> {
-    return await this.notificationRepo.deleteNotification(id);
+    return await this._notifyRep.deleteNotification(id);
   }
 
-  async getNotificationByUserId(userId: string): Promise<PublicNotificationDTO[] | null> {
-    const notifications = await this.notificationRepo.getNotificationByUser(userId);
-    return toPublicNotificationDTOs(notifications as NotificationIF[]);
+  async getNotificationByUserId(
+    userId: string
+  ): Promise<PublicNotificationDTO[] | null> {
+    const notifications = await this._notifyRep.getNotificationByUser(userId);
+    return notifications ? this.toDTOs(notifications) : null;
   }
 }

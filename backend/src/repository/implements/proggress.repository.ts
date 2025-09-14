@@ -2,6 +2,7 @@ import { ChallengeProgress } from "../../models/progress.model";
 import { BaseRepository } from "../base.repository";
 import { IChallengeProgressRepository } from "../interfaces/progress.repository.interface";
 import { ChallengeProgressIF } from "../../types/progress.types";
+import { Types } from "mongoose";
 
 export class ChallengeProgressRepository
   extends BaseRepository<ChallengeProgressIF>
@@ -18,17 +19,17 @@ export class ChallengeProgressRepository
     return await progress.save();
   }
 
-  async getProgressByUserAndChallenge(data: {
-    userId: string;
-    challengeId: string;
-  }): Promise<ChallengeProgressIF[]> {
+  async getProgressByUserAndChallenge(
+    userId: Types.ObjectId,
+    challengeId: Types.ObjectId
+  ): Promise<ChallengeProgressIF[]> {
     return await this.model.find({
-      userId: data.userId,
-      challengeId: data.challengeId,
+      userId: userId,
+      challengeId: challengeId,
     });
   }
 
-  async findCompletedDomainsByUser(userId: string): Promise<number> {
+  async findCompletedDomainsByUser(userId: Types.ObjectId): Promise<number> {
     console.log("userId", userId);
     const uniqueCompleted = await this.model.distinct("challengeId", {
       userId,
@@ -37,7 +38,9 @@ export class ChallengeProgressRepository
     return uniqueCompleted.length;
   }
 
-  async getProgressById(id: string): Promise<ChallengeProgressIF | null> {
+  async getProgressById(
+    id: Types.ObjectId
+  ): Promise<ChallengeProgressIF | null> {
     return await this.model.findById(id);
   }
 
@@ -46,18 +49,20 @@ export class ChallengeProgressRepository
   }
 
   async updateProgress(
-    id: string,
+    id: Types.ObjectId,
     data: Partial<ChallengeProgressIF>
   ): Promise<ChallengeProgressIF | null> {
     return await this.model.findByIdAndUpdate(id, data, { new: true });
   }
 
-  async deleteProgressById(id: string): Promise<boolean> {
+  async deleteProgressById(id: Types.ObjectId): Promise<boolean> {
     const result = await this.model.findByIdAndDelete(id);
     return result !== null;
   }
 
-  async getAllProgressByUser(userId: string): Promise<ChallengeProgressIF[]> {
+  async getAllProgressByUser(
+    userId: Types.ObjectId
+  ): Promise<ChallengeProgressIF[]> {
     const allProgress = await this.model.find({ userId });
 
     const latestProgressMap = new Map<string, ChallengeProgressIF>();
@@ -78,28 +83,28 @@ export class ChallengeProgressRepository
   }
 
   async getLatestSubmissionByUserAndChallenge(
-    userId: string,
-    challengeId: string
+    userId: Types.ObjectId,
+    challengeId: Types.ObjectId
   ) {
     return this.model.findOne({ userId, challengeId }).sort({ createdAt: -1 });
   }
 
   async getAllSubmissionsByUserAndChallenge(
-    userId: string,
-    challengeId: string
+    userId: Types.ObjectId,
+    challengeId: Types.ObjectId
   ) {
     return this.model.find({ userId, challengeId }).sort({ createdAt: -1 });
   }
 
   async getRecentProgress(
-    userId: string
+    userId: Types.ObjectId
   ): Promise<ChallengeProgressIF[] | null> {
     return await this.model.find({ userId }).sort({ submittedAt: -1 }).limit(3);
   }
 
   async getMostCompletedChallengeOfWeek(
     oneWeekAgo: Date
-  ): Promise<string | null> {
+  ): Promise<Types.ObjectId | null> {
     const aggResult = await this.model.aggregate([
       {
         $match: {
@@ -137,11 +142,11 @@ export class ChallengeProgressRepository
   }
 
   async getAllProgressByChallenge(
-    challengeId: string
+    challengeId: Types.ObjectId
   ): Promise<ChallengeProgressIF[]> {
     return await this.model.find({ challengeId });
   }
-  async getSubmissionsByUserAndYear(userId: string, year: number) {
+  async getSubmissionsByUserAndYear(userId: Types.ObjectId, year: number) {
     const start = new Date(`${year}-01-01`);
     const end = new Date(`${year}-12-31T23:59:59.999Z`);
     return ChallengeProgress.find({

@@ -6,7 +6,7 @@ import { tags as t } from '@lezer/highlight';
 const customTheme = EditorView.theme({
   '&': {
     color: '#abb2bf',
-    backgroundColor: '#0B1226'
+    backgroundColor: '#0e1117'
   },
   '.cm-content': {
     padding: '10px 0',
@@ -46,7 +46,7 @@ const customTheme = EditorView.theme({
     outline: '1px solid #515a6b'
   },
   '.cm-gutters': {
-    backgroundColor: '#0B1226',
+    backgroundColor: '#0e1117',
     color: '#546e7a',
     border: 'none'
   },

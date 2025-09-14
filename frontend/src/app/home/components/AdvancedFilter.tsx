@@ -33,8 +33,6 @@ function getCountByKey(data, key) {
   }, {});
 }
 
-
-
 function getIconForType(type) {
   const typeString = String(type).toLowerCase();
   const iconMap = {
@@ -119,12 +117,12 @@ function getStatusColor(status) {
 }
 
 type Params = {
-  filters:any,
-  onFiltersChange:any,
-  onClearFilters:any,
-  searchQuery:string,
-  handleSearchChange:any,
-  challenges:ChallengeDomainIF[],
+  filters: any;
+  onFiltersChange: any;
+  onClearFilters: any;
+  searchQuery: string;
+  handleSearchChange: any;
+  challenges: ChallengeDomainIF[];
 };
 
 const AdvancedFilterSidebar = ({
@@ -134,7 +132,7 @@ const AdvancedFilterSidebar = ({
   searchQuery,
   handleSearchChange,
   challenges,
-}:Params) => {
+}: Params) => {
   const [expandedSections, setExpandedSections] = useState({
     type: true,
     level: true,
@@ -147,7 +145,6 @@ const AdvancedFilterSidebar = ({
     const levelCounts = getCountByKey(challenges, "level");
     const statusCounts = getCountByKey(challenges, "userStatus");
     const tagCounts = getCountByKey(challenges, "tags");
-
 
     const booleanFields = {};
     if (challenges.length > 0) {
@@ -165,10 +162,9 @@ const AdvancedFilterSidebar = ({
       });
     }
 
-
     return {
       type: Object.entries(typeCounts)
-        .sort(([, a], [, b]) => b - a) 
+        .sort(([, a], [, b]) => b - a)
         .map(([type, count]) => ({
           value: type,
           label:
@@ -231,7 +227,6 @@ const AdvancedFilterSidebar = ({
     });
   };
 
-
   const getActiveFilterCount = () => {
     let count = 0;
     count += filters.type?.length || 0;
@@ -290,24 +285,22 @@ const AdvancedFilterSidebar = ({
   }
 
   return (
-    <div
-      className={`bg-gray-950/90 backdrop-blur-xl rounded-2xl border border-gray-700/50 shadow-2xl `}
-    >
-      <div className="p-6 border-b border-gray-800/50">
-        <div className="flex items-center justify-between mb-4">
+    <div className="bg-[var(--logichub-secondary-bg)]/90 backdrop-blur-xl rounded-2xl border border-[var(--logichub-border)] shadow-2xl">
+      <div className="p-6 border-b border-[var(--logichub-border)] flex flex-col space-y-4">
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="p-2 bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-lg">
-              <Filter className="w-5 h-5 text-purple-400" />
+              <Filter className="w-5 h-5 text-[var(--logichub-accent)]" />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">Filters</h3>
-            </div>
+            <h3 className="text-lg font-semibold text-[var(--logichub-primary-text)]">
+              Filters
+            </h3>
           </div>
 
           {getActiveFilterCount() > 0 && (
             <button
               onClick={onClearFilters}
-              className="flex items-center space-x-1 text-xs text-gray-400 hover:text-red-400 transition-colors group"
+              className="flex items-center space-x-1 text-xs text-[var(--logichub-muted-text)] hover:text-red-400 transition-colors group"
             >
               <RefreshCw className="w-3 h-3 group-hover:rotate-180 transition-transform duration-300" />
               <span>Clear ({getActiveFilterCount()})</span>
@@ -316,18 +309,18 @@ const AdvancedFilterSidebar = ({
         </div>
 
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[var(--logichub-muted-text)]" />
           <input
             type="text"
             placeholder="Search challenges..."
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full bg-gray-800/50 border border-gray-600/50 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
+            className="w-full bg-[var(--logichub-card-bg)] border border-[var(--logichub-border)] rounded-xl pl-10 pr-4 py-3 text-sm text-[var(--logichub-primary-text)] placeholder-[var(--logichub-muted-text)] focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] focus:border-[var(--logichub-accent)] transition-all duration-200"
           />
           {filters.searchQuery && (
             <button
               onClick={() => handleSearchChange("")}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--logichub-muted-text)] hover:text-[var(--logichub-primary-text)] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -335,28 +328,28 @@ const AdvancedFilterSidebar = ({
         </div>
       </div>
 
-      <div className="p-6 space-y-0 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
+      <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
         {filterConfig.type.length > 0 && (
           <FilterSection title="Challenge Type" sectionKey="type" icon={Puzzle}>
             <div className="space-y-2">
               {filterConfig.type.map(({ value, label, icon: Icon, count }) => (
                 <label
                   key={value}
-                  className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-800/30 cursor-pointer group transition-colors"
+                  className="flex items-center justify-between p-2 rounded-lg hover:bg-[var(--logichub-secondary-bg)]/30 cursor-pointer group transition-colors"
                 >
                   <div className="flex items-center space-x-3">
                     <input
                       type="checkbox"
                       checked={filters.type?.includes(value) || false}
                       onChange={() => handleFilterChange("type", value)}
-                      className="w-4 h-4 text-purple-500 bg-gray-800 border-gray-600 rounded focus:ring-purple-500 focus:ring-2 focus:ring-offset-0"
+                      className="w-4 h-4 text-[var(--logichub-accent)] bg-[var(--logichub-secondary-bg)] border-[var(--logichub-border)] rounded focus:ring-[var(--logichub-accent)] focus:ring-2 focus:ring-offset-0"
                     />
-                    <Icon className="w-4 h-4 text-gray-400 group-hover:text-purple-400 transition-colors" />
-                    <span className="text-sm text-gray-300 group-hover:text-white transition-colors">
+                    <Icon className="w-4 h-4 text-[var(--logichub-muted-text)] group-hover:text-[var(--logichub-accent)] transition-colors" />
+                    <span className="text-sm text-[var(--logichub-secondary-text)] group-hover:text-[var(--logichub-primary-text)] transition-colors">
                       {label}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-500 bg-gray-800/50 px-2 py-0.5 rounded-full">
+                  <span className="text-xs text-[var(--logichub-muted-text)] bg-[var(--logichub-card-bg)] px-2 py-0.5 rounded-full">
                     {count}
                   </span>
                 </label>
@@ -372,21 +365,21 @@ const AdvancedFilterSidebar = ({
                 ({ value, label, color, bgColor, count }) => (
                   <label
                     key={value}
-                    className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-800/30 cursor-pointer group transition-colors"
+                    className="flex items-center justify-between p-2 rounded-lg hover:bg-[var(--logichub-secondary-bg)]/30 cursor-pointer group transition-colors"
                   >
                     <div className="flex items-center space-x-3">
                       <input
                         type="checkbox"
                         checked={filters.level?.includes(value) || false}
                         onChange={() => handleFilterChange("level", value)}
-                        className="w-4 h-4 text-purple-500 bg-gray-800 border-gray-600 rounded focus:ring-purple-500 focus:ring-2 focus:ring-offset-0"
+                        className="w-4 h-4 text-[var(--logichub-accent)] bg-[var(--logichub-secondary-bg)] border-[var(--logichub-border)] rounded focus:ring-[var(--logichub-accent)] focus:ring-2 focus:ring-offset-0"
                       />
                       <div className={`w-3 h-3 rounded-full ${bgColor}`}></div>
                       <span className={`text-sm font-medium ${color}`}>
                         {label}
                       </span>
                     </div>
-                    <span className="text-xs text-gray-500 bg-gray-800/50 px-2 py-0.5 rounded-full">
+                    <span className="text-xs text-[var(--logichub-muted-text)] bg-[var(--logichub-card-bg)] px-2 py-0.5 rounded-full">
                       {count}
                     </span>
                   </label>
@@ -402,23 +395,23 @@ const AdvancedFilterSidebar = ({
               {filterConfig.status.map(({ value, label, color, count }) => (
                 <label
                   key={value}
-                  className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-800/30 cursor-pointer group transition-colors"
+                  className="flex items-center justify-between p-2 rounded-lg hover:bg-[var(--logichub-secondary-bg)]/30 cursor-pointer group transition-colors"
                 >
                   <div className="flex items-center space-x-3">
                     <input
                       type="checkbox"
                       checked={filters.status?.includes(value) || false}
                       onChange={() => handleFilterChange("status", value)}
-                      className="w-4 h-4 text-purple-500 bg-gray-800 border-gray-600 rounded focus:ring-purple-500 focus:ring-2 focus:ring-offset-0"
+                      className="w-4 h-4 text-[var(--logichub-accent)] bg-[var(--logichub-secondary-bg)] border-[var(--logichub-border)] rounded focus:ring-[var(--logichub-accent)] focus:ring-2 focus:ring-offset-0"
                     />
                     <div
                       className={`w-2 h-2 rounded-full bg-current ${color}`}
                     ></div>
-                    <span className="text-sm text-gray-300 group-hover:text-white transition-colors capitalize">
+                    <span className="text-sm text-[var(--logichub-secondary-text)] group-hover:text-[var(--logichub-primary-text)] transition-colors capitalize">
                       {label}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-500 bg-gray-800/50 px-2 py-0.5 rounded-full">
+                  <span className="text-xs text-[var(--logichub-muted-text)] bg-[var(--logichub-card-bg)] px-2 py-0.5 rounded-full">
                     {count}
                   </span>
                 </label>
@@ -429,23 +422,21 @@ const AdvancedFilterSidebar = ({
 
         {filterConfig.tags.length > 0 && (
           <FilterSection title="Tags" sectionKey="tags" icon={Tag}>
-            <div className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                {filterConfig.tags.map(({ value, label, count }) => (
-                  <button
-                    key={value}
-                    onClick={() => handleFilterChange("tags", value)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 flex items-center space-x-1 ${
-                      filters.tags?.includes(value)
-                        ? "bg-gradient-to-r from-purple-600/30 to-blue-600/30 text-purple-300 border border-purple-500/50 shadow-lg"
-                        : "bg-gray-800/50 text-gray-400 border border-gray-700/50 hover:bg-gray-700/50 hover:text-gray-300 hover:border-gray-600"
-                    }`}
-                  >
-                    <span>{label}</span>
-                    <span className="text-xs opacity-70">({count})</span>
-                  </button>
-                ))}
-              </div>
+            <div className="flex flex-wrap gap-2">
+              {filterConfig.tags.map(({ value, label, count }) => (
+                <button
+                  key={value}
+                  onClick={() => handleFilterChange("tags", value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 flex items-center space-x-1 ${
+                    filters.tags?.includes(value)
+                      ? "bg-gradient-to-r from-purple-600/30 to-blue-600/30 text-[var(--logichub-accent)] border border-purple-500/50 shadow-lg"
+                      : "bg-[var(--logichub-card-bg)] text-[var(--logichub-muted-text)] border border-[var(--logichub-border)] hover:bg-[var(--logichub-secondary-bg)]/50 hover:text-[var(--logichub-secondary-text)] hover:border-[var(--logichub-border)]"
+                  }`}
+                >
+                  <span>{label}</span>
+                  <span className="text-xs opacity-70">({count})</span>
+                </button>
+              ))}
             </div>
           </FilterSection>
         )}
@@ -460,11 +451,11 @@ const AdvancedFilterSidebar = ({
           border-radius: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(139, 92, 246, 0.3);
+          background: rgba(0, 133, 229, 0.3);
           border-radius: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(139, 92, 246, 0.5);
+          background: rgba(0, 133, 229, 0.5);
         }
       `}</style>
     </div>

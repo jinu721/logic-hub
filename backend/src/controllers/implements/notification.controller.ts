@@ -1,97 +1,78 @@
 import { Request, Response } from "express";
 import { INotificationController } from "../interfaces/notification.controller.interface";
 import { HttpStatus } from "../../constants/http.status";
-import { NotificationService } from "../../services/implements/notification.service";
-import { UserService } from "../../services/implements/user.service";
+import { sendError, sendSuccess } from "../../utils/application/response.util";
+import { INotificationService } from "../../services/interfaces/notification.service.interface";
+import { IUserService } from "../../services/interfaces/user.services.interface";
 
 export class NotificationController implements INotificationController {
-  constructor(private notificationService: NotificationService,private userService: UserService) {}
+  constructor(
+    private readonly _notifySvc: INotificationService,
+    private readonly _userSvc: IUserService
+  ) {}
 
   async createNotification(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.notificationService.create(req.body);
-      res.status(HttpStatus.CREATED).json({ success: true, data: result });
+      const result = await this._notifySvc.create(req.body);
+      sendSuccess(res, HttpStatus.CREATED, result);
     } catch (error) {
       console.log(error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed to create notification",
-      });
+      sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create notification");
     }
   }
 
   async getAllNotifications(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.notificationService.getAll();
-      res.status(HttpStatus.OK).json({ success: true, data: result });
+      const result = await this._notifySvc.getAll();
+      sendSuccess(res, HttpStatus.OK, result);
     } catch (error) {
       console.log(error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed to fetch notifications",
-      });
+      sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch notifications");
     }
   }
 
   async getNotificationById(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.notificationService.getById(req.params.id);
+      const result = await this._notifySvc.getById(req.params.id);
       if (!result) {
-        res
-          .status(HttpStatus.NOT_FOUND)
-          .json({ success: false, message: "Notification not found" });
+        sendError(res, HttpStatus.NOT_FOUND, "Notification not found");
         return;
       }
-      res.status(HttpStatus.OK).json({ success: true, data: result });
+      sendSuccess(res, HttpStatus.OK, result);
     } catch (error) {
       console.log(error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed to fetch notification",
-      });
+      sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch notification");
     }
   }
 
   async updateNotification(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.notificationService.update(
+      const result = await this._notifySvc.update(
         req.params.id,
         req.body
       );
       if (!result) {
-        res
-          .status(HttpStatus.NOT_FOUND)
-          .json({ success: false, message: "Notification not found" });
+        sendError(res, HttpStatus.NOT_FOUND, "Notification not found");
         return;
       }
-      res.status(HttpStatus.OK).json({ success: true, data: result });
+      sendSuccess(res, HttpStatus.OK, result);
     } catch (error) {
       console.log(error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed to update notification",
-      });
+      sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update notification");
     }
   }
 
   async deleteNotification(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.notificationService.delete(req.params.id);
+      const result = await this._notifySvc.delete(req.params.id);
       if (!result) {
-        res
-          .status(HttpStatus.NOT_FOUND)
-          .json({ success: false, message: "Notification not found" });
+        sendError(res, HttpStatus.NOT_FOUND, "Notification not found");
         return;
       }
-      res
-        .status(HttpStatus.OK)
-        .json({ success: true, message: "Notification deleted successfully" });
+      sendSuccess(res, HttpStatus.OK, { message: "Notification deleted successfully" });
     } catch (error) {
       console.log(error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed to delete notification",
-      });
+      sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Failed to delete notification");
     }
   }
 
@@ -100,20 +81,17 @@ export class NotificationController implements INotificationController {
       const userId = (req as any).user?.userId;
 
       if (!userId) {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
+        sendError(res, HttpStatus.UNAUTHORIZED, "Unauthorized");
         return;
       }
 
-      const result =  await this.notificationService.getNotificationByUserId(
+      const result = await this._notifySvc.getNotificationByUserId(
         userId
       );
-      res.status(HttpStatus.OK).json(result);
+      sendSuccess(res, HttpStatus.OK, result);
     } catch (err) {
       console.log(err);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed to fetch notification",
-      });
+      sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch notification");
     }
   }
 
@@ -122,18 +100,15 @@ export class NotificationController implements INotificationController {
       const userId = (req as any).user?.userId;
 
       if (!userId) {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
+        sendError(res, HttpStatus.UNAUTHORIZED, "Unauthorized");
         return;
       }
 
-      const result = await this.notificationService.markAllAsRead(userId);
-      res.status(HttpStatus.OK).json({ success: true, data: result });
+      const result = await this._notifySvc.markAllAsRead(userId);
+      sendSuccess(res, HttpStatus.OK, result);
     } catch (error) {
       console.log(error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed to mark all notifications as read",
-      });
+      sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Failed to mark all notifications as read");
     }
   }
   async deleteAllNotifications(req: Request, res: Response): Promise<void> {
@@ -141,34 +116,31 @@ export class NotificationController implements INotificationController {
       const userId = (req as any).user?.userId;
 
       if (!userId) {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
+        sendError(res, HttpStatus.UNAUTHORIZED, "Unauthorized");
         return;
       }
 
-        const result = await this.notificationService.deleteAll(userId);
-        res.status(HttpStatus.OK).json({ success: true, data: result });
-      } catch (error) {
-        console.log(error);
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-          success: false,
-          message: "Failed to mark all notifications as read",
-        });
-      }
+      const result = await this._notifySvc.deleteAll(userId);
+      sendSuccess(res, HttpStatus.OK, result);
+    } catch (error) {
+      console.log(error);
+      sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Failed to mark all notifications as read");
+    }
   }
   async toggleUserNotification(req: Request, res: Response): Promise<void> {
     try {
       const userId = (req as any).user?.userId;
 
       if (!userId) {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
+        sendError(res, HttpStatus.UNAUTHORIZED, "Unauthorized");
         return;
       }
 
-      const result = await this.userService.toggleUserNotification(userId);
-      res.status(HttpStatus.OK).json({ message: `Notification Toggle Successfully`, result });
+      const result = await this._userSvc.toggleUserNotification(userId);
+      sendSuccess(res, HttpStatus.OK, { message: `Notification Toggle Successfully`, result });
     } catch (err: any) {
       console.log(err);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: err.message });
+      sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Failed to toggle notification");
     }
   }
 }

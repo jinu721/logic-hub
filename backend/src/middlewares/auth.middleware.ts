@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { CustomRequest } from "../types/custom.request";
-import { verifyAccessToken } from "../utils/verify.token";
+import { verifyAccessToken } from "../utils/token/verify.token";
 import redisClient from "../config/redis.config";
 
 

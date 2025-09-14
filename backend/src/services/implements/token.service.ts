@@ -1,10 +1,10 @@
 import { PublicTokenDTO, toPublicTokenDto } from "../../mappers/token.dto";
-import { TokenRepository } from "../../repository/implements/token.repository";
+import { ITokenRepository } from "../../repository/interfaces/token.repository.interface";
 import { TokenIF, TokenPayloadIF } from "../../types/token.types";
 import { ITokenService } from "../interfaces/token.service.interface";
 
 export class TokenService implements ITokenService {
-    constructor(private readonly tokenRepo: TokenRepository) {}
+    constructor(private readonly tokenRepo: ITokenRepository) {}
 
     async createToken(token: TokenPayloadIF): Promise<void> {
         const isAlreadyExist = await this.tokenRepo.getTokenByUserId(token.userId)

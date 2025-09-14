@@ -8,4 +8,5 @@ export interface IConversationController {
   removeTypingUser(req: Request, res: Response): Promise<void>;
   getTypingUsers(req: Request, res: Response): Promise<void>;
   findConversationByGroup(req: Request, res: Response): Promise<void>;
+  findConversationByUser(req: Request, res: Response): Promise<void>;
 }

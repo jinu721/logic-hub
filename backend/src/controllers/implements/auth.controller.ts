@@ -1,56 +1,72 @@
 import { Request, Response } from "express";
-import { UserService } from "../../services/implements/user.service";
 import { HttpStatus } from "../../constants/http.status";
 import {
   generateAccessToken,
   generateRefreshToken,
-} from "../../utils/generate.token";
-import { setAccessToken, setRefreshToken } from "../../utils/set.cookies";
+} from "../../utils/token/generate.token";
+import { setAccessToken, setRefreshToken } from "../../utils/token/set.cookies";
 import { IAuthController } from "../interfaces/auth.controller.interface";
 import { env } from "../../config/env";
-import { verifyLinkToken, verifyRefreshToken } from "../../utils/verify.token";
-import redisClient from "../../config/redis.config";
+import {
+  verifyLinkToken,
+  verifyRefreshToken,
+} from "../../utils/token/verify.token";
 import jwt from "jsonwebtoken";
-import { TokenService } from "../../services/implements/token.service";
+import { sendError, sendSuccess } from "../../utils/application/response.util";
+import { IUserService } from "../../services/interfaces/user.services.interface";
+import { ITokenService } from "../../services/interfaces/token.service.interface";
+import { RedisHelper } from "../../utils/database/redis.util";
+import logger from "../../utils/application/logger";
 
 export class AuthController implements IAuthController {
   constructor(
-    private userService: UserService,
-    private tokenService: TokenService
+    private readonly _userSvc: IUserService,
+    private readonly _tokenSvc: ITokenService
   ) {}
 
-  async register(req: Request, res: Response): Promise<void> {
+  async register(req: Request, res: Response): Promise<Response> {
     try {
-      const userData = await this.userService.register(
-        req.body.username,
-        req.body.email,
-        req.body.password
+      const { username, email, password } = req.body;
+      if (!username || !email || !password) {
+        return sendError(
+          res,
+          HttpStatus.BAD_REQUEST,
+          "All fields are required"
+        );
+      }
+      const userData = await this._userSvc.register(username, email, password);
+      return sendSuccess(
+        res,
+        HttpStatus.CREATED,
+        { email: userData.email },
+        "OTP Sent Successfully"
       );
-      res
-        .status(HttpStatus.CREATED)
-        .json({ email: userData.email, message: "OTP Sent Successfully" });
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message:
-          error instanceof Error ? error.message : "Something Went Wrong",
+      logger.error(`Failed to register user ${req.method} ${req.url}`, {
+        error,
       });
+      return sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
   }
 
-  async verifyOTP(req: Request, res: Response): Promise<void> {
+  async verifyOTP(req: Request, res: Response): Promise<Response> {
     try {
-      const userData = await this.userService.verifyOTP(
-        req.body.email,
-        req.body.otp
-      );
+      const { email, otp } = req.body;
+      if (!email || !otp) {
+        return sendError(
+          res,
+          HttpStatus.BAD_REQUEST,
+          "Email and OTP are required"
+        );
+      }
+      const userData = await this._userSvc.verifyOTP(email, otp);
       if (!userData) {
-        res.status(HttpStatus.BAD_REQUEST).json({ message: "Invalid OTP" });
-        return;
+        return sendError(res, HttpStatus.BAD_REQUEST, "Invalid OTP");
       }
 
       const accessToken = generateAccessToken(userData);
       const refreshToken = generateRefreshToken(userData);
-      await this.tokenService.createToken({
+      await this._tokenSvc.createToken({
         userId: userData._id,
         accessToken,
         refreshToken,
@@ -61,58 +77,51 @@ export class AuthController implements IAuthController {
       setAccessToken(res, accessToken);
       setRefreshToken(res, refreshToken);
 
-      res.status(HttpStatus.OK).json({ userData, accessToken, refreshToken });
+      return sendSuccess(
+        res,
+        HttpStatus.OK,
+        { accessToken, refreshToken },
+        "Account Verified Successfully"
+      );
     } catch (error) {
-      res.status(HttpStatus.BAD_REQUEST).json({
-        message:
-          error instanceof Error ? error.message : "Something Went Wrong",
-      });
+      logger.error(`Failed to verify OTP ${req.method} ${req.url}`, { error });
+      return sendError(res, HttpStatus.BAD_REQUEST, error);
     }
   }
 
-  async login(req: Request, res: Response): Promise<void> {
+  async login(req: Request, res: Response): Promise<Response> {
     try {
-      const result: any = await this.userService.login(
-        req.body.email,
-        req.body.password
-      );
+      const { emailOrUsername, password } = req.body;
+      const result: any = await this._userSvc.login(emailOrUsername, password);
 
       if (result.isBanned) {
-        res.status(HttpStatus.OK).json({
+        return sendError(res, HttpStatus.FORBIDDEN, result.message, {
           isBanned: true,
-          message: result.message,
         });
-        return;
       }
 
       if (!result.isVerified) {
-        res.status(HttpStatus.OK).json({
-          isVerified: false,
-          email: result.email,
-          security: true,
-          message: result.message,
-        });
-        return;
+        return sendSuccess(
+          res,
+          HttpStatus.OK,
+          { email: result.email, security: true },
+          result.message
+        );
       }
 
       if (result.security) {
-        res
-          .status(HttpStatus.OK)
-          .json({ isVerified: true, security: true, message: result.message });
-        return;
+        return sendSuccess(
+          res,
+          HttpStatus.OK,
+          { isVerified: true, security: true },
+          result.message
+        );
       }
 
-      console.log("User OK");
-
-      console.log(`Access Token: ${result.accessToken}`);
-      console.log(`Refresh Token: ${result.refreshToken}`);
-
       setAccessToken(res, result.accessToken);
       setRefreshToken(res, result.refreshToken);
 
-      console.log("Cookie Setted")
-
-      await this.tokenService.createToken({
+      await this._tokenSvc.createToken({
         userId: result.userId,
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
@@ -120,31 +129,35 @@ export class AuthController implements IAuthController {
         device: req.headers["user-agent"] || "unknown",
       });
 
-      res.status(HttpStatus.OK).json({
-        isVerified: true,
-        security: false,
-        message: "Login Completed Successfully",
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
-      });
-    } catch (error) {
-      console.log(error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: error instanceof Error ? error.message : "Invalid credentials",
-      });
-    }
-  }
-
-  async verifyLogin(req: Request, res: Response): Promise<void> {
-    try {
-      const result = await this.userService.verifyLogin(
-        req.query.token as string
+      return sendSuccess(
+        res,
+        HttpStatus.OK,
+        {
+          isVerified: true,
+          security: false,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        },
+        "Login Completed Successfully"
       );
+    } catch (error) {
+      logger.error(`Failed to login user ${req.method} ${req.url}`, { error });
+      return sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, error);
+    }
+  }
+
+  async verifyLogin(req: Request, res: Response): Promise<Response> {
+    try {
+      const { token } = req.query;
+      if (!token || typeof token !== "string") {
+        return sendError(res, HttpStatus.BAD_REQUEST, "Invalid token");
+      }
+      const result = await this._userSvc.verifyLogin(token as string);
 
       setAccessToken(res, result.accessToken);
       setRefreshToken(res, result.refreshToken);
 
-      await this.tokenService.createToken({
+      await this._tokenSvc.createToken({
         userId: result.userId,
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
@@ -152,237 +165,245 @@ export class AuthController implements IAuthController {
         device: req.headers["user-agent"] || "unknown",
       });
 
-      res.status(HttpStatus.OK).json({
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
-      });
+      return sendSuccess(
+        res,
+        HttpStatus.OK,
+        { accessToken: result.accessToken, refreshToken: result.refreshToken },
+        "Login Verified Successfully"
+      );
     } catch (error) {
-      console.log(error);
-      res.status(HttpStatus.UNAUTHORIZED).json({
-        message: error instanceof Error ? error.message : "Invalid token",
+      logger.error(`Failed to verify login ${req.method} ${req.url}`, {
+        error,
       });
+      return sendError(res, HttpStatus.UNAUTHORIZED, error);
     }
   }
 
-  refreshToken(req: Request, res: Response): void {
+  refreshToken(req: Request, res: Response): Response {
     try {
       const refreshToken = req.cookies.refreshToken;
 
-      console.log("COOKIES: ", req.cookies);
-
-      console.log("Refresh Token: ", refreshToken);
-
       if (!refreshToken) {
-        res
-          .status(HttpStatus.FORBIDDEN)
-          .json({ message: "Refresh token not found. Please log in again." });
-        return;
+        return sendError(
+          res,
+          HttpStatus.FORBIDDEN,
+          "Refresh token not found. Please log in again."
+        );
       }
 
       const user = verifyRefreshToken(refreshToken);
 
       if (!user) {
-        res
-          .status(HttpStatus.FORBIDDEN)
-          .json({ message: "Invalid refresh token. Please log in again." });
-        return;
+        return sendError(
+          res,
+          HttpStatus.FORBIDDEN,
+          "Invalid refresh token. Please log in again."
+        );
       }
-
-      console.log("VERIFIED USER: ", user);
 
       const newAccessToken = generateAccessToken(user as any);
 
       setAccessToken(res, newAccessToken);
 
-      res.json({ accessToken: newAccessToken });
+      return sendSuccess(
+        res,
+        HttpStatus.OK,
+        { accessToken: newAccessToken },
+        "Token refreshed successfully"
+      );
     } catch (err) {
-      console.log(err);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: err instanceof Error ? err.message : "Internal Server Error",
+      logger.error(`Failed to refresh token ${req.method} ${req.url}`, {
+        error: err,
       });
+      return sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, err);
     }
   }
 
   async googleAuth(req: Request, res: Response): Promise<void> {
-    if (!req.user) {
-      res
-        .status(HttpStatus.UNAUTHORIZED)
-        .json({ message: "Authentication failed!" });
-      return;
-    }
-
-    const user = req.user as any;
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-    await this.tokenService.createToken({
-      userId: user._id,
-      accessToken,
-      refreshToken,
-      ip: req.ip || req.connection.remoteAddress,
-      device: req.headers["user-agent"] || "unknown",
-    });
-
-    setAccessToken(res, accessToken);
-    setRefreshToken(res, refreshToken);
-
-    res.cookie("accessToken", accessToken, {
-      httpOnly: false,
-      secure: true,
-      sameSite: "none",
-      maxAge: 1000 * 15,
-    });
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: false,
-      secure: true,
-      sameSite: "none",
-      maxAge: 1000 * 15,
-    });
-
-    res.redirect(`${env.FRONTEND_URL}/home?logged=social&accessToken=${accessToken}`);
-  }
-
-  async githubAuth(req: Request, res: Response): Promise<void> {
-    if (!req.user) {
-      res
-        .status(HttpStatus.UNAUTHORIZED)
-        .json({ message: "Authentication failed!" });
-      return;
-    }
-
-    const user = req.user as any;
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-    console.log("User", user);
-
-    await this.tokenService.createToken({
-      userId: user._id,
-      accessToken,
-      refreshToken,
-      ip: req.ip || req.connection.remoteAddress,
-      device: req.headers["user-agent"] || "unknown",
-    });
-
-    setAccessToken(res, accessToken);
-    setRefreshToken(res, refreshToken);
-
-    res.redirect(`${env.FRONTEND_URL}/home?logged=social&accessToken=${accessToken}`);
-  }
-
-  async forgotPassword(req: Request, res: Response): Promise<void> {
     try {
-      const forgotData = await this.userService.forgotPassword(req.body.email);
-      res.status(HttpStatus.OK).json({ message: forgotData.message });
-    } catch (err) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message:
-          err instanceof Error ? err.message : "Failed to Forgot Password",
-      });
-    }
-  }
-
-  async resetPassword(req: Request, res: Response): Promise<void> {
-    try {
-
-      const password = req.body.password;
-      if (!password) {
-        res.status(HttpStatus.BAD_REQUEST).json({ message: "Password is required" });
+      if (!req.user) {
+        sendError(res, HttpStatus.UNAUTHORIZED, "Authentication failed!");
         return;
       }
 
+      const user = req.user as any;
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
+
+      await this._tokenSvc.createToken({
+        userId: user._id,
+        accessToken,
+        refreshToken,
+        ip: req.ip || req.connection.remoteAddress,
+        device: req.headers["user-agent"] || "unknown",
+      });
+
+      setAccessToken(res, accessToken);
+      setRefreshToken(res, refreshToken);
+
+      res.redirect(
+        `${env.FRONTEND_URL}/home?logged=social&accessToken=${accessToken}`
+      );
+    } catch (error) {
+      logger.error(
+        `Failed to authenticate with Google ${req.method} ${req.url}`,
+        { error }
+      );
+      sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, error);
+    }
+  }
+
+  async githubAuth(req: Request, res: Response): Promise<void> {
+    try {
+      if (!req.user) {
+        sendError(res, HttpStatus.UNAUTHORIZED, "Authentication failed!");
+        return;
+      }
+
+      const user = req.user as any;
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
+
+      await this._tokenSvc.createToken({
+        userId: user._id,
+        accessToken,
+        refreshToken,
+        ip: req.ip || req.connection.remoteAddress,
+        device: req.headers["user-agent"] || "unknown",
+      });
+
+      setAccessToken(res, accessToken);
+      setRefreshToken(res, refreshToken);
+
+      res.redirect(
+        `${env.FRONTEND_URL}/home?logged=social&accessToken=${accessToken}`
+      );
+    } catch (error) {
+      logger.error(
+        `Failed to authenticate with GitHub ${req.method} ${req.url}`,
+        { error }
+      );
+      sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, error);
+    }
+  }
+
+  async forgotPassword(req: Request, res: Response): Promise<Response> {
+    try {
+      const email = req.body.email;
+      const forgotData = await this._userSvc.forgotPassword(email);
+      return sendSuccess(res, HttpStatus.OK, { message: forgotData.message });
+    } catch (error) {
+      logger.error(
+        `Failed to process forgot password ${req.method} ${req.url}`,
+        { error }
+      );
+      return sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, error);
+    }
+  }
+
+  async resetPassword(req: Request, res: Response): Promise<Response> {
+    try {
+      const password = req.body.password;
       const token = req.query.token as string;
+      if (!password || !token) {
+        return sendError(
+          res,
+          HttpStatus.BAD_REQUEST,
+          "Password and token are required"
+        );
+      }
+
       const user = await verifyLinkToken(token);
 
-      if(!user) {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
-        return;
+      if (!user) {
+        return sendError(res, HttpStatus.UNAUTHORIZED, "Invalid token");
       }
 
       const userId = user.userId;
 
+      await this._userSvc.resetPassword(userId, password);
 
-      await this.userService.resetPassword(userId, password);
-
-      res.status(HttpStatus.OK).json({
-        message: "Forgot Password Completed",
+      return sendSuccess(res, HttpStatus.OK, {
+        message: "Password reset successfully",
       });
-    } catch (err) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message:
-          err instanceof Error ? err.message : "Failed to Forgot Password",
+    } catch (error) {
+      logger.error(`Failed to reset password ${req.method} ${req.url}`, {
+        error,
       });
+      return sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
   }
 
-  async changePassword(req: Request, res: Response): Promise<void> {
+  async changePassword(req: Request, res: Response): Promise<Response> {
     try {
       const userId = (req as any).user?.userId;
 
       if (!userId) {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
-        return;
+        return sendError(res, HttpStatus.UNAUTHORIZED, "Unauthorized");
       }
 
-      await this.userService.changePassword(
+      await this._userSvc.changePassword(
         userId,
         req.body.oldPassword,
         req.body.newPassword
       );
-      res
-        .status(HttpStatus.OK)
-        .json({ message: "Your password has been changed" });
-    } catch (err) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message:
-          err instanceof Error ? err.message : "Failed to Change Password",
+      return sendSuccess(res, HttpStatus.OK, {
+        message: "Your password has been changed",
       });
+    } catch (error) {
+      logger.error(`Failed to change password ${req.method} ${req.url}`, {
+        error,
+      });
+      return sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
   }
 
-  async getMe(req: Request, res: Response): Promise<void> {
+  async getMe(req: Request, res: Response): Promise<Response> {
     try {
       const userId = (req as any).user?.userId;
 
       if (!userId) {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
-        return;
+        return sendError(res, HttpStatus.UNAUTHORIZED, "Unauthorized");
       }
 
-      const user = await this.userService.findUserById(userId);
+      const user = await this._userSvc.findUserById(userId);
 
       if (!user) {
-        res.status(HttpStatus.NOT_FOUND).json({ message: "User not found" });
-        return;
+        return sendError(res, HttpStatus.NOT_FOUND, "User not found");
       }
 
-      res.status(HttpStatus.OK).json({
+      return sendSuccess(res, HttpStatus.OK, {
         role: user.role,
         isBanned: user.isBanned,
       });
-    } catch (err) {
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: "Server error" });
+    } catch (error) {
+      logger.error(`Failed to get user ${req.method} ${req.url}`, {
+        error,
+      });
+      return sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Error Getting User");
     }
   }
 
-  async logout(req: Request, res: Response): Promise<void> {
+  async logout(req: Request, res: Response): Promise<Response> {
     try {
       const authHeader = req.headers["authorization"];
+      if (!authHeader) {
+        return sendError(res, HttpStatus.UNAUTHORIZED, "Unauthorized");
+      }
       const token = authHeader && authHeader.split(" ")[1];
 
-      if (token) {
-        const decoded = jwt.decode(token) as jwt.JwtPayload;
-
-        if (decoded && decoded.exp) {
-          const expiry = decoded.exp - Math.floor(Date.now() / 1000);
-          redisClient.setEx(`blacklist_${token}`, expiry, "true");
-        }
+      if (!token) {
+        return sendError(res, HttpStatus.UNAUTHORIZED, "Unauthorized");
       }
 
-      await this.tokenService.deleteTokenByUserId((req as any).user?.userId);
+      const decoded = jwt.decode(token) as jwt.JwtPayload;
+
+      if (decoded && decoded.exp) {
+        const expiry = decoded.exp - Math.floor(Date.now() / 1000);
+        RedisHelper.set(`blacklist_${token}`, "true", expiry);
+      }
+
+      await this._tokenSvc.deleteTokenByUserId((req as any).user?.userId);
 
       res.clearCookie("accessToken", {
         httpOnly: true,
@@ -399,12 +420,9 @@ export class AuthController implements IAuthController {
         path: "/",
       });
 
-      res.status(200).json({ message: "Logout successful" });
+      sendSuccess(res, HttpStatus.OK, { message: "Logged out successfully" });
     } catch (err) {
-      console.log(err);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: err instanceof Error ? err.message : "Internal Server Error",
-      });
+      sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, err);
     }
   }
 

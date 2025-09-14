@@ -4,8 +4,8 @@ import {
   GroupUpdateData,
   VoiceRoomData,
 } from "../../types/socket.types";
-import { AppContainer } from "../../utils/app.container";
-import { generateSystemMessage } from "../../utils/generate.message";
+import { AppContainer } from "../../utils/socket/app.container";
+import { generateSystemMessage } from "../../utils/application/generate.message";
 import { Types } from "mongoose";
 
 export class GroupHandler {

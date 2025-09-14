@@ -5,16 +5,12 @@ import { IMarketService } from "../../services/interfaces/market.service.interfa
 
 export class MarketController implements IMarketController {
 
-  private marketService:IMarketService
-
-  constructor(marketService:IMarketService) {
-    this.marketService = marketService
-  }
+  constructor(private readonly _marketSvc:IMarketService) {}
 
   async createItem(req: Request, res: Response): Promise<void> {
     try {
       console.log("req.body", req.body);
-      const result = await this.marketService.createItem(req.body);
+      const result = await this._marketSvc.createItem(req.body);
       res.status(HttpStatus.CREATED).json({ success: true, data: result });
     } catch (error) {
       console.log(error);
@@ -27,7 +23,7 @@ export class MarketController implements IMarketController {
       const filter = {category: req.query.category, searchQuery: req.query.searchQuery, sortOption: req.query.sortOption};
       const page = req.query.page;
       const limit = req.query.limit;
-      const result = await this.marketService.getAllItems(filter,Number(page),Number(limit));
+      const result = await this._marketSvc.getAllItems(filter,Number(page),Number(limit));
       res.status(HttpStatus.OK).json(result);
     } catch (error) {
       console.log(error);
@@ -37,7 +33,7 @@ export class MarketController implements IMarketController {
 
   async getItemById(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.marketService.getItemById(req.params.id);
+      const result = await this._marketSvc.getItemById(req.params.id);
       if (!result) {
         res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Item not found" });
         return;
@@ -51,7 +47,7 @@ export class MarketController implements IMarketController {
 
   async updateItem(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.marketService.updateItem(req.params.id, req.body);
+      const result = await this._marketSvc.updateItem(req.params.id, req.body);
       if (!result) {
         res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Item not found" });
         return;
@@ -65,7 +61,7 @@ export class MarketController implements IMarketController {
 
   async deleteItem(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.marketService.deleteItem(req.params.id);
+      const result = await this._marketSvc.deleteItem(req.params.id);
       if (!result) {
         res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Item not found" });
         return;
@@ -92,7 +88,7 @@ export class MarketController implements IMarketController {
         return;
       }
 
-      const result = await this.marketService.purchaseMarketItem(itemId, userId);
+      const result = await this._marketSvc.purchaseMarketItem(itemId, userId);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (error) {
       console.log(error);

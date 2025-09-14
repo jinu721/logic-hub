@@ -1,8 +1,8 @@
 import { IChallengeController } from "../interfaces/challange.controller.interface";
 import { Request, Response } from "express";
 import { HttpStatus } from "../../constants/http.status";
-import { ChallengeService } from "../../services/implements/challange.service";
 import { Types } from "mongoose";
+import { IChallengeService } from "../../services/interfaces/challange.service.interface";
 
 interface RunCodeRequest {
   challengeId: string;
@@ -14,15 +14,12 @@ interface RunCodeRequest {
 
 
 export class ChallengeController implements IChallengeController {
-  private challengeService: ChallengeService;
 
-  constructor(challengeService: ChallengeService) {
-    this.challengeService = challengeService;
-  }
+  constructor(private readonly _challengeSvc: IChallengeService) {}
 
   async createChallenge(req: Request, res: Response): Promise<void> {
     try {
-      const challenge = await this.challengeService.createChallenge(req.body);
+      const challenge = await this._challengeSvc.createChallenge(req.body);
       res.status(HttpStatus.CREATED).json(challenge);
     } catch (err:any) {
       console.log(err)
@@ -40,7 +37,7 @@ export class ChallengeController implements IChallengeController {
       }
 
       const challengeId = req.params.id;
-      const challenge = await this.challengeService.getChallengeById(challengeId,userId);
+      const challenge = await this._challengeSvc.getChallengeById(challengeId,userId);
       res.status(HttpStatus.OK).json(challenge);
     } catch (err:any) {
       console.log(err)
@@ -58,7 +55,7 @@ export class ChallengeController implements IChallengeController {
         res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
         return;
       }
-      const result = await this.challengeService.getChallenges(req.query,userId);
+      const result = await this._challengeSvc.getChallenges(req.query,userId);
       res.status(HttpStatus.OK).json(result);
     } catch (err:any) {
       console.log(err);
@@ -71,7 +68,7 @@ export class ChallengeController implements IChallengeController {
       const search = req.query.search;
       const page = req.query.page;
       const limit = req.query.limit;
-      const challenges = await this.challengeService.getAllChallenges(search as string,Number(page),Number(limit));
+      const challenges = await this._challengeSvc.getAllChallenges(search as string,Number(page),Number(limit));
       res.status(HttpStatus.OK).json(challenges);
     } catch (err:any) {
       console.log(err);
@@ -83,7 +80,7 @@ export class ChallengeController implements IChallengeController {
     try {
       const challengeId = req.params.id;
       const updateData = req.body;
-      const updatedChallenge = await this.challengeService.updateChallenge(new Types.ObjectId(challengeId), updateData);
+      const updatedChallenge = await this._challengeSvc.updateChallenge(new Types.ObjectId(challengeId), updateData);
       res.status(HttpStatus.OK).json(updatedChallenge);
     } catch (err:any) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: "Failed to update challenge" });
@@ -94,7 +91,7 @@ export class ChallengeController implements IChallengeController {
     try {
       const challengeId = req.params.id;
       const challengeObjectId = new Types.ObjectId(challengeId);
-      await this.challengeService.deleteChallenge(challengeObjectId);
+      await this._challengeSvc.deleteChallenge(challengeObjectId);
       res.status(HttpStatus.OK).json({ message: "Challenge deleted successfully" });
     } catch (err:any) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: "Failed to delete challenge" });
@@ -104,7 +101,7 @@ export class ChallengeController implements IChallengeController {
   async getChallengesByStatus(req: Request, res: Response): Promise<void> {
     try {
       const status = req.params.status;
-      const challenges = await this.challengeService.getChallengesByStatus(status as "active" | "inactive" | "draft" | "archived");
+      const challenges = await this._challengeSvc.getChallengesByStatus(status as "active" | "inactive" | "draft" | "archived");
       res.status(HttpStatus.OK).json(challenges);
     } catch (err:any) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: "Failed to fetch challenges by status" });
@@ -114,7 +111,7 @@ export class ChallengeController implements IChallengeController {
   async getChallengesByTags(req: Request, res: Response): Promise<void> {
     try {
       const tags = req.body.tags;
-      const challenges = await this.challengeService.getChallengesByTags(tags);
+      const challenges = await this._challengeSvc.getChallengesByTags(tags);
       res.status(HttpStatus.OK).json(challenges);
     } catch (err:any) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: "Failed to fetch challenges by tags" });
@@ -124,7 +121,7 @@ export class ChallengeController implements IChallengeController {
   async getChallengesByDifficulty(req: Request, res: Response): Promise<void> {
     try {
       const difficulty = req.params.difficulty;
-      const challenges = await this.challengeService.getChallengesByDifficulty(difficulty as "novice" | "adept" | "master");
+      const challenges = await this._challengeSvc.getChallengesByDifficulty(difficulty as "novice" | "adept" | "master");
       res.status(HttpStatus.OK).json(challenges);
     } catch (err:any) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: "Failed to fetch challenges by difficulty" });
@@ -134,7 +131,7 @@ export class ChallengeController implements IChallengeController {
   async runChallengeCode (req: Request, res: Response):Promise<void> {
     const { challengeId, language, sourceCode, input,userId}: RunCodeRequest = req.body;
     try {
-      const result = await this.challengeService.runChallengeCode(challengeId,language,sourceCode,input,userId);
+      const result = await this._challengeSvc.runChallengeCode(challengeId,language,sourceCode,input,userId);
       res.status(HttpStatus.OK).json(result);
     } catch (err:any) {
       console.log(err)
@@ -151,7 +148,7 @@ export class ChallengeController implements IChallengeController {
         return;
       }
 
-      const result = await this.challengeService.submitChallange(req.body,userId);
+      const result = await this._challengeSvc.submitChallange(req.body,userId);
       res.status(HttpStatus.OK).json(result);
     } catch (err:any) {
       console.log(err)

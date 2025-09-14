@@ -11,4 +11,6 @@ export interface IChallengeController {
   getChallengesByStatus(req: Request, res: Response): Promise<void>;
   getChallengesByTags(req: Request, res: Response): Promise<void>;
   getChallengesByDifficulty(req: Request, res: Response): Promise<void>;
+  runChallengeCode(req: Request, res: Response): Promise<void>;
+  submitChallenge(req: Request, res: Response): Promise<void>;
 }

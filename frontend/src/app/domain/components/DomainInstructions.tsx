@@ -46,34 +46,6 @@ const DomainInstructions: FC<DomainInstructionsProps> = ({ challenge }) => {
           {challenge?.instructions || "Loading challenge instructions..."}
         </p>
       </div>
-
-      <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-4">
-        <h4 className="text-base font-bold mb-3 text-blue-300 flex items-center">
-          <AlertTriangle size={18} className="mr-2 text-amber-400" />
-          Requirements
-        </h4>
-
-        <ul className="space-y-2 text-slate-300 text-sm list-none">
-          <li className="flex items-start">
-            <span className="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3"></span>
-            Complete within time limit
-          </li>
-          <li className="flex items-start">
-            <span className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3"></span>
-            All test cases must pass
-          </li>
-          <li className="flex items-start">
-            <span className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3"></span>
-            Handle edge cases
-          </li>
-          {isCodeType && (
-            <li className="flex items-start">
-              <span className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3"></span>
-              Follow best coding practices
-            </li>
-          )}
-        </ul>
-      </div>
     </div>
   );
 };

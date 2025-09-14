@@ -1,30 +1,23 @@
 import { Router } from "express";
-import { ChallengeProgressService } from "../services/implements/progress.service";
-import { ChallengeProgressController } from "../controllers/implements/progress.controller";
-import { ChallengeProgressRepository } from "../repository/implements/progress.repository";
-import { UserRepository } from "../repository/implements/user.repository";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { PROGRESS_ROUTES } from "../constants/ROUTES/proggress.constants";
+import { container } from "../di/container";
 
 const router = Router();
 
-const challengeProgressController = new ChallengeProgressController(
-  new ChallengeProgressService(
-    new ChallengeProgressRepository(),
-    new UserRepository()
-  )
-);
+const challengeProgressController = container.progressCtrl;
 
 router.use(authMiddleware);
 
-router.post("/", challengeProgressController.createProgress.bind(challengeProgressController));
-router.get("/", challengeProgressController.getAllProgress.bind(challengeProgressController));
-router.get("/:id", challengeProgressController.getProgressById.bind(challengeProgressController));
-router.put("/:id", challengeProgressController.updateProgress.bind(challengeProgressController));
-router.delete("/:id", challengeProgressController.deleteProgress.bind(challengeProgressController));
-router.get("/user/:username", challengeProgressController.getAllProgressByUser.bind(challengeProgressController));
-router.get("/recent/user/:input", challengeProgressController.getRecentProgress.bind(challengeProgressController));
-router.get("/challenge/:challengeId", challengeProgressController.getAllProgressByChallenge.bind(challengeProgressController));
-router.get("/user/heatmap/:userId", challengeProgressController.getHeatmap.bind(challengeProgressController));
-router.get("/user/:userId/challenge/:challengeId", challengeProgressController.getProgressByUserAndChallenge.bind(challengeProgressController));
+router.post(PROGRESS_ROUTES.BASE, challengeProgressController.createProgress.bind(challengeProgressController));
+router.get(PROGRESS_ROUTES.BASE, challengeProgressController.getAllProgress.bind(challengeProgressController));
+router.get(PROGRESS_ROUTES.BY_ID, challengeProgressController.getProgressById.bind(challengeProgressController));
+router.put(PROGRESS_ROUTES.UPDATE, challengeProgressController.updateProgress.bind(challengeProgressController));
+router.delete(PROGRESS_ROUTES.DELETE, challengeProgressController.deleteProgress.bind(challengeProgressController));
+router.get(PROGRESS_ROUTES.BY_USER, challengeProgressController.getAllProgressByUser.bind(challengeProgressController));
+router.get(PROGRESS_ROUTES.RECENT_BY_USER, challengeProgressController.getRecentProgress.bind(challengeProgressController));
+router.get(PROGRESS_ROUTES.BY_CHALLENGE, challengeProgressController.getAllProgressByChallenge.bind(challengeProgressController));
+router.get(PROGRESS_ROUTES.HEATMAP, challengeProgressController.getHeatmap.bind(challengeProgressController));
+router.get(PROGRESS_ROUTES.BY_USER_AND_CHALLENGE, challengeProgressController.getProgressByUserAndChallenge.bind(challengeProgressController));
 
 export default router;

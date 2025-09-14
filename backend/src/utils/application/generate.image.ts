@@ -1,4 +1,4 @@
-import cloudinary from "../config/cloudinary.config";
+import cloudinary from "../../config/cloudinary.config";
 
 export const generateSignedImageUrl = (
   publicId: string,

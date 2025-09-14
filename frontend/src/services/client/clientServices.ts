@@ -11,14 +11,17 @@ export const register = async (userData: RegisterIF) => {
 };
 export const login = async (userData: LoginIF) => {
   const response = await axiosInstance.post("/auth/login", userData);
-  if (!response.data.isVerified) {
-    localStorage.setItem("userEmail", response.data.email);
+  console.log(`Login Response: ${JSON.stringify(response.data)}`);
+  const data = response.data.data;
+  if (!data.isVerified) {
+    localStorage.setItem("userEmail", data.email);
   } else {
     localStorage.setItem("user", "true");
-    const accessToken = response.data.accessToken;
+    const accessToken = data.accessToken;
     localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("token", accessToken);
   }
-  return response.data;
+  return data;
 };
 export const checkUser = async (userData: CheckUserIF) => {
   const response = await axiosInstance.post("/users/check-user", userData);
@@ -386,7 +389,8 @@ export const getMyProfile = async () => {
   try {
     const response = await axiosInstance.get("/users/me");
 
-    return response.data;
+
+    return response.data.data;
   } catch (err) {
     console.error("Error fetching user profile:", err);
     throw err;
@@ -457,12 +461,12 @@ export const getItems = async (type: string,search:string,page:number,limit:numb
 
 export const getUser = async (username: string) => {
   const response = await axiosInstance.get(`/users/${username}`);
-  return response.data;
+  return response.data.data;
 };
 
 export const getUsers = async (search: string,page: number,limit: number) => {
   const response = await axiosInstance.get(`/users?search=${search}&page=${page}&limit=${limit}`);
-  return response.data;
+  return response.data.data;
 }
 
 export const getUserProgress = async (username: string) => {

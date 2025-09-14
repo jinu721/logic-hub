@@ -1,22 +1,20 @@
 import express from "express";
-import { MembershipController } from "../controllers/implements/membership.controller";
-import { MembershipService } from "../services/implements/membership.service";
-import { MembershipRepository } from "../repository/implements/membership.repository";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { MEMBERSHIP_ROUTES } from "../constants/ROUTES/membership.constants";
+import { container } from "../di/container";
 
 const router = express.Router();
 
-const membershipController = new MembershipController(
-  new MembershipService(new MembershipRepository())
-);
+const membershipController = container.membershipCtrl;
 
 router.use(authMiddleware);
 
-router.post("/", membershipController.createMembership.bind(membershipController));
-router.get("/", membershipController.getAllMemberships.bind(membershipController));
-router.get("/active", membershipController.getTwoActiveMemberships.bind(membershipController));
-router.get("/:id", membershipController.getMembershipById.bind(membershipController));
-router.put("/:id", membershipController.updateMembership.bind(membershipController));
-router.delete("/:id", membershipController.deleteMembership.bind(membershipController));
+router.post(MEMBERSHIP_ROUTES.BASE, membershipController.createMembership.bind(membershipController));
+router.get(MEMBERSHIP_ROUTES.GET_ALL, membershipController.getAllMemberships.bind(membershipController));
+router.get(MEMBERSHIP_ROUTES.ACTIVE, membershipController.getTwoActiveMemberships.bind(membershipController));
+router.get(MEMBERSHIP_ROUTES.BY_ID, membershipController.getMembershipById.bind(membershipController));
+router.put(MEMBERSHIP_ROUTES.UPDATE, membershipController.updateMembership.bind(membershipController));
+router.delete(MEMBERSHIP_ROUTES.DELETE, membershipController.deleteMembership.bind(membershipController));
+
 
 export default router;

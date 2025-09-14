@@ -18,13 +18,13 @@ const ForgotForm: React.FC<ForgotFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-[var(--logichub-secondary-text)] mb-2">
           Email
         </label>
         <div className="relative">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--logichub-muted-text)] w-5 h-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -37,9 +37,9 @@ const ForgotForm: React.FC<ForgotFormProps> = ({
             name="email"
             value={email}
             onChange={handleChange}
-            className={`w-full pl-10 pr-12 py-3 bg-gray-900/60 border rounded-lg ${
-              error ? "border-red-500" : "border-gray-700"
-            } focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white`}
+            className={`w-full pl-10 pr-12 py-3 bg-[var(--logichub-secondary-bg)] border rounded-lg ${
+              error ? "border-red-500" : "border-[var(--logichub-border)]"
+            } focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] text-[var(--logichub-primary-text)]`}
             placeholder="Enter your email"
             required
           />
@@ -50,7 +50,7 @@ const ForgotForm: React.FC<ForgotFormProps> = ({
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full curosor-pointer py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full cursor-pointer py-3 bg-[var(--logichub-btn)] text-[var(--logichub-btn-text)] rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
       >
         {isLoading ? "Sending..." : "Send Reset Link"}
       </button>

@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
 import { IMessageService } from "../../services/interfaces/message.service.interface";
 import { HttpStatus } from "../../constants/http.status";
-import { uploadFile } from "../../utils/cloudnary.store";
+import { uploadFile } from "../../utils/application/cloudnary.store";
+import { IMessageController } from "../interfaces/message.controller.interface";
 
-export class MessageController {
-  constructor(private messageService: IMessageService) {}
+export class MessageController implements IMessageController {
+  constructor(private readonly _messageSvc: IMessageService) {}
 
 
   getMessages = async (req: Request, res: Response) => {
     try {
       const { limit, ...query } = req.query;
-      const messages = await this.messageService.getMessages(Number(limit), query);
+      const messages = await this._messageSvc.getMessages(Number(limit), query);
       res.status(HttpStatus.OK).json({ success: true, data: messages });
     } catch (err) {
       console.log(err);
@@ -21,7 +22,7 @@ export class MessageController {
   editMessage = async (req: Request, res: Response) => {
     try {
       const { messageId, newText } = req.body;
-      const result = await this.messageService.editMessage(messageId, newText);
+      const result = await this._messageSvc.editMessage(messageId, newText);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (err) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to edit message" });
@@ -31,7 +32,7 @@ export class MessageController {
   deleteMessage = async (req: Request, res: Response) => {
     try {
       const { messageId } = req.params;
-      const result = await this.messageService.deleteMessage(messageId);
+      const result = await this._messageSvc.deleteMessage(messageId);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (err) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to delete message" });
@@ -41,7 +42,7 @@ export class MessageController {
   addReaction = async (req: Request, res: Response) => {
     try {
       const { messageId, userId, reaction } = req.body;
-      const result = await this.messageService.addReaction(messageId, userId, reaction);
+      const result = await this._messageSvc.addReaction(messageId, userId, reaction);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (err) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to add reaction" });
@@ -51,7 +52,7 @@ export class MessageController {
   removeReaction = async (req: Request, res: Response) => {
     try {
       const { messageId, userId, reaction } = req.body;
-      const result = await this.messageService.removeReaction(messageId, userId, reaction);
+      const result = await this._messageSvc.removeReaction(messageId, userId, reaction);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (err) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to remove reaction" });
@@ -61,7 +62,7 @@ export class MessageController {
   markAsSeen = async (req: Request, res: Response) => {
     try {
       const { messageId, userId } = req.body;
-      const result = await this.messageService.markAsSeen(messageId, userId);
+      const result = await this._messageSvc.markAsSeen(messageId, userId);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (err) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to mark as seen" });
@@ -71,7 +72,7 @@ export class MessageController {
   getMessageById = async (req: Request, res: Response) => {
     try {
       const { messageId } = req.params;
-      const result = await this.messageService.getMessageById(messageId);
+      const result = await this._messageSvc.getMessageById(messageId);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (err) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to get message" });

@@ -4,18 +4,15 @@ import { ILevelController } from "../interfaces/level.controller.interface";
 import { HttpStatus } from "../../constants/http.status";
 
 export class LevelController implements ILevelController {
-  private levelService: ILevelService;
 
-  constructor(levelService: ILevelService) {
-    this.levelService = levelService;
-  }
+  constructor(private readonly _levelSvc: ILevelService) {}
 
   async updateUserLevel(req: Request, res: Response): Promise<void> {
     const userId = req.params.userId;
     const xp = req.body.xpPoints;
 
     try {
-      const userLevel = await this.levelService.updateUserLevel(userId, xp);
+      const userLevel = await this._levelSvc.updateUserLevel(userId, xp);
       if (!userLevel) {
         res
           .status(HttpStatus.NOT_FOUND)
@@ -36,7 +33,7 @@ export class LevelController implements ILevelController {
     const levelData = req.body;
 
     try {
-      const level = await this.levelService.createLevel(levelData);
+      const level = await this._levelSvc.createLevel(levelData);
       res
         .status(HttpStatus.CREATED)
         .json({ message: "Level created successfully", level });
@@ -54,7 +51,7 @@ export class LevelController implements ILevelController {
     try {
       const page = req.query.page;
       const limit = req.query.limit;
-      const levels = await this.levelService.getAllLevels(Number(page),Number(limit));
+      const levels = await this._levelSvc.getAllLevels(Number(page),Number(limit));
       res.status(HttpStatus.OK).json(levels);
     } catch (err) {
       console.log(err);
@@ -70,7 +67,7 @@ export class LevelController implements ILevelController {
     const { id } = req.params;
 
     try {
-      const level = await this.levelService.getLevelById(id);
+      const level = await this._levelSvc.getLevelById(id);
       if (!level) {
         res.status(404).json({ message: "Level not found" });
         return;
@@ -90,7 +87,7 @@ export class LevelController implements ILevelController {
     const levelData = req.body;
 
     try {
-      const level = await this.levelService.updateLevel(id, levelData);
+      const level = await this._levelSvc.updateLevel(id, levelData);
       if (!level) {
         res.status(404).json({ message: "Level not found" });
         return;
@@ -110,7 +107,7 @@ export class LevelController implements ILevelController {
     const { id } = req.params;
 
     try {
-      const level = await this.levelService.deleteLevel(id);
+      const level = await this._levelSvc.deleteLevel(id);
       if (!level) {
         res.status(404).json({ message: "Level not found" });
         return;

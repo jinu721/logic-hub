@@ -1,5 +1,5 @@
-import { env } from "../config/env";
-import { transporter } from "../config/mailer.config";
+import { env } from "../../config/env";
+import { transporter } from "../../config/mailer.config";
 
 type EmailType = "otp" | "link" | "announcement";
 

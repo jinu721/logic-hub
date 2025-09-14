@@ -7,4 +7,7 @@ export interface INotificationController {
   updateNotification(req: Request, res: Response): Promise<void>;
   deleteNotification(req: Request, res: Response): Promise<void>;
   getNotificationByUser(req: Request, res: Response): Promise<void>;
+  markAllAsRead(req: Request, res: Response): Promise<void>;
+  deleteAllNotifications(req: Request, res: Response): Promise<void>;
+  toggleUserNotification(req: Request, res: Response): Promise<void>;
 }

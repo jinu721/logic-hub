@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { ISolutionController } from "../interfaces/solution.controller.interface";
 import { HttpStatus } from "../../constants/http.status";
-import { SolutionService } from "../../services/implements/solution.service";
+import { ISolutionService } from "../../services/interfaces/solution.service.interface";
 
 export class SolutionController implements ISolutionController {
-  constructor(private service: SolutionService) {}
+  constructor(private readonly _solutionSvc: ISolutionService) {}
 
   async create(req: Request, res: Response): Promise<void> {
     try {
@@ -15,7 +15,7 @@ export class SolutionController implements ISolutionController {
         return;
       }
 
-      const result = await this.service.addSolution({
+      const result = await this._solutionSvc.addSolution({
         ...req.body,
         user: userId,
       });
@@ -37,7 +37,7 @@ export class SolutionController implements ISolutionController {
         sortBy = "likes",
       } = req.query;
 
-      const result = await this.service.getSolutionsByChallenge(
+      const result = await this._solutionSvc.getSolutionsByChallenge(
         req.params.challengeId,
         search.toString(),
         parseInt(page.toString()),
@@ -57,7 +57,7 @@ export class SolutionController implements ISolutionController {
 
   async getByUser(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.service.getSolutionsByUser(req.params.userId);
+      const result = await this._solutionSvc.getSolutionsByUser(req.params.userId);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (error) {
       console.error("Get By User Error:", error);
@@ -76,7 +76,7 @@ export class SolutionController implements ISolutionController {
         return;
       }
 
-      const result = await this.service.like(req.params.solutionId, userId);
+      const result = await this._solutionSvc.like(req.params.solutionId, userId);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (error) {
       console.error("Like Solution Error:", error);
@@ -95,7 +95,7 @@ export class SolutionController implements ISolutionController {
         return;
       }
 
-      const result = await this.service.comment(userId, req.body.data);
+      const result = await this._solutionSvc.comment(userId, req.body.data);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (error) {
       console.error("Comment Error:", error);
@@ -107,7 +107,7 @@ export class SolutionController implements ISolutionController {
 
   async deleteComment(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.service.deleteComment(
+      const result = await this._solutionSvc.deleteComment(
         req.params.solutionId,
         req.params.commentId
       );
@@ -122,7 +122,7 @@ export class SolutionController implements ISolutionController {
 
   async update(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.service.update(req.params.solutionId, req.body);
+      const result = await this._solutionSvc.update(req.params.solutionId, req.body);
       res.status(HttpStatus.OK).json({ success: true, data: result });
     } catch (error) {
       console.error("Update Solution Error:", error);
@@ -134,7 +134,7 @@ export class SolutionController implements ISolutionController {
 
   async delete(req: Request, res: Response): Promise<void> {
     try {
-      await this.service.delete(req.params.solutionId);
+      await this._solutionSvc.delete(req.params.solutionId);
       res.status(HttpStatus.NO_CONTENT).send();
     } catch (error) {
       console.error("Delete Solution Error:", error);

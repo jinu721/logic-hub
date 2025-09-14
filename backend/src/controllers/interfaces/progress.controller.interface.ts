@@ -6,6 +6,7 @@ export interface IChallengeProgressController {
   getProgressById(req: Request, res: Response): Promise<void>;
   updateProgress(req: Request, res: Response): Promise<void>;
   deleteProgress(req: Request, res: Response): Promise<void>;
+  getRecentProgress(req: Request, res: Response): Promise<void>;
   getAllProgressByUser(req: Request, res: Response): Promise<void>;
   getAllProgressByChallenge(req: Request, res: Response): Promise<void>;
   getAllProgress(req: Request, res: Response): Promise<void>;

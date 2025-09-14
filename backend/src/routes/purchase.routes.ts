@@ -1,27 +1,18 @@
 import { Router } from "express";
-import { PurchaseController } from "../controllers/implements/purchase.controller";
-import { PurchaseService } from "../services/implements/purchase.service";
-import { PurchaseRepository } from "../repository/implements/purchase.repository";
-import { MembershipRepository } from "../repository/implements/membership.repository";
-import { UserRepository } from "../repository/implements/user.repository";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { PURCHASE_ROUTES } from "../constants/ROUTES/purchase.constants";
+import { container } from "../di/container";
 
 const router = Router();
 
-const purchaseController = new PurchaseController(
-  new PurchaseService(
-    new PurchaseRepository(),
-    new MembershipRepository(),
-    new UserRepository()
-  )
-);
+const purchaseController = container.purchaseCtrl;
 
 router.use(authMiddleware);
 
-router.post('/create-order', purchaseController.createOrder.bind(purchaseController));
-router.post('/', purchaseController.createMembershipPurchase.bind(purchaseController));
-router.get('/history/:id', purchaseController.getPlanHistoryById.bind(purchaseController));
-router.get('/history', purchaseController.getPlanHistory.bind(purchaseController));
-router.get('/:userId', purchaseController.getUserMembershipHistory.bind(purchaseController));
+router.post(PURCHASE_ROUTES.CREATE_ORDER, purchaseController.createOrder.bind(purchaseController));
+router.post(PURCHASE_ROUTES.CREATE_MEMBERSHIP, purchaseController.createMembershipPurchase.bind(purchaseController));
+router.get(PURCHASE_ROUTES.HISTORY_BY_ID, purchaseController.getPlanHistoryById.bind(purchaseController));
+router.get(PURCHASE_ROUTES.HISTORY, purchaseController.getPlanHistory.bind(purchaseController));
+router.get(PURCHASE_ROUTES.USER_HISTORY, purchaseController.getUserMembershipHistory.bind(purchaseController));
 
 export default router;

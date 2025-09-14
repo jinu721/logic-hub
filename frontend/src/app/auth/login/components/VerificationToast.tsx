@@ -2,18 +2,20 @@ import React from "react";
 
 interface ToastProps {
   onClose: () => void;
-  onAction: () => void;
 }
 
-const VerificationToast: React.FC<ToastProps> = ({ onClose, onAction }) => {
+const VerificationToast: React.FC<ToastProps> = ({ onClose}) => {
   return (
-    <div className="fixed bottom-4 right-4 z-50 animate-slideIn">
-      <div className="bg-gray-900 border border-gray-700 rounded-lg shadow-2xl p-4 max-w-sm w-full backdrop-blur-sm">
-        <div className="flex items-start space-x-3">
+    <div className="fixed bottom-6 right-6 z-50 animate-slideIn">
+      <div className="bg-[var(--logichub-secondary-bg)]/80 border border-[var(--logichub-border)] backdrop-blur-lg rounded-2xl shadow-2xl p-5 max-w-sm w-full relative overflow-hidden">
+        <div className="absolute -top-6 -right-6 w-20 h-20 bg-[var(--logichub-accent)]/20 rounded-full blur-2xl animate-pulseSlow"></div>
+        <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-[var(--logichub-accent-secondary)]/20 rounded-full blur-2xl animate-pulseSlow"></div>
+
+        <div className="flex items-start space-x-4 relative z-10">
           <div className="flex-shrink-0 mt-0.5">
-            <div className="w-8 h-8 bg-amber-500/20 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-[var(--logichub-accent)]/20 rounded-full flex items-center justify-center shadow-lg">
               <svg
-                className="w-4 h-4 text-amber-400"
+                className="w-5 h-5 text-[var(--logichub-accent)]"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -30,12 +32,12 @@ const VerificationToast: React.FC<ToastProps> = ({ onClose, onAction }) => {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-white">
+              <h4 className="text-sm font-semibold text-[var(--logichub-primary-text)]">
                 Email Verification Required
               </h4>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-white transition-colors ml-2"
+                className="text-[var(--logichub-muted-text)] hover:text-[var(--logichub-primary-text)] transition-colors ml-2"
                 aria-label="Close toast"
               >
                 <svg
@@ -53,21 +55,10 @@ const VerificationToast: React.FC<ToastProps> = ({ onClose, onAction }) => {
                 </svg>
               </button>
             </div>
-            <p className="text-sm text-gray-300 mt-1">
+            <p className="text-sm text-[var(--logichub-secondary-text)] mt-1">
               Check your email for a verification link to complete your login.
             </p>
-
-            <button
-              onClick={onAction}
-              className="mt-3 text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors border-b border-transparent hover:border-cyan-400"
-            >
-              Got it
-            </button>
           </div>
-        </div>
-
-        <div className="mt-3 w-full bg-gray-700 rounded-full h-1 overflow-hidden">
-          <div className="h-full bg-cyan-500 rounded-full animate-shrink" />
         </div>
       </div>
     </div>

@@ -1,264 +1,286 @@
-import { Request, Response } from "express";
-import { UserService } from "../../services/implements/user.service";
-import { HttpStatus } from "../../constants/http.status";
-import jwt from "jsonwebtoken";
-import { IUserController } from "../interfaces/user.controller.interface";
-import redisClient from "../../config/redis.config";
-import { TokenService } from "../../services/implements/token.service";
-import { env } from "../../config/env";
+  import { Request, Response } from "express";
+  import { HttpStatus } from "../../constants/http.status";
+  import jwt from "jsonwebtoken";
+  import { IUserController } from "../interfaces/user.controller.interface";
+  import { env } from "../../config/env";
+  import { IUserService } from "../../services/interfaces/user.services.interface";
+  import { ITokenService } from "../../services/interfaces/token.service.interface";
+  import { sendError, sendSuccess } from "../../utils/application/response.util";
+  import { RedisHelper } from "../../utils/database/redis.util";
 
-export class UserController implements IUserController {
-  constructor(
-    private userService: UserService,
-    private tokenService: TokenService
-  ) {}
+  // fetching controller 
+  //
 
-  async findUser(req: Request, res: Response): Promise<void> {
-    try {
-      const { type, value } = req.body;
-      const user = await this.userService.findByEmailOrUsername(value);
-      const status = user ? true : false;
-      res.status(HttpStatus.OK).json({ type, status });
-    } catch (err) {
-      console.log(`Error Getting User: ${err}`);
-      res.status(HttpStatus.OK).json({
-        message:
-          err instanceof Error ? err.message : "An Uxpected Error Occured",
-      });
+  export class UserController implements IUserController {
+    constructor(
+      private readonly _userSvc: IUserService,
+      private readonly _tokenSvc: ITokenService
+    ) {}
+
+    async findUser(req: Request, res: Response): Promise<void> {
+      try {
+        const { type, value } = req.body;
+        if (!type || !value) {
+          sendError(res, HttpStatus.BAD_REQUEST, "Type and value are required");
+          return;
+        }
+        const user = await this._userSvc.findByEmailOrUsername(value);
+        const status = user ? true : false;
+        sendSuccess(res, HttpStatus.OK, { user, status });
+      } catch (err) {
+        sendError(res, HttpStatus.OK, err);
+      }
     }
-  }
 
-  async getUser(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).user?.userId;
+    async getUser(req: Request, res: Response): Promise<void> {
+      try {
+        const userId = (req as any).user?.userId;
 
-      if (!userId) {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
-        return;
+        if (!userId) {
+          sendError(res, HttpStatus.UNAUTHORIZED, "Unauthorized");
+          return;
+        }
+
+        const { username } = req.params as { username: string };
+        const user = await this._userSvc.findUserByName(username, userId);
+        if (!user) {
+          sendError(res, HttpStatus.NOT_FOUND, "User Not Found");
+          return;
+        }
+        sendSuccess(res, HttpStatus.OK, { user });
+      } catch (err) {
+        console.log(`Error Getting User: ${err}`);
+        sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Error Getting User");
       }
-
-      const { username } = req.params as { username: string };
-      const user = await this.userService.findUserByName(username, userId);
-      res.status(HttpStatus.OK).json({ user });
-    } catch (err) {
-      console.log(`Error Getting User: ${err}`);
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: "Error Getting User" });
     }
-  }
 
-  async cancelMembership(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).user?.userId;
+    async cancelMembership(req: Request, res: Response): Promise<void> {
+      try {
+        const userId = (req as any).user?.userId;
 
-      if (!userId) {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
-        return;
+        if (!userId) {
+          sendError(res, HttpStatus.UNAUTHORIZED, "Unauthorized");
+          return;
+        }
+
+        const user = await this._userSvc.cancelMembership(userId);
+        if (!user) {
+          sendError(res, HttpStatus.NOT_FOUND, "User Not Found");
+          return;
+        }
+        sendSuccess(res, HttpStatus.OK, { user });
+      } catch (err) {
+        sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Error Getting User");
       }
-
-      const user = await this.userService.cancelMembership(userId);
-      res.status(HttpStatus.OK).json({ user });
-    } catch (err) {
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: "Error Getting User" });
     }
-  }
 
-  async getCurrentUser(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).user?.userId;
+    async getCurrentUser(req: Request, res: Response): Promise<void> {
+      try {
+        const userId = (req as any).user?.userId;
 
-      if (!userId) {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
-        return;
+        if (!userId) {
+          sendError(res, HttpStatus.UNAUTHORIZED, "Unauthorized");
+          return;
+        }
+
+        const user = await this._userSvc.findUserById(userId);
+
+        if (!user) {
+          sendError(res, HttpStatus.NOT_FOUND, "User Not Found");
+          return;
+        }
+
+        sendSuccess(res, HttpStatus.OK, { user, status: true });
+      } catch (err) {
+        console.log("Error Getting User:", err);
+        sendError(res, HttpStatus.UNAUTHORIZED, "Invalid or expired token");
       }
-
-      const user = await this.userService.findUserById(userId);
-
-      if (!user) {
-        res.status(HttpStatus.NOT_FOUND).json({ message: "User Not Found" });
-        return;
-      }
-
-      res.status(HttpStatus.OK).json({ user, status: true });
-    } catch (err) {
-      console.log("Error Getting User:", err);
-      res
-        .status(HttpStatus.UNAUTHORIZED)
-        .json({ message: "Invalid or expired token" });
     }
-  }
-  async updateCurrentUser(req: Request, res: Response): Promise<void> {
-    try {
-      const token = req.cookies.accessToken;
 
-      if (!token) {
-        res
-          .status(HttpStatus.UNAUTHORIZED)
-          .json({ message: "No token found in cookies" });
-        return;
+    async updateCurrentUser(req: Request, res: Response): Promise<void> {
+      try {
+        const token = req.cookies.accessToken;
+
+        if (!token) {
+          sendError(res, HttpStatus.UNAUTHORIZED, "No token found in cookies");
+          return;
+        }
+
+        const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET as string) as {
+          userId: string;
+        };
+
+        let avatar = null;
+        let banner = null;
+
+        if (req.body.userData.avatar) {
+          avatar = req.body.userData.avatar;
+        }
+        if (req.body.userData.banner) {
+          banner = req.body.userData.banner;
+        }
+
+        const user = await this._userSvc.findUserByIdAndUpdate(decoded.userId, {
+          ...req.body.userData,
+          avatar,
+          banner,
+        });
+        sendSuccess(res, HttpStatus.OK, { user }, "User updated successfully");
+      } catch (err) {
+        console.error("Token Error:", err);
+        sendError(res, HttpStatus.UNAUTHORIZED, "Invalid or expired token");
       }
-
-      const decoded = jwt.verify(
-        token,
-        env.ACCESS_TOKEN_SECRET as string
-      ) as { userId: string };
-
-      let avatar = null;
-      let banner = null;
-
-      if (req.body.userData.avatar) {
-        avatar = req.body.userData.avatar;
-      }
-      if (req.body.userData.banner) {
-        banner = req.body.userData.banner;
-      }
-
-      console.log(avatar, banner);
-
-      const user = await this.userService.findUserByIdAndUpdate(
-        decoded.userId,
-        { ...req.body.userData, avatar, banner }
-      );
-      res.status(HttpStatus.OK).json({ user });
-    } catch (err) {
-      console.error("Token Error:", err);
-      res
-        .status(HttpStatus.UNAUTHORIZED)
-        .json({ message: "Invalid or expired token" });
     }
-  }
-  async getUsers(req: Request, res: Response): Promise<void> {
-    try {
-      const { search, page, limit } = req.query;
-      const users = await this.userService.findUsers(
-        search as string,
-        Number(page),
-        Number(limit)
-      );
-      res.status(HttpStatus.OK).json({ users });
-    } catch (err) {
-      console.log(`Get Users Error : ${err}`);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message:
-          err instanceof Error ? err.message : "An Unexpected Error Occured",
-      });
+
+    async getUsers(req: Request, res: Response): Promise<void> {
+      try {
+        const { search, page, limit } = req.query;
+        if (!search || !page || !limit) {
+          sendError(
+            res,
+            HttpStatus.BAD_REQUEST,
+            "Missing required query parameters"
+          );
+          return;
+        }
+        const users = await this._userSvc.findUsers(
+          search as string,
+          Number(page),
+          Number(limit)
+        );
+        sendSuccess(res, HttpStatus.OK, { users });
+      } catch (err) {
+        sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "Error fetching users");
+      }
     }
-  }
 
-  async toggleBan(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = req.params.userId;
-      const result = await this.userService.toggleBanStatus(userId);
+    async toggleBan(req: Request, res: Response): Promise<void> {
+      try {
+        const userId = req.params.userId;
+        if (!userId) {
+          sendError(res, HttpStatus.BAD_REQUEST, "User ID is required");
+          return;
+        }
+        const result = await this._userSvc.toggleBanStatus(userId);
 
-      if (result.isBanned) {
-        const tokenData = await this.tokenService.getTokenByUserId(userId);
-        const token = tokenData?.accessToken;
+        if (result.isBanned) {
+          const tokenData = await this._tokenSvc.getTokenByUserId(userId);
+          const token = tokenData?.accessToken;
 
-        if (token) {
-          const decoded = jwt.decode(token) as jwt.JwtPayload;
+          if (token) {
+            const decoded = jwt.decode(token) as jwt.JwtPayload;
 
-          if (decoded && decoded.exp) {
-            const expiry = decoded.exp - Math.floor(Date.now() / 1000);
-            redisClient.setEx(`blacklist_${token}`, expiry, "true");
+            if (decoded && decoded.exp) {
+              const expiry = decoded.exp - Math.floor(Date.now() / 1000);
+              RedisHelper.set(`blacklist_${token}`, "true", expiry);
+            }
           }
         }
+        sendSuccess(res, HttpStatus.OK, { result }, "User ban status toggled");
+      } catch (err) {
+        sendError(
+          res,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          "Error toggling user ban status"
+        );
       }
-      res.status(HttpStatus.OK).json({
-        message: result.isBanned
-          ? "User has been banned."
-          : "User has been unbanned.",
-        status: true,
-      });
-    } catch (err) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message:
-          err instanceof Error ? err.message : "An unexpected error occurred",
-      });
     }
-  }
 
-  async giftItem(req: Request, res: Response): Promise<void> {
-    try {
-      const { userId, type } = req.params;
-      const { itemId } = req.body;
+    async giftItem(req: Request, res: Response): Promise<void> {
+      try {
+        const { userId, type } = req.params;
+        const { itemId } = req.body;
 
-      const result = await this.userService.giftItem(userId, itemId, type);
-      res
-        .status(HttpStatus.OK)
-        .json({ message: `Gifted ${type} successfully`, result });
-    } catch (err: any) {
-      console.log(`Gift Item Error : ${err}`);
-      res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
-    }
-  }
-  async resendOtp(req: Request, res: Response): Promise<void> {
-    try {
-      const { email } = req.body;
-      console.log(req.body);
-      const result = await this.userService.resendOtp(email);
-      res
-        .status(HttpStatus.OK)
-        .json({ message: `OTP Sended Successfully`, result });
-    } catch (err: any) {
-      console.log(err);
-      res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
-    }
-  }
+        if (!itemId || !userId || !type) {
+          sendError(
+            res,
+            HttpStatus.BAD_REQUEST,
+            "Item ID, User ID and Type are required"
+          );
+          return;
+        }
 
-  async claimDailyReward(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).user?.userId;
+        const result = await this._userSvc.giftItem(userId, itemId, type);
 
-      if (!userId) {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: "Unauthorized" });
-        return;
+        if (!result) {
+          sendError(res, HttpStatus.BAD_REQUEST, "Error gifting item");
+        }
+        sendSuccess(
+          res,
+          HttpStatus.OK,
+          { result },
+          `Gifted ${type} successfully`
+        );
+      } catch (err: any) {
+        sendError(res, HttpStatus.BAD_REQUEST, err.message);
       }
-
-      const updatedUser = await this.userService.claimDailyReward(userId);
-
-      res.status(HttpStatus.OK).json({
-        message: "Daily reward claimed!",
-        dailyRewardDay: updatedUser.dailyRewardDay,
-        lastRewardClaimDate: updatedUser.lastRewardClaimDate,
-      });
-    } catch (error: any) {
-      console.log(error);
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: error.message || "Error claiming reward" });
     }
-  }
-  async verifyAdmin(req: Request, res: Response): Promise<void> {
-    try {
-      const token = req.headers.authorization?.split(" ")[1];
-
-      console.log("Req.headers :- ",token);
-
-      if (!token) {
-        res.status(HttpStatus.BAD_REQUEST).json({ message: "Token missing" });
-        return;
-      }
-
-      const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET!) as {
-        role: string;
-      };
-
-      if (!decoded || decoded.role !== "admin") {
+    async resendOtp(req: Request, res: Response): Promise<void> {
+      try {
+        const { email } = req.body;
+        console.log(req.body);
+        const result = await this._userSvc.resendOtp(email);
         res
-          .status(HttpStatus.FORBIDDEN)
-          .json({ message: "Only admins allowed", approved: false });
-        return;
+          .status(HttpStatus.OK)
+          .json({ message: `OTP Sended Successfully`, result });
+      } catch (err: any) {
+        console.log(err);
+        res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
       }
+    }
 
-      res
-        .status(HttpStatus.OK)
-        .json({ message: "Admin verified successfully", approved: true });
-    } catch (err: any) {
-      console.log(`Verify Admin Error: ${err}`);
-      res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
+    async claimDailyReward(req: Request, res: Response): Promise<void> {
+      try {
+        const userId = (req as any).user?.userId;
+
+        if (!userId) {
+          sendError(res, HttpStatus.BAD_REQUEST, "User ID is required");
+          return;
+        }
+
+        const updatedUser = await this._userSvc.claimDailyReward(userId);
+
+        if (!updatedUser) {
+          sendError(res, HttpStatus.BAD_REQUEST, "Error claiming daily reward");
+          return;
+        }
+
+        sendSuccess(
+          res,
+          HttpStatus.OK,
+          {
+            message: "Daily reward claimed!",
+            dailyRewardDay: updatedUser.dailyRewardDay,
+            lastRewardClaimDate: updatedUser.lastRewardClaimDate,
+          },
+          "Daily reward claimed successfully"
+        );
+      } catch (error: any) {
+        sendError(res, HttpStatus.BAD_REQUEST, error.message);
+      }
+    }
+
+    async verifyAdmin(req: Request, res: Response): Promise<void> {
+      try {
+        const token = req.headers.authorization?.split(" ")[1];
+
+        if (!token) {
+          sendError(res, HttpStatus.BAD_REQUEST, "Token missing");
+          return;
+        }
+
+        const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET!) as {
+          role: string;
+        };
+
+        if (!decoded || decoded.role !== "admin") {
+          sendError(res, HttpStatus.FORBIDDEN, "Only admins allowed");
+          return;
+        }
+
+        sendSuccess(res, HttpStatus.OK, { message: "Admin verified successfully", approved: true });
+      } catch (err: any) {
+        sendError(res, HttpStatus.BAD_REQUEST, err.message);
+      }
     }
   }
-}

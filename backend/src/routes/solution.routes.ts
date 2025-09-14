@@ -1,24 +1,22 @@
 import { Router } from "express";
-import { SolutionController } from "../controllers/implements/solution.controller";
-import { SolutionService } from "../services/implements/solution.service";
-import { SolutionRepository } from "../repository/implements/solution.repository";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { SOLUTION_ROUTES } from "../constants/ROUTES/solution.constants";
+import { container } from "../di/container";
 
 const router = Router();
 
-const solutionController = new SolutionController(
-  new SolutionService(new SolutionRepository())
-);
+const solutionController = container.solutionCtrl;
 
 router.use(authMiddleware);
 
-router.post("/", solutionController.create.bind(solutionController));
-router.get("/challenge/:challengeId", solutionController.getByChallenge.bind(solutionController));
-router.get("/user/:userId", solutionController.getByUser.bind(solutionController));
-router.post("/:solutionId/like", solutionController.like.bind(solutionController));
-router.post("/:solutionId/comment", solutionController.comment.bind(solutionController));
-router.delete("/:solutionId/comment/:commentId", solutionController.deleteComment.bind(solutionController));
-router.put("/:solutionId", solutionController.update.bind(solutionController));
-router.delete("/:solutionId", solutionController.delete.bind(solutionController));
+router.post(SOLUTION_ROUTES.BASE, solutionController.create.bind(solutionController));
+router.get(SOLUTION_ROUTES.BY_CHALLENGE, solutionController.getByChallenge.bind(solutionController));
+router.get(SOLUTION_ROUTES.BY_USER, solutionController.getByUser.bind(solutionController));
+router.post(SOLUTION_ROUTES.LIKE, solutionController.like.bind(solutionController));
+router.post(SOLUTION_ROUTES.COMMENT, solutionController.comment.bind(solutionController));
+router.delete(SOLUTION_ROUTES.DELETE_COMMENT, solutionController.deleteComment.bind(solutionController));
+router.put(SOLUTION_ROUTES.UPDATE, solutionController.update.bind(solutionController));
+router.delete(SOLUTION_ROUTES.DELETE, solutionController.delete.bind(solutionController));
+
 
 export default router;

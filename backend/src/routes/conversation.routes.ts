@@ -1,31 +1,22 @@
 import express from "express";
-import { ConversationController } from "../controllers/implements/conversation.controller";
-import { ConversationService } from "../services/implements/conversation.service";
-import { ConversationRepository } from "../repository/implements/conversation.repository";
-import { GroupRepository } from "../repository/implements/group.repository";
-import { UserRepository } from "../repository/implements/user.repository";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { CONVERSATION_ROUTES } from "../constants/ROUTES/conversation.constants";
+import { container } from "../di/container";
 
 const router = express.Router();
 
-const conversationController = new ConversationController(
-  new ConversationService(
-    new ConversationRepository(),
-    new GroupRepository(),
-    new UserRepository()
-  )
-);
+const conversationController = container.conversationCtrl;
 
 router.use(authMiddleware);
 
-router.get("/by-group/:groupId", conversationController.findConversationByGroup.bind(conversationController));
-router.get("/user/:id/data", conversationController.findConversationByUser.bind(conversationController));
-router.get("/:userA/:userB", conversationController.findOneToOne.bind(conversationController));
-router.post("/", conversationController.createOneToOne.bind(conversationController));
-router.get("/:conversationId", conversationController.findConversation.bind(conversationController));
+router.get(CONVERSATION_ROUTES.BY_GROUP, conversationController.findConversationByGroup.bind(conversationController));
+router.get(CONVERSATION_ROUTES.USER_DATA, conversationController.findConversationByUser.bind(conversationController));
+router.get(CONVERSATION_ROUTES.ONE_TO_ONE, conversationController.findOneToOne.bind(conversationController));
+router.post(CONVERSATION_ROUTES.CREATE_ONE_TO_ONE, conversationController.createOneToOne.bind(conversationController));
+router.get(CONVERSATION_ROUTES.FIND_CONVERSATION, conversationController.findConversation.bind(conversationController));
 
-router.post("/typing", conversationController.setTypingUser.bind(conversationController));
-router.delete("/typing", conversationController.removeTypingUser.bind(conversationController));
-router.get("/typing/:conversationId", conversationController.getTypingUsers.bind(conversationController));
+router.post(CONVERSATION_ROUTES.TYPING.SET, conversationController.setTypingUser.bind(conversationController));
+router.delete(CONVERSATION_ROUTES.TYPING.REMOVE, conversationController.removeTypingUser.bind(conversationController));
+router.get(CONVERSATION_ROUTES.TYPING.GET_USERS, conversationController.getTypingUsers.bind(conversationController));
 
 export default router;

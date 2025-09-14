@@ -1,12 +1,12 @@
 import React, { FC, ChangeEvent, FormEvent } from "react";
 
 interface FormData {
-  email: string;
+  emailOrUsername: string;
   password: string;
 }
 
 interface FormErrors {
-  email?: string;
+  emailOrUsername?: string;
   password?: string;
 }
 
@@ -32,13 +32,13 @@ const LoginForm: FC<LoginFormProps> = ({
   return (
     <form className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          Email
+        <label className="block text-sm font-medium text-[var(--logichub-secondary-text)] mb-2">
+          Email or Username
         </label>
         <div className="relative">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--logichub-muted-text)] w-5 h-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -47,29 +47,31 @@ const LoginForm: FC<LoginFormProps> = ({
             <polyline points="22,6 12,13 2,6"></polyline>
           </svg>
           <input
-            type="email"
-            name="email"
-            value={form.email}
+            type="text"
+            name="emailOrUsername"
+            value={form.emailOrUsername}
             onChange={handleChange}
-            className={`w-full pl-10 pr-12 py-3 bg-gray-900/60 border rounded-lg ${
-              errors.email ? "border-red-500" : "border-gray-700"
-            } focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white`}
-            placeholder="Enter your email"
+            className={`w-full pl-10 pr-12 py-3 bg-[var(--logichub-secondary-bg)] border rounded-lg ${
+              errors.emailOrUsername
+                ? "border-red-500"
+                : "border-[var(--logichub-border)]"
+            } focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] text-[var(--logichub-primary-text)]`}
+            placeholder="Enter your login ID"
           />
         </div>
-        {errors.email && (
-          <p className="text-red-400 mt-1">{errors.email}</p>
+        {errors.emailOrUsername && (
+          <p className="text-red-400 mt-1">{errors.emailOrUsername}</p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-[var(--logichub-secondary-text)] mb-2">
           Password
         </label>
         <div className="relative">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--logichub-muted-text)] w-5 h-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -82,15 +84,17 @@ const LoginForm: FC<LoginFormProps> = ({
             name="password"
             value={form.password}
             onChange={handleChange}
-            className={`w-full pl-10 pr-12 py-3 bg-gray-900/60 border rounded-lg ${
-              errors.password ? "border-red-500" : "border-gray-700"
-            } focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white`}
+            className={`w-full pl-10 pr-12 py-3 bg-[var(--logichub-secondary-bg)] border rounded-lg ${
+              errors.password
+                ? "border-red-500"
+                : "border-[var(--logichub-border)]"
+            } focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] text-[var(--logichub-primary-text)]`}
             placeholder="Enter your password"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--logichub-muted-text)] hover:text-[var(--logichub-primary-text)]"
           >
             {showPassword ? (
               <svg
@@ -127,7 +131,7 @@ const LoginForm: FC<LoginFormProps> = ({
         type="button"
         onClick={handleSubmit}
         disabled={isLoading}
-        className="w-full cursor-pointer py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full cursor-pointer py-3 bg-[var(--logichub-btn)] hover:bg-[var(--logichub-btn-hover)] text-[var(--logichub-btn-text)] rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? "Signing In..." : "Sign In"}
       </button>

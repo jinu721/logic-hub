@@ -1,20 +1,18 @@
 import { Router } from "express";
-import { ReportController } from "../controllers/implements/report.controller";
-import { ReportService } from "../services/implements/report.service";
-import { ReportRepository } from "../repository/implements/report.repository";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { REPORT_ROUTES } from "../constants/ROUTES/report.constants";
+import { container } from "../di/container";
 
 const router = Router();
 
-const reportController = new ReportController(
-  new ReportService(new ReportRepository())
-);
+const reportController = container.reportCtrl;
 
 router.use(authMiddleware);
 
-router.post("/", reportController.createReport.bind(reportController));
-router.get("/", reportController.getAllReports.bind(reportController));
-router.get("/:id", reportController.getReportById.bind(reportController));
-router.patch("/:id/status", reportController.updateReportStatus.bind(reportController));
+router.post(REPORT_ROUTES.BASE, reportController.createReport.bind(reportController));
+router.get(REPORT_ROUTES.BASE, reportController.getAllReports.bind(reportController));
+router.get(REPORT_ROUTES.BY_ID, reportController.getReportById.bind(reportController));
+router.patch(REPORT_ROUTES.STATUS, reportController.updateReportStatus.bind(reportController));
+
 
 export default router;

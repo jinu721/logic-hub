@@ -5,7 +5,7 @@ import {
   PollVoteData,
   TypingData,
 } from "../../types/socket.types";
-import { AppContainer } from "../../utils/app.container";
+import { AppContainer } from "../../utils/socket/app.container";
 import redisClient from "../../config/redis.config";
 import { PublicUserDTO } from "../../mappers/user.dto";
 

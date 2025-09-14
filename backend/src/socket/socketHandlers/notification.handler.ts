@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { ExtendedSocket } from "../../types/socket.types";
-import { AppContainer } from "../../utils/app.container";
-import { sendNotificationToAllUsers } from "../../utils/send.notification";
+import { AppContainer } from "../../utils/socket/app.container";
+import { sendNotificationToAllUsers } from "../../utils/application/send.notification";
 import redisClient from "../../config/redis.config";
 
 export class NotificationHandler {

@@ -1,7 +1,4 @@
 import { IConversationService } from "../interfaces/conversation.service.interface";
-import { ConversationRepository } from "../../repository/implements/conversation.repository";
-import { GroupRepository } from "../../repository/implements/group.repository";
-import { UserRepository } from "../../repository/implements/user.repository";
 import {
   PublicConversationDTO,
   toPublicConversationDTO,
@@ -9,27 +6,25 @@ import {
 import { ConversationIF } from "../../types/conversation.types";
 import { toPublicGroupDTO } from "../../mappers/group.dto";
 import { toPublicUserDTO, toPublicUserDTOs } from "../../mappers/user.dto";
+import { IConversationRepository } from "../../repository/interfaces/conversation.repository.interface";
+import { IGroupRepository } from "../../repository/interfaces/group.repository.interface";
+import { IUserRepository } from "../../repository/interfaces/user.repository.interface";
 
 export class ConversationService implements IConversationService {
-  private conversationRepo: ConversationRepository;
-  private groupRepo: GroupRepository;
-  private userRepo: UserRepository;
-
   constructor(
-    conversationRepo: ConversationRepository,
-    groupRepo: GroupRepository,
-    userRepo: UserRepository
-  ) {
-    this.conversationRepo = conversationRepo;
-    this.groupRepo = groupRepo;
-    this.userRepo = userRepo;
-  }
+    private readonly _conversationRepo: IConversationRepository,
+    private readonly _groupRepo: IGroupRepository,
+    private readonly _userRepo: IUserRepository
+  ) {}
 
   async findOneToOne(
     userA: string,
     userB: string
   ): Promise<PublicConversationDTO | null> {
-    const conversation = await this.conversationRepo.findOneToOne(userA, userB);
+    const conversation = await this._conversationRepo.findOneToOne(
+      userA,
+      userB
+    );
     return toPublicConversationDTO(conversation as ConversationIF);
   }
 
@@ -39,7 +34,7 @@ export class ConversationService implements IConversationService {
   ): Promise<PublicConversationDTO | null> {
     if (!userId) throw new Error("Invalid Token");
 
-    const conversation = await this.conversationRepo.findConversationById(
+    const conversation = await this._conversationRepo.findConversationById(
       conversationId
     );
 
@@ -58,7 +53,7 @@ export class ConversationService implements IConversationService {
     };
 
     if (conversation.type === "group") {
-      const group = await this.groupRepo.findGroupById(
+      const group = await this._groupRepo.findGroupById(
         conversation.groupId ? conversation.groupId.toString() : ""
       );
       if (!group) throw new Error("Group not found");
@@ -68,7 +63,7 @@ export class ConversationService implements IConversationService {
         (user: any) => user._id.toString() !== userId.toString()
       );
 
-      const user = await this.userRepo.getUserById(
+      const user = await this._userRepo.getUserById(
         otherUser ? otherUser._id.toString() : ""
       );
       if (!user) throw new Error("User not found");
@@ -83,14 +78,13 @@ export class ConversationService implements IConversationService {
     userId: string,
     search: any
   ): Promise<PublicConversationDTO[] | null> {
+    const query: any = {};
 
-    const query:any = {}
-
-    if(search.search){
+    if (search.search) {
       query.name = { $regex: search.search, $options: "i" };
     }
 
-    const conversations = await this.conversationRepo.findConversationsByUser(
+    const conversations = await this._conversationRepo.findConversationsByUser(
       userId
     );
 
@@ -108,7 +102,7 @@ export class ConversationService implements IConversationService {
         };
 
         if (conv.type === "group" && conv.groupId) {
-          const group = await this.groupRepo.findGroupById(
+          const group = await this._groupRepo.findGroupById(
             conv.groupId.toString()
           );
           if (group) {
@@ -118,7 +112,7 @@ export class ConversationService implements IConversationService {
           const otherUser = conv.participants.find(
             (user: any) => user._id.toString() !== userId.toString()
           );
-          const user = await this.userRepo.getUserById(
+          const user = await this._userRepo.getUserById(
             otherUser ? otherUser._id.toString() : ""
           );
           if (!user) throw new Error("User not found");
@@ -133,11 +127,11 @@ export class ConversationService implements IConversationService {
   }
 
   async createOneToOne(userA: string, userB: string): Promise<string | null> {
-    const existing = await this.conversationRepo.findOneToOne(userA, userB);
+    const existing = await this._conversationRepo.findOneToOne(userA, userB);
     if (existing) {
       return existing._id ? existing._id.toString() : "";
     }
-    const created = await this.conversationRepo.createOneToOne(userA, userB);
+    const created = await this._conversationRepo.createOneToOne(userA, userB);
     return created?._id ? created?._id.toString() ?? null : null;
   }
 
@@ -145,7 +139,7 @@ export class ConversationService implements IConversationService {
     conversationId: string,
     userId: string
   ): Promise<PublicConversationDTO | null> {
-    const conversation = await this.conversationRepo.setTypingUser(
+    const conversation = await this._conversationRepo.setTypingUser(
       conversationId,
       userId
     );
@@ -153,7 +147,7 @@ export class ConversationService implements IConversationService {
     if (!conversation) throw new Error("Conversation Not Found");
 
     const typingUserIds = conversation.typingUsers || [];
-    const typingUsers = await this.userRepo.findUsersByIds(typingUserIds);
+    const typingUsers = await this._userRepo.findUsersByIds(typingUserIds);
 
     const publicTypingUsers = toPublicUserDTOs(typingUsers);
 
@@ -169,7 +163,7 @@ export class ConversationService implements IConversationService {
     conversationId: string,
     userId: string
   ): Promise<PublicConversationDTO | null> {
-    const conversation = await this.conversationRepo.removeTypingUser(
+    const conversation = await this._conversationRepo.removeTypingUser(
       conversationId,
       userId
     );
@@ -177,14 +171,14 @@ export class ConversationService implements IConversationService {
   }
 
   async getTypingUsers(conversationId: string): Promise<any[]> {
-    return this.conversationRepo.getTypingUsers(conversationId);
+    return this._conversationRepo.getTypingUsers(conversationId);
   }
 
   async addUnreadCountsForUsers(
     conversationId: string,
     userIds: string[]
   ): Promise<PublicConversationDTO | null> {
-    const conversation = await this.conversationRepo.addUnreadCountsForUsers(
+    const conversation = await this._conversationRepo.addUnreadCountsForUsers(
       conversationId,
       userIds
     );
@@ -195,7 +189,7 @@ export class ConversationService implements IConversationService {
     conversationId: string,
     userId: string
   ): Promise<PublicConversationDTO | null> {
-    const conversation = await this.conversationRepo.markRead(
+    const conversation = await this._conversationRepo.markRead(
       conversationId,
       userId
     );
@@ -205,7 +199,7 @@ export class ConversationService implements IConversationService {
   async findConversationByGroup(
     groupId: string
   ): Promise<PublicConversationDTO | null> {
-    const conversation = await this.conversationRepo.findConversationByGroup(
+    const conversation = await this._conversationRepo.findConversationByGroup(
       groupId
     );
     return toPublicConversationDTO(conversation as ConversationIF);
@@ -215,7 +209,7 @@ export class ConversationService implements IConversationService {
     conversationId: string,
     messageId: string
   ): Promise<PublicConversationDTO | null> {
-    const conversation = await this.conversationRepo.updateLastMessage(
+    const conversation = await this._conversationRepo.updateLastMessage(
       conversationId,
       messageId
     );
@@ -224,7 +218,7 @@ export class ConversationService implements IConversationService {
   async getConversationById(
     conversationId: string
   ): Promise<PublicConversationDTO | null> {
-    const conversation = await this.conversationRepo.findConversationById(
+    const conversation = await this._conversationRepo.findConversationById(
       conversationId
     );
     return toPublicConversationDTO(conversation as ConversationIF);

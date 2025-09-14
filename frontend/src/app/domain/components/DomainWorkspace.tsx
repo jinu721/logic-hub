@@ -41,45 +41,33 @@ const DomainWorkspace: React.FC<DomainWorkspaceProps> = ({
   getLastSubmission,
   handleSubmitSolution,
 }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+
   return (
     <div
-      className="bg-slate-900/30 border-b border-slate-700/50 relative flex-shrink-0"
+      className="relative flex-shrink-0"
       style={{ height: `${100 - bottomPanelHeight}%` }}
     >
       <div className="h-full flex flex-col">
-        <div className="flex-shrink-0 bg-slate-800/50 backdrop-blur-sm px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 border-b border-slate-700/30 flex items-center justify-between">
+        <div className="flex-shrink-0 bg-[#0e1117] px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 border-b border-slate-700/30 flex items-center justify-between">
           <div className="flex items-center space-x-3 sm:space-x-5 min-w-0 flex-1">
             <h3 className="font-bold text-slate-200 text-sm sm:text-base lg:text-lg flex items-center">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-400 rounded-full mr-2 sm:mr-3 animate-pulse" />
               {challenge.type === "code" ? "Code Editor" : "Cipher"}
             </h3>
             {challenge?.type === "code" && (
               <div className="relative">
-                <select
-                  value={currentLanguage}
-                  onChange={(e) => setCurrentLanguage(e.target.value)}
-                  className="group relative flex items-center justify-between pl-8 pr-10 py-1.5 sm:pl-10 sm:pr-12 sm:py-2 bg-slate-800/70 hover:bg-slate-700/80 text-slate-300 hover:text-slate-200 rounded-lg sm:rounded-xl text-xs sm:text-sm border border-slate-600/50 hover:border-slate-500/70 focus:border-blue-500/60 focus:outline-none backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] min-w-[90px] sm:min-w-[110px] shadow-lg hover:shadow-slate-900/40 appearance-none cursor-pointer"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: "right 0.75rem center",
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "1.5em 1.5em",
-                  }}
+                <button
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="flex items-center gap-3 px-4 py-2.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 rounded-lg border border-slate-700/50 hover:border-slate-600/70 focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 min-w-[140px]"
                 >
-                  {Object.keys(challenge?.initialCode ?? {}).map((language) => (
-                    <option
-                      key={language}
-                      value={language}
-                      className="bg-slate-800 text-slate-300 hover:bg-slate-700"
-                    >
-                      {language}
-                    </option>
-                  ))}
-                </select>
-
-                <div className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                    <span className="font-mono text-sm">{currentLanguage}</span>
+                  </div>
                   <svg
-                    className="w-4 h-4 text-blue-400"
+                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -88,10 +76,46 @@ const DomainWorkspace: React.FC<DomainWorkspaceProps> = ({
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                      d="M19 9l-7 7-7-7"
                     />
                   </svg>
-                </div>
+                </button>
+
+                {isOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-64 bg-[#0e1117] backdrop-blur-md rounded-xl border border-[#1c1f26] shadow-2xl z-50 max-h-80 overflow-y-auto">
+                    <div className="p-2">
+                      <div className="grid grid-cols-2 gap-1">
+                        {Object.keys(challenge?.initialCode ?? {}).map(
+                          (language) => (
+                            <button
+                              key={language}
+                              onClick={() => {
+                                setCurrentLanguage(language);
+                                setIsOpen(false);
+                              }}
+                              className={`flex items-center gap-3 w-full px-3 py-2.5 text-left rounded-lg transition-all duration-150 ${
+                                currentLanguage === language
+                                  ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
+                                  : "hover:bg-slate-700/60 text-slate-300 hover:text-slate-200"
+                              }`}
+                            >
+                              <div
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  currentLanguage === language
+                                    ? "bg-blue-400"
+                                    : "bg-slate-500"
+                                }`}
+                              ></div>
+                              <span className="font-mono text-sm">
+                                {language}
+                              </span>
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -196,8 +220,8 @@ const DomainWorkspace: React.FC<DomainWorkspaceProps> = ({
           </div>
         </div>
 
-        <div className="flex-1 bg-slate-950/50 backdrop-blur-sm relative min-h-0">
-          <div className="absolute inset-2 sm:inset-3 bg-[#0B1226] rounded-lg sm:rounded-xl border border-slate-700/30 backdrop-blur-sm">
+        <div className="flex-1 bg-[#0e1117] border-t border-[#1c1f26] backdrop-blur-sm relative min-h-0">
+          <div className="absolute inset-2 sm:inset-3 bg-[#0e1117] border-t border-[#1c1f26] rounded-lg sm:rounded-xl border border-slate-700/30 backdrop-blur-sm">
             {challengeStarted ? (
               <ChallengeContent
                 challenge={challenge}

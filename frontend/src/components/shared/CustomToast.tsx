@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { XCircle, Trophy, Zap } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle, Info, Trophy, X, Zap } from 'lucide-react';
 
 export default function GameToast({
   type = 'success',
@@ -19,7 +19,7 @@ export default function GameToast({
       
       const entryTimer = setTimeout(() => {
         setAnimationState('idle');
-      }, 400);
+      }, 300);
       
       const dismissTimer = setTimeout(() => {
         setAnimationState('exiting');
@@ -27,7 +27,7 @@ export default function GameToast({
         setTimeout(() => {
           setVisible(false);
           if (onClose) onClose();
-        }, 400);
+        }, 300);
       }, duration);
       
       return () => {
@@ -41,151 +41,137 @@ export default function GameToast({
   
   const toastConfig = {
     success: {
-      bgGradient: 'from-emerald-600 to-green-700',
-      glowColor: 'shadow-emerald-500/30',
-      iconBg: 'bg-emerald-800'
+      icon: CheckCircle,
+      iconColor: 'text-green-600',
+      borderColor: 'border-green-200'
     },
     achievement: {
-      bgGradient: 'from-amber-600 to-yellow-700',
-      glowColor: 'shadow-amber-500/30',
-      iconBg: 'bg-amber-800'
+      icon: Trophy,
+      iconColor: 'text-amber-600',
+      borderColor: 'border-amber-200'
     },
     levelup: {
-      bgGradient: 'from-purple-600 to-fuchsia-700',
-      glowColor: 'shadow-purple-500/30',
-      iconBg: 'bg-purple-800'
+      icon: Trophy,
+      iconColor: 'text-purple-600',
+      borderColor: 'border-purple-200'
     },
     legendary: {
-      bgGradient: 'from-orange-600 to-red-700',
-      glowColor: 'shadow-orange-500/30',
-      iconBg: 'bg-orange-800'
+      icon: Trophy,
+      iconColor: 'text-orange-600',
+      borderColor: 'border-orange-200'
     },
     error: {
-      bgGradient: 'from-red-600 to-rose-700',
-      glowColor: 'shadow-red-500/30',
-      iconBg: 'bg-red-800'
+      icon: AlertCircle,
+      iconColor: 'text-red-600',
+      borderColor: 'border-red-200'
     },
     warning: {
-      bgGradient: 'from-amber-600 to-orange-700',
-      glowColor: 'shadow-amber-500/30',
-      iconBg: 'bg-amber-800'
+      icon: AlertTriangle,
+      iconColor: 'text-yellow-600',
+      borderColor: 'border-yellow-200'
     },
     info: {
-      bgGradient: 'from-blue-600 to-indigo-700',
-      glowColor: 'shadow-blue-500/30',
-      iconBg: 'bg-blue-800'
+      icon: Info,
+      iconColor: 'text-blue-600',
+      borderColor: 'border-blue-200'
     }
   };
   
   const config = toastConfig[type] || toastConfig.success;
+  const IconComponent = config.icon;
   
   const animationClasses = {
     entering: 'animate-slide-in',
-    idle: 'animate-float',
+    idle: '',
     exiting: 'animate-slide-out'
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="fixed bottom-4 right-4 z-50">
       <div 
         className={`
-          bg-gradient-to-r ${config.bgGradient} 
-          rounded-lg shadow-lg ${config.glowColor}
-          w-64 overflow-hidden
+          bg-white border ${config.borderColor} shadow-lg rounded-lg
+          w-80 overflow-hidden
           ${animationClasses[animationState]}
         `}
       >
-        <div className="absolute inset-0 opacity-10">
-          <div className="w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NiIgaGVpZ2h0PSIxMDAiPgogIDxnIGZpbGw9IiNmZmYiPgogICAgPHBhdGggZD0iTTAgMGwxNCAxMC43TDAgMjEuNHoiLz4KICAgIDxwYXRoIGQ9Ik0xNyA4LjVMMSAxOS4yTDE3IDMwbDE2LTEwLjhMMTcgOC41eiIvPgogICAgPHBhdGggZD0iTTM3IDEwLjdMMjEgMEwzNyAyMS40eiIvPgogICAgPHBhdGggZD0iTTAgMjFsMTQgMTAuN0wwIDQyLjR6Ii8+CiAgICA8cGF0aCBkPSJNMTcgMjkuNUwxIDQwLjJMMTcgNTFsMTYtMTAuOEwxNyAyOS41eiIvPgogICAgPHBhdGggZD0iTTM3IDMxLjdMMjEgMjFMMzcgNDIuNHoiLz4KICAgIDxwYXRoIGQ9Ik0wIDQyLjRsMTQgMTAuN0wwIDYzLjh6Ii8+CiAgICA8cGF0aCBkPSJNMTcgNTAuNUwxIDYxLjJMMTcgNzJsMTYtMTAuOEwxNyA1MC41eiIvPgogICAgPHBhdGggZD0iTTM3IDUyLjdMMjEgNDJMMzcgNjMuNHoiLz4KICA8L2c+Cjwvc3ZnPg==')]"></div>
-        </div>
-        
-        <div className="relative p-3">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="font-bold text-white text-base">{message}</div>
+        <div className="relative p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <IconComponent className={`w-5 h-5 ${config.iconColor}`} />
+            </div>
             
-            <button 
-              onClick={() => {
-                setAnimationState('exiting');
-                setTimeout(() => {
-                  setVisible(false);
-                  if (onClose) onClose();
-                }, 400);
-              }}
-              className="ml-auto text-white/70 hover:text-white"
-            >
-              <XCircle size={16} />
-            </button>
-          </div>
-        
-          
-          <div className="flex items-center gap-3">
-            {xp && (
-              <div className="bg-black/20 px-2 py-1 rounded flex items-center gap-1">
-                <Zap className="text-yellow-300" size={14} />
-                <span className="text-yellow-100 text-xs font-bold">+{xp} XP</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm font-semibold text-gray-900 leading-tight">
+                  {message}
+                </p>
+                
+                <button 
+                  onClick={() => {
+                    setAnimationState('exiting');
+                    setTimeout(() => {
+                      setVisible(false);
+                      if (onClose) onClose();
+                    }, 300);
+                  }}
+                  className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors rounded-md p-1 hover:bg-gray-100"
+                >
+                  <X size={16} />
+                </button>
               </div>
-            )}
-            
-            {reward && (
-              <div className="bg-black/20 px-2 py-1 rounded flex items-center gap-1">
-                <Trophy className="text-amber-300" size={14} />
-                <span className="text-amber-100 text-xs font-bold">{reward}</span>
-              </div>
-            )}
+              
+              {(xp || reward) && (
+                <div className="flex items-center gap-2 mt-3">
+                  {xp && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 rounded-md border border-gray-200">
+                      <Zap className="text-yellow-600 w-3.5 h-3.5" />
+                      <span className="text-gray-700 text-xs font-medium">+{xp} XP</span>
+                    </div>
+                  )}
+                  
+                  {reward && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 rounded-md border border-gray-200">
+                      <Trophy className="text-amber-600 w-3.5 h-3.5" />
+                      <span className="text-gray-700 text-xs font-medium">{reward}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
       
-      <style jsx global>{`
-        @keyframes toast-progress {
-          from { width: 100%; }
-          to { width: 0%; }
-        }
-        
+      <style jsx global>{`        
         @keyframes slide-in {
           from {
-            transform: translateX(110%) translateY(0);
+            transform: translateX(100%);
             opacity: 0;
           }
           to {
-            transform: translateX(0) translateY(0);
+            transform: translateX(0);
             opacity: 1;
           }
         }
         
         @keyframes slide-out {
           from {
-            transform: translateX(0) translateY(0);
+            transform: translateX(0);
             opacity: 1;
           }
           to {
-            transform: translateX(110%) translateY(0);
+            transform: translateX(100%);
             opacity: 0;
           }
         }
         
-        @keyframes float {
-          0% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-5px);
-          }
-          100% {
-            transform: translateY(0px);
-          }
-        }
-        
         .animate-slide-in {
-          animation: slide-in 0.4s ease-out forwards;
+          animation: slide-in 0.3s ease-out forwards;
         }
         
         .animate-slide-out {
-          animation: slide-out 0.4s ease-in forwards;
-        }
-        
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
+          animation: slide-out 0.3s ease-in forwards;
         }
       `}</style>
     </div>

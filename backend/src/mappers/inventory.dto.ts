@@ -1,5 +1,5 @@
 import { InventoryIF } from "../types/inventory.types";
-import { generateSignedImageUrl } from "../utils/generate.image";
+import { generateSignedImageUrl } from "../utils/application/generate.image";
 
 export interface IPublicInventoryDTO {
   _id: string;

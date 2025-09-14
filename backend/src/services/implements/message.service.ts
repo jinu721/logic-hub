@@ -1,7 +1,7 @@
 import { IMessageService } from "../interfaces/message.service.interface";
 import { IMessageRepository } from "../../repository/interfaces/message.repository.interface";
 import { MessageIF } from "../../types/message.types";
-import { verifyAccessToken } from "../../utils/verify.token";
+import { verifyAccessToken } from "../../utils/token/verify.token";
 import { Types } from "mongoose";
 import {
   PublicMessageDTO,

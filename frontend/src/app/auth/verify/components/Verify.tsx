@@ -149,10 +149,13 @@ export default function OtpVerification() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      className="p-6 space-y-8 bg-[var(--logichub-secondary-bg)]/70 backdrop-blur-lg rounded-2xl border border-[var(--logichub-border)] shadow-2xl max-w-md mx-auto"
+    >
       {verificationStatus !== "success" ? (
         <>
-          <div className="flex justify-center space-x-2">
+          <div className="flex justify-center space-x-3">
             {otp.map((digit, index) => (
               <input
                 key={index}
@@ -163,59 +166,55 @@ export default function OtpVerification() {
                 onChange={(e) => handleChange(e.target.value, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
                 onPaste={(e) => handlePaste(e)}
-                className={`w-12 h-12 text-center text-white text-xl 
-                bg-gray-900/60 border rounded-lg 
-                ${
-                  verificationStatus === "error"
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-700 focus:border-cyan-500 focus:ring-cyan-500"
-                }
-                focus:outline-none focus:ring-2 transition-all duration-300`}
+                className={`w-14 h-14 text-center text-white text-2xl 
+              bg-[var(--logichub-input-bg)] border rounded-xl 
+              ${
+                verificationStatus === "error"
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-700 focus:border-[var(--logichub-accent)] focus:ring-[var(--logichub-accent)]"
+              } focus:outline-none focus:ring-2 transition-all duration-300 shadow-inner`}
               />
             ))}
           </div>
 
           {verificationStatus === "error" && (
-            <p className="text-center text-red-400 text-sm">
+            <p className="text-center text-red-400 text-sm font-medium mt-2">
               Invalid verification code. Please try again.
             </p>
           )}
 
           <button
             type="submit"
-            className="w-full cursor-pointer py-3 bg-gradient-to-r from-cyan-600 to-blue-600 
-            hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg 
-            font-semibold transition-all duration-300 
-            disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 bg-gradient-to-r from-[var(--logichub-accent)] to-blue-600 
+        hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl 
+        font-semibold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Verify Account
           </button>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-400">
-              Didnt receive the code?{" "}
-              <button
-                type="button"
-                onClick={handleResend}
-                className={`${
-                  isResendActive
-                    ? "text-cyan-500 hover:text-cyan-400"
-                    : "text-gray-500 cursor-not-allowed"
-                } transition-colors cursor-pointer`}
-                disabled={!isResendActive}
-              >
-                Resend
-                {!isResendActive && (
-                  <span className="ml-1">({formatTime(timeLeft)})</span>
-                )}
-              </button>
-            </p>
+          <div className="text-center text-sm text-[var(--logichub-muted-text)]">
+            Didn't receive the code?{" "}
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={!isResendActive}
+              className={`font-medium transition-colors ${
+                isResendActive
+                  ? "text-[var(--logichub-accent)] hover:text-[var(--logichub-accent-hover)]"
+                  : "text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              Resend
+              {!isResendActive && (
+                <span className="ml-1">({formatTime(timeLeft)})</span>
+              )}
+            </button>
           </div>
 
-          <div className="text-center">
+          <div className="text-center mt-4">
             <Link
               href="/auth/login"
-              className="inline-flex items-center text-sm text-cyan-500 hover:text-cyan-400 transition-colors"
+              className="inline-flex items-center text-sm text-[var(--logichub-accent)] hover:text-[var(--logichub-accent-hover)] transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back to Login
@@ -223,24 +222,23 @@ export default function OtpVerification() {
           </div>
         </>
       ) : (
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-6 py-6">
           <div className="flex justify-center mb-4">
-            <div className="bg-green-500/20 p-4 rounded-full">
-              <Check className="w-8 h-8 text-green-500" />
+            <div className="bg-green-500/20 p-5 rounded-full shadow-lg">
+              <Check className="w-10 h-10 text-green-500" />
             </div>
           </div>
-          <h3 className="text-xl font-bold text-white">
+          <h3 className="text-2xl font-bold text-white">
             Verification Successful
           </h3>
-          <p className="text-gray-400 text-sm">
+          <p className="text-[var(--logichub-muted-text)] text-base">
             Your account has been successfully verified.
           </p>
           <button
             onClick={handleGoHome}
             type="button"
-            className="w-full  cursor-pointer py-3 bg-gradient-to-r from-cyan-600 to-blue-600 
-              hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg 
-              font-semibold transition-all duration-300"
+            className="w-full py-3 bg-[var(--logichub-accent)] 
+        font-semibold text-lg transition-all duration-300"
           >
             Continue to Home
           </button>

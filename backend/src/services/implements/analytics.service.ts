@@ -3,7 +3,6 @@ import { IAdminAnalyticsRepository } from "../../repository/interfaces/analytics
 import {
   UserAnalytics,
   ChallengeStats,
-  LeaderboardTrends,
 } from "../../types/analytics.types";
 import { LeaderboardRepository } from "../../repository/implements/leaderboard.repostory";
 import { toPublicUserDTO } from "../../mappers/user.dto";

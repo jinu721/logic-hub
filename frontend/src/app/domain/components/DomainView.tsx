@@ -40,7 +40,7 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
   );
   const [challengeStarted, setChallengeStarted] = useState<boolean>(false);
   const [challengeCompleted, setChallengeCompleted] = useState<boolean>(false);
-  const [xpReward,setXpReward] = useState<number>(0);
+  const [xpReward, setXpReward] = useState<number>(0);
   const [consoleOutput, setConsoleOutput] = useState<ConsoleOutput[]>([]);
   const [previewResults, setPreviewResults] = useState<any>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -56,7 +56,7 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
   const [isResizingHorizontal, setIsResizingHorizontal] = useState(false);
   const [isResizingVertical, setIsResizingVertical] = useState(false);
   const [activeRightTab, setActiveRightTab] = useState<"console" | "testcases">(
-    "console"
+    "testcases"
   );
   const [timeExpired, setTimeExpired] = useState(false);
   const [userInput, setUserInput] = useState("");
@@ -413,7 +413,7 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
 
   return (
     <div
-      className="h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 flex flex-col overflow-hidden"
+      className="h-screen bg-[var(--logichub-primary-bg)] text-[var(--logichub-primary-text)] flex flex-col overflow-hidden"
       ref={containerRef}
     >
       {isLoading ? (
@@ -444,11 +444,11 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
               />
 
               <div
-                className="w-1 bg-slate-700/50 hover:bg-blue-500/50 cursor-col-resize transition-colors duration-200 relative group flex-shrink-0"
+                className="w-1 bg-[var(--logichub-border)]/50 hover:bg-[var(--logichub-accent)]/50 cursor-col-resize transition-colors duration-200 relative group flex-shrink-0"
                 onMouseDown={handleMouseDown("horizontal")}
               >
                 <div className="absolute inset-y-0 -inset-x-2 flex items-center justify-center">
-                  <div className="w-1 h-16 bg-slate-600 rounded-full group-hover:bg-blue-400 transition-colors shadow-lg"></div>
+                  <div className="w-1 h-16 bg-[var(--logichub-border)] rounded-full group-hover:bg-[var(--logichub-accent)] transition-colors shadow-lg"></div>
                 </div>
               </div>
 
@@ -495,21 +495,19 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
             </div>
           </div>
 
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center">
-            <div className="rounded-2xl p-8 max-w-md w-full mx-4 ">
-              <h3 className="text-2xl font-bold text-white text-center mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          <div className="absolute inset-0 bg-[var(--logichub-secondary-bg)]/80 backdrop-blur-md z-50 flex items-center justify-center">
+            <div className="rounded-2xl p-8 max-w-md w-full mx-4 bg-[var(--logichub-card-bg)] shadow-lg border border-[var(--logichub-border)]">
+              <h3 className="text-2xl font-bold text-center mb-4 bg-gradient-to-r from-[var(--logichub-accent)] to-[var(--logichub-btn)] bg-clip-text text-transparent">
                 Premium Challenge
               </h3>
-
-              <p className="text-gray-400 text-center mb-8 leading-relaxed">
+              <p className="text-[var(--logichub-muted-text)] text-center mb-8 leading-relaxed">
                 This challenge is available for Premium members only. Upgrade to
                 unlock advanced problems and exclusive features.
               </p>
-
               <div className="flex items-center justify-between gap-4 w-full max-w-xl mx-auto">
                 <button
                   onClick={handleBack}
-                  className="w-1/5 h-12 flex items-center justify-center rounded-xl bg-gray-800/50 border border-gray-700 hover:bg-gray-700/50 hover:border-gray-600 text-gray-300 transition-all duration-300 backdrop-blur-sm hover:scale-[1.02]"
+                  className="w-1/5 h-12 flex items-center justify-center rounded-xl bg-[var(--logichub-secondary-bg)] border border-[var(--logichub-border)] hover:bg-[var(--logichub-card-bg)] hover:border-[var(--logichub-accent)] text-[var(--logichub-primary-text)] transition-all duration-300 backdrop-blur-sm hover:scale-[1.02]"
                   title="Go Back"
                 >
                   <svg
@@ -528,9 +526,9 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
                 </button>
                 <button
                   onClick={() => router.push("/premiumplans")}
-                  className="group relative w-4/5 h-12 cursor-pointer bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/25 transform hover:scale-[1.02] overflow-hidden"
+                  className="group relative w-4/5 h-12 cursor-pointer bg-[var(--logichub-accent)] hover:bg-[var(--logichub-btn-hover)] text-[var(--logichub-accent-text)] font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-[var(--logichub-accent)]/25 transform hover:scale-[1.02] overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-[var(--logichub-accent)] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div className="relative flex items-center justify-center space-x-2">
                     <svg
                       className="w-5 h-5"
@@ -541,7 +539,6 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
                     </svg>
                     <span>Upgrade to Premium</span>
                   </div>
-                  <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700 skew-x-12"></div>
                 </button>
               </div>
             </div>
@@ -570,11 +567,11 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
             />
 
             <div
-              className="w-1 bg-slate-700/50 hover:bg-blue-500/50 cursor-col-resize transition-colors duration-200 relative group flex-shrink-0"
+              className="w-1 bg-[var(--logichub-border)]/50 hover:bg-[var(--logichub-accent)]/50 cursor-col-resize transition-colors duration-200 relative group flex-shrink-0"
               onMouseDown={handleMouseDown("horizontal")}
             >
               <div className="absolute inset-y-0 -inset-x-2 flex items-center justify-center">
-                <div className="w-1 h-16 bg-slate-600 rounded-full group-hover:bg-blue-400 transition-colors shadow-lg"></div>
+                <div className="w-1 h-16 bg-[var(--logichub-border)] rounded-full group-hover:bg-[var(--logichub-accent)] transition-colors shadow-lg"></div>
               </div>
             </div>
 
@@ -620,9 +617,7 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
             </div>
           </div>
 
-          {challengeCompleted && (
-            <DomainCompletePopup xp={xpReward} />
-          )}
+          {challengeCompleted && <DomainCompletePopup xp={xpReward} />}
           {timeExpired && <TimeUpPopup />}
         </>
       ) : null}

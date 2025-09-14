@@ -1,23 +1,20 @@
 import { Router } from "express";
-import { LevelController } from "../controllers/implements/level.controller";
-import { LevelService } from "../services/implements/level.service";
-import { LevelRepository } from "../repository/implements/level.repository";
-import { UserRepository } from "../repository/implements/user.repository";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { LEVEL_ROUTES } from "../constants/ROUTES/level.constants";
+import { container } from "../di/container";
 
 const router: Router = Router();
 
-const levelController = new LevelController(
-  new LevelService(new LevelRepository(), new UserRepository())
-);
+const levelController = container.levelCtrl;
 
 router.use(authMiddleware);
 
-router.post("/", levelController.createLevel.bind(levelController));
-router.get("/", levelController.getAllLevels.bind(levelController));
-router.get("/:id", levelController.getLevelById.bind(levelController));
-router.put("/:id", levelController.updateLevel.bind(levelController));
-router.delete("/:id", levelController.deleteLevel.bind(levelController));
-router.put("/user/:userId/xp", levelController.updateUserLevel.bind(levelController));
+router.post(LEVEL_ROUTES.BASE, levelController.createLevel.bind(levelController));
+router.get(LEVEL_ROUTES.BASE, levelController.getAllLevels.bind(levelController));
+router.get(LEVEL_ROUTES.BY_ID, levelController.getLevelById.bind(levelController));
+router.put(LEVEL_ROUTES.UPDATE, levelController.updateLevel.bind(levelController));
+router.delete(LEVEL_ROUTES.DELETE, levelController.deleteLevel.bind(levelController));
+router.put(LEVEL_ROUTES.USER_XP, levelController.updateUserLevel.bind(levelController));
+
 
 export default router;

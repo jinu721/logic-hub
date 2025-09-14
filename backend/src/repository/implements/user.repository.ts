@@ -3,6 +3,13 @@ import User from "../../models/user.model";
 import { UserIF } from "../../types/user.types";
 import { IUserRepository } from "../interfaces/user.repository.interface";
 import { Types } from "mongoose";
+import { populateUser } from "../../utils/database/user.populate";
+import {
+  toLean,
+  toLeanMany,
+  populateAndLean,
+  populateAndLeanMany,
+} from "../../utils/database/query.utils";
 
 export class UserRepository
   extends BaseRepository<UserIF>
@@ -12,41 +19,45 @@ export class UserRepository
     super(User);
   }
 
+  async createUser(user: Partial<UserIF>): Promise<UserIF | null> {
+    const newUser = new this.model(user);
+    return toLean<UserIF>(newUser.save());
+  }
+
   async getByEmailOrUsername(value: string): Promise<UserIF | null> {
-    return User.findOne({ $or: [{ email: value }, { username: value }] })
-      .populate("avatar")
-      .populate("banner")
-      .populate("inventory.ownedAvatars")
-      .populate("inventory.ownedBanners")
-      .populate("inventory.badges")
-      .populate("membership.planId");
+    return populateAndLean<UserIF>(
+      this.model.findOne({ $or: [{ email: value }, { username: value }] }),
+      populateUser
+    );
   }
 
   async getAllByRole(role: string): Promise<UserIF[]> {
-    return this.model.find({ role });
+    return toLeanMany<UserIF>(this.model.find({ role }));
   }
-  async getUserByName(usermame: string): Promise<UserIF | null> {
-    return this.model
-      .findOne({ username: usermame })
-      .populate("avatar")
-      .populate("banner")
-      .populate("inventory.ownedAvatars")
-      .populate("inventory.ownedBanners")
-      .populate("inventory.badges")
-      .populate("membership.planId");
+
+
+
+  async getUserByName(username: string): Promise<UserIF | null> {
+    return populateAndLean<UserIF>(
+      this.model.findOne({ username }),
+      populateUser
+    );
   }
 
   async verifyAccount(email: string): Promise<UserIF | null> {
-    return this.model.findOneAndUpdate(
-      { email },
-      { isVerified: true },
-      { new: true }
+    return toLean<UserIF>(
+      this.model.findOneAndUpdate(
+        { email },
+        { isVerified: true },
+        { new: true }
+      )
     );
   }
 
   async findUserRank(userId: string): Promise<number> {
-    const user = await this.model.findById(userId);
+    const user = await toLean<UserIF>(this.model.findById(userId));
     if (!user) return 0;
+
     const userXp = user.stats.totalXpPoints;
     const usersWithMoreXp = await this.model.countDocuments({
       "stats.totalXpPoints": { $gt: userXp },
@@ -55,101 +66,95 @@ export class UserRepository
   }
 
   async updateUser(
-    userId: string,
+    userId: Types.ObjectId,
     updateData: Partial<UserIF>
   ): Promise<UserIF | null> {
-    return this.model.findByIdAndUpdate(userId, updateData, { new: true });
+    return toLean<UserIF>(
+      this.model.findByIdAndUpdate(userId, updateData, { new: true })
+    );
   }
-  async save(user: any) {
-    return await user.save();
+
+  async save(user: UserIF): Promise<UserIF> {
+    return await new this.model(user).save();
   }
+
   async findAllUsers(
     search: string,
     skip: number,
     limit: number
-  ): Promise<UserIF[] | null> {
-    return this.model
-      .find({ username: { $regex: search || "", $options: "i" } })
-      .sort({ _id: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate("avatar")
-      .populate("banner")
-      .populate("inventory.ownedAvatars")
-      .populate("inventory.ownedBanners")
-      .populate("inventory.badges")
-      .populate("membership.planId");
+  ): Promise<UserIF[]> {
+    return populateAndLeanMany<UserIF>(
+      this.model
+        .find({ username: { $regex: search || "", $options: "i" } })
+        .sort({ _id: -1 })
+        .skip(skip)
+        .limit(limit),
+      populateUser
+    );
   }
+
   async countAllUsers(search: string): Promise<number> {
     return this.model.countDocuments({
       username: { $regex: search || "", $options: "i" },
     });
   }
 
-  async searchUsers(search: string): Promise<UserIF[] | null> {
-    return this.model
-      .find({
-        $or: [
-          { username: { $regex: search, $options: "i" } },
-          { email: { $regex: search, $options: "i" } },
-        ],
-      })
-      .sort({ _id: -1 })
-      .populate("avatar")
-      .populate("banner")
-      .populate("inventory.ownedAvatars")
-      .populate("inventory.ownedBanners")
-      .populate("inventory.badges")
-      .populate("membership.planId");
+  async searchUsers(search: string): Promise<UserIF[]> {
+    return populateAndLeanMany<UserIF>(
+      this.model
+        .find({
+          $or: [
+            { username: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+          ],
+        })
+        .sort({ _id: -1 }),
+      populateUser
+    );
   }
 
   async getUserById(userId: string): Promise<UserIF | null> {
-    return this.model
-      .findById(userId)
-      .populate("avatar")
-      .populate("banner")
-      .populate("inventory.ownedAvatars")
-      .populate("inventory.ownedBanners")
-      .populate("inventory.badges")
-      .populate("membership.planId");
+    return populateAndLean<UserIF>(
+      this.model.findById(userId),
+      populateUser
+    );
   }
 
   async findUsersByIds(userIds: Types.ObjectId[]): Promise<UserIF[]> {
-    return this.model
-      .find({ _id: { $in: userIds } })
-      .populate("avatar")
-      .populate("banner")
-      .populate("inventory.ownedAvatars")
-      .populate("inventory.ownedBanners")
-      .populate("inventory.badges")
-      .populate("membership.planId");
+    return populateAndLeanMany<UserIF>(
+      this.model.find({ _id: { $in: userIds } }),
+      populateUser
+    );
   }
 
-  async setUserOnline(userId: string, data: any) {
-    return await this.model.findByIdAndUpdate(userId, data);
-  }
 
-  async cancelMembership(userId: string): Promise<UserIF | null> {
-    return this.model.findByIdAndUpdate(
-      userId,
-      { "membership.isActive": false },
-      { new: true }
+  async cancelMembership(userId: Types.ObjectId): Promise<UserIF | null> {
+    return toLean<UserIF>(
+      this.model.findByIdAndUpdate(
+        userId,
+        { "membership.isActive": false },
+        { new: true }
+      )
     );
   }
 
   async updateUserLevel(userId: string, level: number): Promise<UserIF | null> {
-    return this.model.findByIdAndUpdate(
-      userId,
-      { "stats.level": level },
-      { new: true }
+    return toLean<UserIF>(
+      this.model.findByIdAndUpdate(
+        userId,
+        { "stats.level": level },
+        { new: true }
+      )
     );
   }
 
   async updateUserXP(userId: string, xp: number): Promise<UserIF | null> {
-    return this.model.findByIdAndUpdate(
-      userId,
-      { "stats.totalXpPoints": xp },
-      { new: true }
+    return toLean<UserIF>(
+      this.model.findByIdAndUpdate(
+        userId,
+        { "stats.totalXpPoints": xp },
+        { new: true }
+      )
     );
   }
 }

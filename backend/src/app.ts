@@ -15,7 +15,7 @@ Database.getInstance();
 redisConnect();
 
 import './config/passport.config';
-import './utils/crone.helper';
+import './utils/application/crone.helper';
 
 
 

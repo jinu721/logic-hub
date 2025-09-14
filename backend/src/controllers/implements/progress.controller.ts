@@ -1,23 +1,19 @@
 import { Request, Response } from "express";
-import { IChallengeProgressController } from "../interfaces/progress.controller.interface";
 import { HttpStatus } from "../../constants/http.status";
-import { ChallengeProgressService } from "../../services/implements/progress.service";
+import { IChallengeProgressService } from "../../services/interfaces/progress.service.interface";
+import { IChallengeProgressController } from "../interfaces/progress.controller.interface";
 
 export class ChallengeProgressController
   implements IChallengeProgressController
 {
-  private challengeProgressService: ChallengeProgressService;
-
-  constructor(challengeProgressService: ChallengeProgressService) {
-    this.challengeProgressService = challengeProgressService;
-  }
+  constructor(private readonly _progressSvc: IChallengeProgressService) {}
 
   async createProgress(req: Request, res: Response): Promise<void> {
     const progressData = req.body;
 
     try {
       const createdProgress =
-        await this.challengeProgressService.createProgress(progressData);
+        await this._progressSvc.createProgress(progressData);
       res
         .status(HttpStatus.CREATED)
         .json({ message: "Progress created successfully", createdProgress });
@@ -39,7 +35,7 @@ export class ChallengeProgressController
 
     try {
       const progress =
-        await this.challengeProgressService.getProgressByUserAndChallenge({
+        await this._progressSvc.getProgressByUserAndChallenge({
           userId,
           challengeId,
         });
@@ -58,7 +54,7 @@ export class ChallengeProgressController
     const { id } = req.params;
 
     try {
-      const progress = await this.challengeProgressService.getProgressById(id);
+      const progress = await this._progressSvc.getProgressById(id);
       res.status(HttpStatus.OK).json(progress);
     } catch (err) {
       res
@@ -71,7 +67,7 @@ export class ChallengeProgressController
   }
   async getAllProgress(req: Request, res: Response): Promise<void> {
     try {
-      const progresses = await this.challengeProgressService.getAllProgress();
+      const progresses = await this._progressSvc.getAllProgress();
       res.status(HttpStatus.OK).json(progresses);
     } catch (err) {
       console.log(err);
@@ -93,7 +89,7 @@ export class ChallengeProgressController
         return;
       }
 
-      let progress = await this.challengeProgressService.getRecentProgress(
+      let progress = await this._progressSvc.getRecentProgress(
         req.params.input === "me" ? (userId as string) : req.params.input
       );
 
@@ -116,7 +112,7 @@ export class ChallengeProgressController
 
     try {
       const updatedProgress =
-        await this.challengeProgressService.updateProgress(id, progressData);
+        await this._progressSvc.updateProgress(id, progressData);
       res
         .status(HttpStatus.OK)
         .json({ message: "Progress updated successfully", updatedProgress });
@@ -134,7 +130,7 @@ export class ChallengeProgressController
     const { id } = req.params;
 
     try {
-      const result = await this.challengeProgressService.deleteProgressById(id);
+      const result = await this._progressSvc.deleteProgressById(id);
 
       res
         .status(HttpStatus.OK)
@@ -160,7 +156,7 @@ export class ChallengeProgressController
     let userId = req.params.userId ? req.params.userId : currentUserId;
 
     try {
-      const progress = await this.challengeProgressService.getAllProgressByUser(
+      const progress = await this._progressSvc.getAllProgressByUser(
         userId as string
       );
       res.status(HttpStatus.OK).json(progress);
@@ -181,7 +177,7 @@ export class ChallengeProgressController
 
     try {
       const progress =
-        await this.challengeProgressService.getAllProgressByChallenge(
+        await this._progressSvc.getAllProgressByChallenge(
           challengeId
         );
       res.status(HttpStatus.OK).json(progress);
@@ -212,7 +208,7 @@ export class ChallengeProgressController
         return;
       } 
 
-      const progress = await this.challengeProgressService.getUserHeatmapData(
+      const progress = await this._progressSvc.getUserHeatmapData(
         userId,
         Number(year)
       );
