@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { container } from "../di/container";
-import { ANALYSIS_ROUTES } from "../constants/routes.contants";
+import { ANALYSIS_ROUTES } from "../constants/ROUTES/analysis.constants";
 
 const router = Router();
 

@@ -1,15 +1,8 @@
-import { MessageRepository } from "../../repository/implements/message.repository";
-import { OtpRepository } from "../../repository/implements/otp.repository";
-import { ChallengeProgressRepository } from "../../repository/implements/proggress.repository";
-import { UserRepository } from "../../repository/implements/user.repository";
-import { MessageService } from "../../services/implements/message.service";
-import { OTPServices } from "../../services/implements/otp.service";
-import { UserService } from "../../services/implements/user.service";
-
-const userService = new UserService(new UserRepository(),new OTPServices(new OtpRepository()),new ChallengeProgressRepository());
+import { container } from "../../di/container";
+const userService = container.userSvc;
 
 
-const messageService = new MessageService(new MessageRepository());
+const messageService = container.messageSvc;
 
 
 export const generateSystemMessage = async (

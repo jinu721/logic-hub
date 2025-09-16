@@ -4,6 +4,7 @@ import { ChallengeProgressIF } from "../../types/progress.types";
 export interface IChallengeProgressService {
   createProgress(data: ChallengeProgressIF): Promise<PublicChallengeProgressDTO>;
   getProgressByUserAndChallenge(data: { userId: string; challengeId: string }): Promise<PublicChallengeProgressDTO[]>;
+  getRecentProgress(username: string): Promise<PublicChallengeProgressDTO[] | null>;
   getProgressById(id: string): Promise<PublicChallengeProgressDTO | null>;
   updateProgress(id: string, data: Partial<ChallengeProgressIF>): Promise<PublicChallengeProgressDTO | null>;
   deleteProgressById(id: string): Promise<boolean>;

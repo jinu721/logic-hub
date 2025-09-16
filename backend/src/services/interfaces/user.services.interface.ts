@@ -3,9 +3,9 @@ import { UserIF } from "../../types/user.types";
 
 export interface IUserService {
   register(username: string, email: string, password: string): Promise<{ email: string }>;
-  verifyOTP(email: string, otp: string): Promise<PublicUserDTO | null>;
+  verifyOTP(email: string, otp: string): Promise<{ accessToken: string; refreshToken: string, userData: PublicUserDTO}>;
   verifyLogin(token: string): Promise<{ accessToken: string; refreshToken: string, userId: string }>;
-  login(emailOrUsername: string, password: string): Promise<{ accessToken: string; refreshToken: string, userId: string }>;
+  login(emailOrUsername: string, password: string): Promise<any>;
   forgotPassword(email: string): Promise<{ message: string }>;
   resetPassword(userId: string, password: string): Promise<void>;
   findUserById(id: string): Promise<PublicUserDTO | null>;

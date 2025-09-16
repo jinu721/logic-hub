@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { UserIF } from "../../types/user.types";
 
 export interface IUserRepository {
-    createUser(user: Partial<UserIF>): Promise<UserIF | null>;
+    createUser(user: {username:string,email:string,password:string}): Promise<void>;
     getByEmailOrUsername(value: string): Promise<UserIF | null>;
     getUserByName(role: string): Promise<UserIF | null>;
     updateUser(userId: Types.ObjectId, updateData: Partial<UserIF>): Promise<UserIF | null>;

@@ -1,34 +1,31 @@
 import { UserRepository } from "../repository/implements/user.repository";
-import { OtpRepository } from "../repository/implements/otp.repository";
 import { ChallengeProgressRepository } from "../repository/implements/proggress.repository";
 import { TokenRepository } from "../repository/implements/token.repository";
 
 import { UserService } from "../services/implements/user.service";
 import { TokenService } from "../services/implements/token.service";
-import { AuthController } from "../controllers/implements/auth.controller";
-import { UserController } from "../controllers/implements/user.controller";
+import { AuthController } from "../controllers/auth/auth.controller";
+import { UserController } from "../controllers/user/user.controller";
 
 import { IUserService } from "../services/interfaces/user.services.interface";
 import { ITokenService } from "../services/interfaces/token.service.interface";
-import { IUserController } from "../controllers/interfaces/user.controller.interface";
-import { IAuthController } from "../controllers/interfaces/auth.controller.interface";
-import { ITokenProvider } from "../providers/interfaces/token.interface";
-import { IEmailProvider } from "../providers/interfaces/email.interface";
-import { IHashProvider } from "../providers/interfaces/crypto.interface";
-import { JwtTokenProvider } from "../providers/implements/jwt.token";
-import { HashProvider } from "../providers/implements/bcrypt.hasher";
-import { EmailProvider } from "../providers/implements/email.sender";
+import { IUserController } from "../controllers/user/user.controller.interface";
+import { IAuthController } from "../controllers/auth/auth.controller.interface";
+import { ITokenProvider } from "../providers/token/auth.token.interface";
+import { IEmailProvider } from "../providers/email/email.sender.interface";
+import { IHashProvider } from "../providers/hashing/secure.hasher.interface";
+import { TokenProvider } from "../providers/token/auth.token";
+import { HashProvider } from "../providers/hashing/secure.hasher";
+import { EmailProvider } from "../providers/email/email.sender";
 import { IUserRepository } from "../repository/interfaces/user.repository.interface";
-import { IOtpRepository } from "../repository/interfaces/otp.repository.interface";
 import { IChallengeProgressRepository } from "../repository/interfaces/progress.repository.interface";
 import { ITokenRepository } from "../repository/interfaces/token.repository.interface";
-import { IOTPService } from "../services/interfaces/otp.services.interface";
 import { INotificationRepository } from "../repository/interfaces/notification.repository.interface";
 import { INotificationService } from "../services/interfaces/notification.service.interface";
-import { INotificationController } from "../controllers/interfaces/notification.controller.interface";
+import { INotificationController } from "../controllers/notification/notification.controller.interface";
 import { NotificationRepository } from "../repository/implements/notification.repository";
 import { NotificationService } from "../services/implements/notification.service";
-import { NotificationController } from "../controllers/implements/notification.controller";
+import { NotificationController } from "../controllers/notification/notification.controller";
 import { IAdminAnalyticsRepository } from "../repository/interfaces/analytics.repository.interface";
 import { ILeaderboardRepository } from "../repository/interfaces/leaderboard.repostory.interface";
 import { IAvatarRepository } from "../repository/interfaces/avatar.repository.interface";
@@ -55,62 +52,63 @@ import { IAvatarService } from "../services/interfaces/avatar.service.interface"
 import { IBadgeService } from "../services/interfaces/badge.service.interface";
 import { IBannerService } from "../services/interfaces/banner.service.interface";
 import { IChallengeService } from "../services/interfaces/challange.service.interface";
-import { IAdminAnalyticsController } from "../controllers/interfaces/analytics.controller.interface";
-import { IAvatarController } from "../controllers/interfaces/avatar.controller.interface";
-import { IBadgeController } from "../controllers/interfaces/badge.controller.interface";
-import { IBannerController } from "../controllers/interfaces/banner.controller.interface";
-import { IChallengeController } from "../controllers/interfaces/challange.controller.interface";
-import { IConversationController } from "../controllers/interfaces/conversation.controller.interface";
-import { IMessageController } from "../controllers/interfaces/message.controller.interface";
-import { IGroupController } from "../controllers/interfaces/group.controller.interface";
-import { ILevelController } from "../controllers/interfaces/level.controller.interface";
-import { IChallengeProgressController } from "../controllers/interfaces/progress.controller.interface";
-import { IPurchaseController } from "../controllers/interfaces/purchase.controller.interface";
-import { ISolutionController } from "../controllers/interfaces/solution.controller.interface";
-import { IMarketController } from "../controllers/interfaces/market.controller.interface";
+import { IAdminAnalyticsController } from "../controllers/analysis/analytics.controller.interface";
+import { IAvatarController } from "../controllers/avatar/avatar.controller.interface";
+import { IBadgeController } from "../controllers/badge/badge.controller.interface";
+import { IBannerController } from "../controllers/banner/banner.controller.interface";
+import { IChallengeController } from "../controllers/challenge/challange.controller.interface";
+import { IConversationController } from "../controllers/conversation/conversation.controller.interface";
+import { IMessageController } from "../controllers/message/message.controller.interface";
+import { IGroupController } from "../controllers/group/group.controller.interface";
+import { ILevelController } from "../controllers/level/level.controller.interface";
+import { IChallengeProgressController } from "../controllers/submition/progress.controller.interface";
+import { IPurchaseController } from "../controllers/purchase/purchase.controller.interface";
+import { ISolutionController } from "../controllers/solution/solution.controller.interface";
+import { IMarketController } from "../controllers/market/market.controller.interface";
 import { AdminAnalyticsRepository } from "../repository/implements/analytics.repository";
 import { AdminAnalyticsService } from "../services/implements/analytics.service";
 import { LeaderboardRepository } from "../repository/implements/leaderboard.repostory";
-import { AdminAnalyticsController } from "../controllers/implements/analytics.controller";
+import { AdminAnalyticsController } from "../controllers/analysis/analytics.controller";
 import { AvatarRepository } from "../repository/implements/avatar.repository";
 import { ChallengeRepository } from "../repository/implements/challange.repository";
 import { ChallengeService } from "../services/implements/challange.service";
-import { ChallengeController } from "../controllers/implements/challange.controller";
+import { ChallengeController } from "../controllers/challenge/challange.controller";
 import { ConversationRepository } from "../repository/implements/conversation.repository";
 import { ConversationService } from "../services/implements/conversation.service";
 import { GroupRepository } from "../repository/implements/group.repository";
 import { GroupService } from "../services/implements/group.service";
-import { GroupController } from "../controllers/implements/group.controller";
-import { ConversationController } from "../controllers/implements/conversation.controller";
+import { GroupController } from "../controllers/group/group.controller";
+import { ConversationController } from "../controllers/conversation/conversation.controller";
 import { LevelRepository } from "../repository/implements/level.repository";
 import { LevelService } from "../services/implements/level.service";
-import { LevelController } from "../controllers/implements/level.controller";
+import { LevelController } from "../controllers/level/level.controller";
 import { MarketRepository } from "../repository/implements/market.repository";
 import { MarketService } from "../services/implements/market.service";
-import { MarketController } from "../controllers/implements/market.controller";
+import { MarketController } from "../controllers/market/market.controller";
 import { IMembershipRepository } from "../repository/interfaces/membership.repository.interface";
 import { IMembershipService } from "../services/interfaces/membership.service.interface";
-import { IMembershipController } from "../controllers/interfaces/membership.controller.interface";
+import { IMembershipController } from "../controllers/membership/membership.controller.interface";
 import { MembershipRepository } from "../repository/implements/membership.repository";
 import { MembershipService } from "../services/implements/membership.service";
-import { MembershipController } from "../controllers/implements/membership.controller";
+import { MembershipController } from "../controllers/membership/membership.controller";
 import { MessageRepository } from "../repository/implements/message.repository";
 import { MessageService } from "../services/implements/message.service";
-import { MessageController } from "../controllers/implements/message.controller";
-import { connect } from "mongoose";
-import { ChallengeProgressController } from "../controllers/implements/progress.controller";
+import { MessageController } from "../controllers/message/message.controller";
+import { ChallengeProgressController } from "../controllers/submition/progress.controller";
 import { PurchaseRepository } from "../repository/implements/purchase.repository";
 import { PurchaseService } from "../services/implements/purchase.service";
-import { PurchaseController } from "../controllers/implements/purchase.controller";
+import { PurchaseController } from "../controllers/purchase/purchase.controller";
 import { IReportRepository } from "../repository/interfaces/report.repository.interface";
 import { IReportService } from "../services/interfaces/report.service.interface";
-import { IReportController } from "../controllers/interfaces/report.controller.interface";
+import { IReportController } from "../controllers/report/report.controller.interface";
 import { ReportRepository } from "../repository/implements/report.repository";
 import { ReportService } from "../services/implements/report.service";
-import { ReportController } from "../controllers/implements/report.controller";
+import { ReportController } from "../controllers/report/report.controller";
 import { SolutionRepository } from "../repository/implements/solution.repository";
 import { SolutionService } from "../services/implements/solution.service";
-import { SolutionController } from "../controllers/implements/solution.controller";
+import { SolutionController } from "../controllers/solution/solution.controller";
+import { IPendingUserRepository } from "../repository/interfaces/pending-user.repository.interface";
+import { PendingUserRepository } from "../repository/implements/pending-user.repository";
 
 interface Container {
   tokenProv: ITokenProvider;
@@ -118,7 +116,7 @@ interface Container {
   emailProv: IEmailProvider;
 
   userRepo: IUserRepository;
-  otpRepo: IOtpRepository;
+  pendingUserRepo: IPendingUserRepository;
   tokenRepo: ITokenRepository;
   notifyRepo: INotificationRepository;
   analysisRepo: IAdminAnalyticsRepository;
@@ -139,7 +137,6 @@ interface Container {
   solutionRepo: ISolutionRepository;
   
 
-  otpSvc: IOTPService;
   userSvc: IUserService;
   tokenSvc: ITokenService;
   notifySvc: INotificationService;
@@ -181,12 +178,12 @@ interface Container {
 
 export const container = {} as Container;
 
-container.tokenProv = new JwtTokenProvider();
+container.tokenProv = new TokenProvider();
 container.hashProv = new HashProvider();
 container.emailProv = new EmailProvider();
 
 container.userRepo = new UserRepository();
-container.otpRepo = new OtpRepository();
+container.pendingUserRepo = new PendingUserRepository();
 container.progressRepo = new ChallengeProgressRepository();
 container.tokenRepo = new TokenRepository();
 container.notifyRepo = new NotificationRepository();
@@ -207,7 +204,7 @@ container.solutionRepo = new SolutionRepository();
 container.tokenSvc = new TokenService(container.tokenRepo);
 container.userSvc = new UserService(
   container.userRepo,
-  container.otpSvc,
+  container.pendingUserRepo,
   container.progressRepo,
   container.tokenProv,
   container.emailProv,

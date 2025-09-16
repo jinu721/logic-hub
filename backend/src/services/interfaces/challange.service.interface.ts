@@ -21,11 +21,11 @@ export interface IChallengeService {
   getChallengeById(id: string, userId?: string): Promise<PublicChallengeDTO | null>;
   getChallenges(filter: any,userId?: string): Promise<{challenges:PublicChallengeDTO[],popularChallange:PublicChallengeDTO | null,totalItems:number}>;
   getAllChallenges(search:string,page:number,limit:number): Promise<{challenges:PublicChallengeDTO[],totalItems:number}>;
-  updateChallenge(id: Types.ObjectId, updateData: Partial<PublicChallengeDTO>): Promise<PublicChallengeDTO | null>;
-  deleteChallenge(id: Types.ObjectId): Promise<boolean>;
+  updateChallenge(id: string, updateData: Partial<PublicChallengeDTO>): Promise<PublicChallengeDTO | null>;
+  deleteChallenge(id: string): Promise<boolean>;
   getChallengesByStatus(status: "active" | "inactive" | "draft" | "archived"): Promise<PublicChallengeDTO[]>;
   getChallengesByTags(tags: string[]): Promise<PublicChallengeDTO[]>;
   getChallengesByDifficulty(difficulty: "novice" | "adept" | "master"): Promise<PublicChallengeDTO[]>;
   runChallengeCode(challengeId: string, language: string, sourceCode: string, input: string,userId: string): Promise<string>;
-  submitChallange(data:SubmitPayload,userId: string): Promise<any>;
+  submitChallenge(data:SubmitPayload,userId: string): Promise<any>;
 }

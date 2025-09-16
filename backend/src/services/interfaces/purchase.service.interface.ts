@@ -1,9 +1,19 @@
 import { PublicPurchaseDTO } from "../../mappers/purchase.dto";
-import { PurchaseIF } from "../../types/purchase.types";
 
 export interface IPurchaseService {
-  createPlanPurchase(data: PurchaseIF): Promise<PublicPurchaseDTO>;
+  createPlanPurchase(data: {
+    userId: string;
+    planId: string;
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+    amount: number;
+    status: "Success" | "Failed";
+  }): Promise<PublicPurchaseDTO>;
   getUserPurchases(userId: string): Promise<PublicPurchaseDTO[] | null>;
   getPlanHistoryById(id: string): Promise<PublicPurchaseDTO | null>;
-  getPlanHistory(page:number,limit:number): Promise<{purchases:PublicPurchaseDTO[],totalItems:number}>;
+  getPlanHistory(
+    page: number,
+    limit: number
+  ): Promise<{ purchases: PublicPurchaseDTO[]; totalItems: number }>;
 }

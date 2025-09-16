@@ -1,22 +1,14 @@
 import { Router } from "express";
-import { AvatarController } from "../controllers/implements/avatar.controller";
-import { AvatarService } from "../services/implements/avatar.service";
-import { AvatarRepository } from "../repository/implements/avatar.repository";
-import { upload } from "../utils/upload.helper";
-import { BannerController } from "../controllers/implements/banner.controller";
-import { BannerService } from "../services/implements/banner.service";
-import { BannerRepository } from "../repository/implements/banner.repository";
-import { BadgeController } from "../controllers/implements/badge.controller";
-import { BadgeService } from "../services/implements/badge.service";
-import { BadgeRepository } from "../repository/implements/badge.repository";
+import { upload } from "../utils/application/upload.helper";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { container } from "../di/container";
 
 const router = Router();
 
 const controllerMap: Record<string, any> = {
-  avatars: new AvatarController(new AvatarService(new AvatarRepository())),
-  banners: new BannerController(new BannerService(new BannerRepository())),
-  badges: new BadgeController(new BadgeService(new BadgeRepository()))
+  avatars: container.avatarCtrl,
+  banners: container.bannerCtrl,
+  badges: container.badgeCtrl
 };
 
 function getController(type: string) {

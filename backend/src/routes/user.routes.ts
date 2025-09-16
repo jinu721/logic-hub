@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middlewares/auth.middleware"; 
-import { USER_ROUTES } from "../constants/routes.contants";
+import { USER_ROUTES } from "../constants/ROUTES/user.constants";
 import { container } from "../di/container";
 const router = express.Router();
 

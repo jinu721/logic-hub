@@ -388,7 +388,7 @@ export class ChallengeService implements IChallengeService {
     }
   }
 
-  async submitChallange(data: SubmitPayload, userId: string): Promise<any> {
+  async submitChallenge(data: SubmitPayload, userId: string): Promise<any> {
     try {
       const { challengeId, userCode, language } = data;
 

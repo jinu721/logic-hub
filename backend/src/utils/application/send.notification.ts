@@ -1,21 +1,10 @@
 
-import { OtpRepository } from "../../repository/implements/otp.repository";
-import { UserRepository } from "../../repository/implements/user.repository";
-import { OTPServices } from "../../services/implements/otp.service";
-import { UserService } from "../../services/implements/user.service";
 import redisClient from "../../config/redis.config";
-import { NotificationService } from "../../services/implements/notification.service";
-import { NotificationRepository } from "../../repository/implements/notification.repository";
+import { container } from "../../di/container";
 
 
-const userService = new UserService(
-  new UserRepository(),
-  new OTPServices(new OtpRepository())
-);
-
-const notificationService = new NotificationService(
-  new NotificationRepository()
-)
+const userService = container.userSvc;
+const notificationService = container.notifySvc;
 
 export const sendNotificationToAllUsers = async ({ io, type, title, message, data, socketEvent }) => {
     try {

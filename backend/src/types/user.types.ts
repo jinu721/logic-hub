@@ -25,6 +25,15 @@ interface Badge {
   timestamp: Date;
 }
 
+export interface MembershipIF {
+  planId: string;
+  startedAt: Date;
+  expiresAt: Date;
+  type: "silver" | "gold";
+  isActive: boolean;
+}
+
+
 export interface UserIF extends Document {
   email: string;
   username: string;
@@ -55,13 +64,7 @@ export interface UserIF extends Document {
   isBanned: boolean;
   isVerified: boolean;
   isOnline: boolean;
-  membership?: {
-    planId: string;
-    startedAt: Date;
-    expiresAt: Date;
-    type: "silver" | "gold";
-    isActive: boolean;
-  };
+  membership?: MembershipIF;
   dailyRewardDay: number;
   lastRewardClaimDate: Date;
   lastSeen: Date;
@@ -70,8 +73,3 @@ export interface UserIF extends Document {
   timestamp: Date;
 }
 
-export interface OtpIF {
-  email: string;
-  otp: string;
-  createdAt?: Date;
-}

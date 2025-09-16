@@ -1,7 +1,7 @@
 import { Router } from "express";
 import passport from "passport";
 import { authMiddleware } from "../middlewares/auth.middleware";
-import { AUTH_ROUTES } from "../constants/routes.contants";
+import { AUTH_ROUTES } from "../constants/ROUTES/auth.constants";
 import { container } from "../di/container";
 
 const router = Router();

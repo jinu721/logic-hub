@@ -19,9 +19,8 @@ export class UserRepository
     super(User);
   }
 
-  async createUser(user: Partial<UserIF>): Promise<UserIF | null> {
-    const newUser = new this.model(user);
-    return toLean<UserIF>(newUser.save());
+  async createUser(user: Partial<UserIF>): Promise<void> {
+    await this.create(user);
   }
 
   async getByEmailOrUsername(value: string): Promise<UserIF | null> {
