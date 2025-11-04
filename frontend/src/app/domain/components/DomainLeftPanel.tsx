@@ -46,7 +46,6 @@ const DomainLeftPanel: FC<DomainLeftPanelProps> = ({
       style={{ width: `${leftPanelWidth}%`, minWidth: "260px" }}
     >
       <div className="h-full flex flex-col">
-        {/* Top Tabs */}
         <div className="flex-shrink-0 border-b border-slate-700/30 bg-slate-800/20 overflow-x-auto">
           <div className="flex min-w-max">
             {tabs.map(({ id, label, icon: Icon, locked }) => {
@@ -94,58 +93,44 @@ const DomainLeftPanel: FC<DomainLeftPanelProps> = ({
                 </h3>
 
                 <div className="space-y-5">
-                  <div className="bg-slate-900/70 border border-slate-700/60 rounded-lg overflow-hidden">
-                    <div className="grid grid-cols-2 divide-x divide-slate-700/50">
-                      <div className="p-4">
-                        <div className="text-[11px] uppercase font-medium text-slate-400 mb-2">
-                          Input
-                        </div>
-                        <pre className="bg-slate-800/60 rounded-md p-3 text-slate-200 text-xs leading-relaxed overflow-x-auto">
-                          {`n = 5\narr = [2, 3, 1, 5, 4]`}
-                        </pre>
-                      </div>
+                  {
+                    challenge.testCases?.map((testCase, index) => (
+                      <div key={index} className="border-slate-700/30 bg-gradient-to-r from-slate-800/30 to-slate-700/20 backdrop-blur-md rounded-lg overflow-hidden">
+                        <div className="grid grid-cols-2 divide-x divide-slate-700/50">
+                          <div className="p-4">
+                            <div className="text-[11px] uppercase font-medium text-slate-400 mb-2">
+                              Input
+                            </div>
+                            <pre className="bg-slate-800/60 rounded-md p-3 text-slate-200 text-xs leading-relaxed overflow-x-auto">
+                              {testCase.input.map((input) => (
+                                `\n${input}`
+                              ))}
+                            </pre>
+                          </div>
 
-                      <div className="p-4">
-                        <div className="text-[11px] uppercase font-medium text-slate-400 mb-2">
-                          Output
+                          <div className="p-4">
+                            <div className="text-[11px] uppercase font-medium text-slate-400 mb-2">
+                              Output
+                            </div>
+                            <pre className="bg-slate-800/60 rounded-md p-3 text-emerald-400 text-xs leading-relaxed overflow-x-auto">
+                              {testCase.output}
+                            </pre>
+                          </div>
                         </div>
-                        <pre className="bg-slate-800/60 rounded-md p-3 text-emerald-400 text-xs leading-relaxed overflow-x-auto">
-                          {`[1, 2, 3, 4, 5]`}
-                        </pre>
-                      </div>
-                    </div>
 
-                    <div className="border-t border-slate-700/50 p-4">
-                      <div className="text-[11px] uppercase font-medium text-slate-400 mb-1">
-                        Explanation
-                      </div>
-                      <p className="text-slate-300 text-xs leading-relaxed">
-                        The array is sorted in ascending order.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-900/70 border border-slate-700/60 rounded-lg overflow-hidden">
-                    <div className="grid grid-cols-2 divide-x divide-slate-700/50">
-                      <div className="p-4">
-                        <div className="text-[11px] uppercase font-medium text-slate-400 mb-2">
-                          Input
+                        {testCase?.explanation && (       
+                        <div className="border-t border-slate-700/50 p-4">
+                            <div className="text-[11px] uppercase font-medium text-slate-400 mb-1">
+                              Explanation
+                            </div>
+                            <p className="text-slate-300 text-xs leading-relaxed">
+                              The array is sorted in ascending order.
+                            </p>
                         </div>
-                        <pre className="bg-slate-800/60 rounded-md p-3 text-slate-200 text-xs leading-relaxed overflow-x-auto">
-                          {`n = 3\narr = [10, -2, 7]`}
-                        </pre>
-                      </div>
-
-                      <div className="p-4">
-                        <div className="text-[11px] uppercase font-medium text-slate-400 mb-2">
-                          Output
-                        </div>
-                        <pre className="bg-slate-800/60 rounded-md p-3 text-emerald-400 text-xs leading-relaxed overflow-x-auto">
-                          {`[-2, 7, 10]`}
-                        </pre>
-                      </div>
-                    </div>
-                  </div>
+                        )}
+                      </div>    
+                    ))
+                  }
                 </div>
               </div>
 

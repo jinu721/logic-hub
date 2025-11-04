@@ -17,6 +17,7 @@ import { IHashProvider } from "../../providers/hashing/secure.hasher.interface";
 import { IPendingUserRepository } from "../../repository/interfaces/pending-user.repository.interface";
 import { generateOTP } from "../../utils/application/generate.otp";
 import { BaseService } from "../base.service";
+import { AppError } from "../../utils/application/app.error";
 
 type UserData = PublicUserDTO & {
   userRank: number;
@@ -80,7 +81,7 @@ export class UserService extends BaseService<UserIF, PublicUserDTO> implements I
     const exists =
       (await this._userRepo.getByEmailOrUsername(username)) ||
       (await this._userRepo.getByEmailOrUsername(email));
-    if (exists) throw new Error("User Already Exist");
+    if (exists) throw new AppError("User Already Exist");
 
     const hashed = await this._hashProv.hashPassword(password);
     const otp = generateOTP();
@@ -101,10 +102,11 @@ export class UserService extends BaseService<UserIF, PublicUserDTO> implements I
     if (user.loginType !== "normal")
       throw new Error("Please log in with GitHub or Google.");
 
-    const isPasswordValid = await bcrypt.compare(
+    const isPasswordValid = await this._hashProv.comparePasswords(
       password,
       user.password as string
     );
+
     if (!isPasswordValid) throw new Error("Invalid Credentials");
 
     if (user.isBanned)
@@ -140,14 +142,20 @@ export class UserService extends BaseService<UserIF, PublicUserDTO> implements I
     refreshToken: string;
     userData: PublicUserDTO;
   }> {
+    console.log("Email: ", email, "OTP: ", otp);
     const user = await this._pendingUserRepo.findPendingUserByEmail(email);
     if (!user) throw new Error("User Not Found");
     const { username, password, otp: userOtp } = user;
     if (userOtp !== Number(otp)) throw new Error("Invalid OTP");
+    console.log("User verified successfully");
+    console.log("User Creation Started");
     await this._userRepo.createUser({ username, email, password });
-    await this._pendingUserRepo.deletePendingUser(email);
+    console.log("User created successfully");
     const userData = await this._userRepo.getByEmailOrUsername(email);
+    console.log("User Data: ", userData);
     if (!userData) throw new Error("User Not Found");
+    await this._pendingUserRepo.deletePendingUser(email);
+    console.log("User deleted successfully");
     const accessToken = this._tokenProv.generateAccessToken(
       this.mapOne(userData)
     );

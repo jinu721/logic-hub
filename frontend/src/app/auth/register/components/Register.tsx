@@ -69,9 +69,10 @@ const Register: React.FC = () => {
   ) => {
     try {
       const response = await checkUser({ type, value });
+      console.log("response", response);
       setAvailability((prev) => ({
         ...prev,
-        [response.type]: response.status,
+        [type]: response.status,
       }));
       if (!response.status) {
         setErrors((prev) => ({

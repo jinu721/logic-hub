@@ -109,6 +109,7 @@ import { SolutionService } from "../services/implements/solution.service";
 import { SolutionController } from "../controllers/solution/solution.controller";
 import { IPendingUserRepository } from "../repository/interfaces/pending-user.repository.interface";
 import { PendingUserRepository } from "../repository/implements/pending-user.repository";
+import { ChallengeProgressService } from "../services/implements/progress.service";
 
 interface Container {
   tokenProv: ITokenProvider;
@@ -213,6 +214,7 @@ container.userSvc = new UserService(
 container.notifySvc = new NotificationService(container.notifyRepo);
 container.analyticsSvc = new AdminAnalyticsService(container.analysisRepo,container.leaderboardRepo);
 container.challengeSvc = new ChallengeService(container.challengeRepo,container.levelRepo,container.userRepo,container.progressRepo);
+container.progressSvc = new ChallengeProgressService(container.progressRepo,container.userRepo);
 container.groupSvc = new GroupService(container.groupRepo,container.conversionRepo);
 container.conversationSvc = new ConversationService(container.conversionRepo,container.groupRepo,container.userRepo);
 container.levelSvc = new LevelService(container.levelRepo,container.userRepo);

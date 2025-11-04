@@ -1,4 +1,4 @@
-import { BadgesModel } from "../../models/badges.model";
+import { BadgesModel } from "../../models/badge.model";
 import { InventoryIF } from "../../types/inventory.types";
 import { BaseRepository } from "../base.repository";
 import { IBadgeRepository } from "../interfaces/badge.repository.interface";

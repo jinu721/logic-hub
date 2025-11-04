@@ -44,7 +44,7 @@ export class AuthController implements IAuthController {
     const { accessToken, refreshToken, userData } = await this._userSvc.verifyOTP(email, otp);
 
     await this._tokenSvc.createToken({
-      userId: userData._id,
+      userId: userData.userId,
       accessToken,
       refreshToken,
       ip: req.ip || req.connection.remoteAddress,

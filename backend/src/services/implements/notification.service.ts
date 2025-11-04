@@ -6,8 +6,9 @@ import {
   toPublicNotificationDTOs,
 } from "../../mappers/notification.dto";
 import { INotificationRepository } from "../../repository/interfaces/notification.repository.interface";
+import { toObjectId } from "../../utils/application/objectId.convertion";
 
-export class NotificationService implements INotificationService {
+export class NotificationService  implements INotificationService {
   constructor(private readonly _notifyRep: INotificationRepository) {}
 
   private toDTO(notification: NotificationIF): PublicNotificationDTO {
@@ -37,12 +38,12 @@ export class NotificationService implements INotificationService {
     id: string,
     data: Partial<NotificationIF>
   ): Promise<PublicNotificationDTO | null> {
-    const updated = await this._notifyRep.updateNotification(id, data);
+    const updated = await this._notifyRep.updateNotification(toObjectId(id), data);
     return updated ? this.toDTO(updated) : null;
   }
 
   async markAllAsRead(userId: string): Promise<boolean> {
-    return await this._notifyRep.markAllAsRead(userId);
+    return await this._notifyRep.markAllAsRead(toObjectId(userId));
   }
 
   async deleteAll(userId: string): Promise<boolean> {

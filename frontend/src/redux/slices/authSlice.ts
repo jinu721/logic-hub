@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { register,verifyOtp, login } from "@/services/client/clientServices";
-import { LoginIF, RegiterIF } from "@/types/auth.types";
+import { LoginIF, RegisterIF } from "@/types/auth.types";
 
 export const userRegister = createAsyncThunk<
   string,
-  RegiterIF,
+  RegisterIF,
   { rejectValue: string }
->("auth/register", async (userData: RegiterIF, { rejectWithValue }) => {
+>("auth/register", async (userData: RegisterIF, { rejectWithValue }) => {
   try {
     await register(userData);
     return "Registration successful! Please verify your email.";

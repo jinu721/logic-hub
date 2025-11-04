@@ -2,7 +2,7 @@ import { UserIF } from "../types/user.types";
 import { IPublicInventoryDTO, toPublicInventoryDTO, toPublicInventoryDTOs } from "./inventory.dto";
 
 export interface PublicUserDTO {
-  _id: string;
+  userId: string;
   email: string;
   username: string;
   bio: string;
@@ -43,7 +43,7 @@ export interface PublicUserDTO {
 
 export const toPublicUserDTO = (user: UserIF & { currentUser?: boolean }): PublicUserDTO => {
   return {
-    _id: user._id? user._id.toString() : "",
+    userId: user._id? user._id.toString() : "",
     email: user.email,
     username: user.username,
     bio: user.bio,

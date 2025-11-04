@@ -15,6 +15,9 @@ export class TokenProvider implements ITokenProvider {
   generateResetToken(payload: any): string {
     return jwt.sign(payload, env.RESET_TOKEN_SECRET!, { expiresIn: "15m" });
   }
+  verifyLinkToken(token: string): any {
+    return jwt.verify(token, env.VERIFY_TOKEN_SECRET!);
+  }
   verifyToken(token: string): any {
     return jwt.verify(token, env.ACCESS_TOKEN_SECRET!);
   }

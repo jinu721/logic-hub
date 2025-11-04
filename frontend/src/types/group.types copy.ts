@@ -1,26 +1,53 @@
-import { Document, Types } from 'mongoose';
 
-export interface GroupIF extends Document {
+export interface GroupIF  {
+  _id: string;
   name: string;
   description?: string;
   image?: string;
-  createdBy: Types.ObjectId;
-  admins: Types.ObjectId[];
-  members: Types.ObjectId[];
+  createdBy: string;
+  admins: string[];
+  members: string[];
   groupType: 'public-open' | 'public-approval';
-  userRequests: Types.ObjectId[];
+  userRequests: string[];
   voiceRoom?: {
     topic?: string;
     scheduledFor?: Date;
     durationMinutes?: number;
     isActive: boolean;
-    host: Types.ObjectId;
-    participants: Types.ObjectId[];
+    host: string;
+    participants: string[];
     startAt: Date;
     endAt: Date;
-    mutedUsers: Types.ObjectId[];
+    mutedUsers: string[];
   };
   isDeleted:boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+
+export interface GroupDataIF {
+  name: string;
+  description: string;
+  isPrivate: boolean;
+  members: string[];
+  groupImage?: File;
+}
+
+export interface UpdateGroupIF {
+  groupId: string;
+  name?: string;
+  description?: string;
+  banner?: string;
+}
+
+export interface MemberUpdateIF {
+  userId: string;
+  groupId: string;
+  members: string[];
+}
+
+export interface AdminUpdateIF {
+  groupId: string;
+  userId: string;
 }

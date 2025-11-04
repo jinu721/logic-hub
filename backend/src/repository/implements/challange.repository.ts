@@ -1,4 +1,4 @@
-import { ChallengeDomain } from "../../models/challange.model";
+import { ChallengeDomain } from "../../models/challenge.model";
 import { BaseRepository } from "../base.repository";
 import { IChallengeRepository } from "../interfaces/challange.repository.interface";
 import { ChallengeDomainIF } from "../../types/challenge.types";

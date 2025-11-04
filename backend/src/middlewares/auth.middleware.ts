@@ -41,6 +41,10 @@ export const authMiddleware = async (
       return;
     }
 
+
+    console.log("User authenticated successfully");
+    // console.log("User: ", user);
+
     (req as CustomRequest).user = user;
 
     next();

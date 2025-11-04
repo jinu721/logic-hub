@@ -1,9 +1,11 @@
+import { Types } from "mongoose";
 import { PublicChallengeProgressDTO, toPublicProgressDTO, toPublicProgressDTOs } from "../../mappers/progress.dto";
 import { IChallengeProgressRepository } from "../../repository/interfaces/progress.repository.interface";
 import { IUserRepository } from "../../repository/interfaces/user.repository.interface";
 import { ChallengeProgressIF } from "../../types/progress.types";
 import { UserIF } from "../../types/user.types";
 import { IChallengeProgressService } from "../interfaces/progress.service.interface";
+import { toObjectId } from "../../utils/application/objectId.convertion";
 
 export class ChallengeProgressService implements IChallengeProgressService {
 
@@ -22,12 +24,12 @@ export class ChallengeProgressService implements IChallengeProgressService {
     challengeId: string;
   }): Promise<PublicChallengeProgressDTO[]> {
     const {userId,challengeId} = data;
-    const progresses = await this._proggressRepo.getProgressByUserAndChallenge(userId,challengeId);
+    const progresses = await this._proggressRepo.getProgressByUserAndChallenge(toObjectId(userId),toObjectId(challengeId));
     return toPublicProgressDTOs(progresses);
   }
 
   async getProgressById(id: string): Promise<PublicChallengeProgressDTO | null> {
-    const progress = await this._proggressRepo.getProgressById(id);
+    const progress = await this._proggressRepo.getProgressById(toObjectId(id));
     return toPublicProgressDTO(progress as ChallengeProgressIF);
   }
 
@@ -37,10 +39,11 @@ export class ChallengeProgressService implements IChallengeProgressService {
   }
 
   async getRecentProgress(username: string): Promise<PublicChallengeProgressDTO[] | null> {
+    console.log("Fetching recent progress for username: ", username);
     const user:UserIF | null = await this._userRepo.getUserByName(username);
     if(!user) throw new Error("User not found");
-    const userId = user._id as string || "";
-    const progresses = await this._proggressRepo.getRecentProgress(userId);
+    const progresses = await this._proggressRepo.getRecentProgress(user._id as Types.ObjectId);
+    console.log("Recent progresses: ", progresses);
     return toPublicProgressDTOs(progresses as ChallengeProgressIF[]);
   }
 
@@ -48,27 +51,30 @@ export class ChallengeProgressService implements IChallengeProgressService {
     id: string,
     data: Partial<ChallengeProgressIF>
   ): Promise<PublicChallengeProgressDTO | null> {
-    const progress = await this._proggressRepo.updateProgress(id, data);
+    const progress = await this._proggressRepo.updateProgress(toObjectId(id), data);
     return toPublicProgressDTO(progress as ChallengeProgressIF);
   }
 
   async deleteProgressById(id: string): Promise<boolean> {
-    return await this._proggressRepo.deleteProgressById(id);
+    return await this._proggressRepo.deleteProgressById(toObjectId(id));
   }
 
   async getAllProgressByUser(userId: string): Promise<PublicChallengeProgressDTO[]> {
-    const progresses = await this._proggressRepo.getAllProgressByUser(userId);
+    const progresses = await this._proggressRepo.getAllProgressByUser(toObjectId(userId));
     return toPublicProgressDTOs(progresses);
   }
 
   async getAllProgressByChallenge(challengeId: string): Promise<PublicChallengeProgressDTO[]> {
-    const progresses = await this._proggressRepo.getAllProgressByChallenge(challengeId);
+    const progresses = await this._proggressRepo.getAllProgressByChallenge(toObjectId(challengeId));
     return toPublicProgressDTOs(progresses);
   }
   async getUserHeatmapData(userId: string, year: number): Promise<{ [date: string]: number }> {
-    const submissions = await this._proggressRepo.getSubmissionsByUserAndYear(userId, year);
+    const submissions = await this._proggressRepo.getSubmissionsByUserAndYear(toObjectId(userId), year);
     const heatMapData: Record<string, number>  = {};
 
+    if(!submissions || submissions.length ===0){
+      return heatMapData;
+    }
 
     submissions.forEach((s)=>{
       const date = s.submittedAt.toISOString().split("T")[0];

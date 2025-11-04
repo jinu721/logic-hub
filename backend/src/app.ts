@@ -16,7 +16,7 @@ redisConnect();
 
 import './config/passport.config';
 import './utils/application/crone.helper';
-
+import './models/index';
 
 
 import authRoutes from './routes/auth.routes'

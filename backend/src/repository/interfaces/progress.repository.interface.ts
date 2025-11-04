@@ -8,6 +8,7 @@ export interface IChallengeProgressRepository {
   updateProgress(id: Types.ObjectId, data: Partial<ChallengeProgressIF>): Promise<ChallengeProgressIF | null>;
   getLatestSubmissionByUserAndChallenge(userId: Types.ObjectId, challengeId: Types.ObjectId): Promise<ChallengeProgressIF | null>;
   getAllSubmissionsByUserAndChallenge(userId: Types.ObjectId, challengeId: Types.ObjectId): Promise<ChallengeProgressIF[]>;
+  getRecentProgress(userId: Types.ObjectId): Promise<ChallengeProgressIF[] | null>;
   deleteProgressById(id: Types.ObjectId): Promise<boolean>;
   getAllProgressByUser(userId: Types.ObjectId): Promise<ChallengeProgressIF[]>;
   findCompletedDomainsByUser(userId: Types.ObjectId): Promise<number>;
