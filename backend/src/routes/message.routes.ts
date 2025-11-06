@@ -1,8 +1,8 @@
 import express from "express";
-import { upload } from "../utils/application/upload.helper";
-import { authMiddleware } from "../middlewares/auth.middleware";
-import { MESSAGE_ROUTES } from "../constants/ROUTES/message.constants";
-import { container } from "../di/container";
+import { upload } from "../shared/utils/application/upload.helper";
+import { authMiddleware } from "../shared/middlewares/auth.middleware";
+import { MESSAGE_ROUTES } from "../shared/constants/ROUTES/message.constants";
+import { container } from "../di/types";
 
 const router = express.Router();
 

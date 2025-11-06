@@ -1,5 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
-import { ChallengeProgressIF } from '../types/progress.types';
+import { ChallengeProgressIF } from '../shared/types/submission.types';
 
 
 const ChallengeProgressSchema = new Schema<ChallengeProgressIF>({

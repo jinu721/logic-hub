@@ -1,5 +1,5 @@
 import { PublicMarketItemDTO } from "../../mappers/market.dto";
-import { MarketItemIF } from "../../types/market.types";
+import { MarketItemIF } from "../../shared/types/market.types";
 
 export interface IMarketService {
   createItem(data: Partial<MarketItemIF>): Promise<PublicMarketItemDTO>;

@@ -3,13 +3,12 @@ import {
   ExtendedSocket,
   GroupUpdateData,
   VoiceRoomData,
-} from "../../types/socket.types";
-import { AppContainer } from "../../utils/socket/app.container";
-import { generateSystemMessage } from "../../utils/application/generate.message";
+} from "../../shared/types/socket.types";
+import { generateSystemMessage } from "../../shared/utils/application/generate.message";
 import { Types } from "mongoose";
 
 export class GroupHandler {
-  constructor(private io: Server) {}
+  constructor(private io: Server, private container: any) {}
 
   public setupGroupHandlers(socket: ExtendedSocket): void {
     socket.on("update_group", this.handleUpdateGroup.bind(this, socket));
@@ -50,53 +49,53 @@ export class GroupHandler {
 
       switch (type) {
         case "add_members":
-          updatedConversation = await AppContainer.groupService.addMembers(
+          updatedConversation = await this.container.groupService.addMembers(
             groupId,
             members || []
           );
           break;
         case "remove_member":
-          updatedConversation = await AppContainer.groupService.removeMember(
+          updatedConversation = await this.container.groupService.removeMember(
             groupId,
             removeMember || ""
           );
           break;
         case "make_admin":
-          updatedConversation = await AppContainer.groupService.makeAdmin(
+          updatedConversation = await this.container.groupService.makeAdmin(
             conversationId,
             groupId,
             userId || ""
           );
           break;
         case "remove_admin":
-          updatedConversation = await AppContainer.groupService.removeAdmin(
+          updatedConversation = await this.container.groupService.removeAdmin(
             conversationId,
             groupId,
             userId || ""
           );
           break;
         case "edit_group_info":
-          updatedConversation = await AppContainer.groupService.updateGroupInfo(
+          updatedConversation = await this.container.groupService.updateGroupInfo(
             conversationId,
             groupId,
             newGroupData
           );
           break;
         case "leave_group":
-          updatedConversation = await AppContainer.groupService.leaveGroup(
+          updatedConversation = await this.container.groupService.leaveGroup(
             conversationId,
             groupId,
             userId || ""
           );
           break;
         case "delete_group":
-          updatedConversation = await AppContainer.groupService.deleteGroup(
+          updatedConversation = await this.container.groupService.deleteGroup(
             groupId
           );
           break;
         case "join_group":
           console.log("JOIN GROUP");
-          const data = await AppContainer.groupService.sendJoinRequest(
+          const data = await this.container.groupService.sendJoinRequest(
             groupId,
             userId || ""
           );
@@ -108,7 +107,7 @@ export class GroupHandler {
           break;
         case "approve_group":
           updatedConversation =
-            await AppContainer.groupService.acceptJoinRequest(
+            await this.container.groupService.acceptJoinRequest(
               conversationId,
               groupId,
               userId || ""
@@ -125,6 +124,7 @@ export class GroupHandler {
       ) {
         try {
           const systemMsg = await generateSystemMessage(
+            this.container,
             type,
             finalConversationId,
             finalUserId as string,
@@ -140,7 +140,7 @@ export class GroupHandler {
               .emit("recive_message", {conversationId:systemMsg.conversationId, message: systemMsg});
           }
 
-          const updatedGroup = await AppContainer.groupService.findGroupById(
+          const updatedGroup = await this.container.groupService.findGroupById(
             groupId
           );
 
@@ -176,7 +176,7 @@ export class GroupHandler {
     { groupId, roomData }: VoiceRoomData
   ): Promise<void> {
     try {
-      await AppContainer.groupService.updateGroup(groupId, {
+      await this.container.groupService.updateGroup(groupId, {
         voiceRoom: roomData,
       });
       socket.emit("voice-room-created", "Thanks");

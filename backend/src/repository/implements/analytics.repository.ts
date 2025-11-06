@@ -1,8 +1,8 @@
 import { IAdminAnalyticsRepository } from "../interfaces/analytics.repository.interface";
-import { UserAnalytics, ChallengeStats, LeaderboardTrends } from "../../types/analytics.types";
+import { UserAnalytics, ChallengeStats, LeaderboardTrends } from "../../shared/types/analytics.types";
 import User from "../../models/user.model";
 import { ChallengeProgress } from "../../models/progress.model";
-import { ChallengeDomain } from "../../models/challenge.model";
+import { ChallengeDomain } from "../../modules/challenge/models/challenge.model";
 
 export class AdminAnalyticsRepository implements IAdminAnalyticsRepository {
   async getUserAnalytics(): Promise<UserAnalytics> {

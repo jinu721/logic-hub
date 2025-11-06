@@ -17,6 +17,7 @@ export const ROUTES = {
     ME: "/users/me",
     SEARCH: "/users",
     GIFT: (userId: Id, type: string) => `/users/${userId}/gift/${type}`,
+    CHANGE_PASSWORD: "/users/change-password",
   },
 
   GROUPS: {

@@ -1,7 +1,7 @@
 import { UpdateQuery } from "mongoose";
 import { MarketItem } from "../../models/market.model";
-import { MarketItemIF } from "../../types/market.types";
-import { BaseRepository } from "../base.repository";
+import { MarketItemIF } from "../../shared/types/market.types";
+import { BaseRepository } from "../../shared/core/base.repository";
 import { IMarketRepository } from "../interfaces/market.repository.interface";
 
 export class MarketRepository

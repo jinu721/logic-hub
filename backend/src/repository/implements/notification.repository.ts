@@ -1,12 +1,12 @@
 import { Types, UpdateQuery } from "mongoose";
 import { INotificationRepository } from "../interfaces/notification.repository.interface";
 import { NotificationModel } from "../../models/notification.model";
-import { NotificationIF } from "../../types/notification.type";
-import { BaseRepository } from "../base.repository";
+import { NotificationIF } from "../../shared/types/notification.type";
+import { BaseRepository } from "../../shared/core/base.repository";
 import {
   toLean,
   toLeanMany,
-} from "../../utils/database/query.utils";
+} from "../../shared/utils/database/query.utils";
 
 export class NotificationRepository
   extends BaseRepository<NotificationIF>

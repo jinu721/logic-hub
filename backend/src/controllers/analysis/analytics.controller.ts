@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { IAdminAnalyticsController } from "../analysis/analytics.controller.interface";
 import { IAdminAnalyticsService } from "../../services/interfaces/analytics.service.interface";
-import { HttpStatus } from "../../constants/http.status";
-import { sendSuccess } from "../../utils/application/response.util";
-import { asyncHandler } from "../../utils/application/async.handler";
+import { HttpStatus } from "../../shared/constants/http.status";
+import { sendSuccess } from "../../shared/utils/application/response.util";
+import { asyncHandler } from "../../shared/utils/application/async.handler";
 
 export class AdminAnalyticsController implements IAdminAnalyticsController {
   constructor(private readonly _analyticsSvc: IAdminAnalyticsService) {}

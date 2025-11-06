@@ -1,4 +1,4 @@
-import { SolutionIF } from "../types/solutions.types";
+import { SolutionIF } from "../shared/types/solutions.types";
 import { PublicChallengeDTO } from "./challenge.dto";
 import { PublicUserDTO, toPublicUserDTO } from "./user.dto";
 

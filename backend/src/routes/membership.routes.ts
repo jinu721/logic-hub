@@ -1,7 +1,7 @@
 import express from "express";
-import { authMiddleware } from "../middlewares/auth.middleware";
-import { MEMBERSHIP_ROUTES } from "../constants/ROUTES/membership.constants";
-import { container } from "../di/container";
+import { authMiddleware } from "../shared/middlewares/auth.middleware";
+import { MEMBERSHIP_ROUTES } from "../shared/constants/ROUTES/membership.constants";
+import { container } from "../di/types";
 
 const router = express.Router();
 

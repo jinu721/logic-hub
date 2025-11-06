@@ -1,4 +1,4 @@
-import { SolutionIF } from "../../types/solutions.types";
+import { SolutionIF } from "../../shared/types/solutions.types";
 
 export interface ISolutionRepository {
   create(data: Partial<SolutionIF>): Promise<SolutionIF>;

@@ -1,4 +1,4 @@
-import { InventoryIF } from "../../types/inventory.types";
+import { InventoryIF } from "../../shared/types/inventory.types";
 import { IBadgeService } from "../interfaces/badge.service.interface";
 import { IBadgeRepository } from "../../repository/interfaces/badge.repository.interface";
 import cloudinary from "../../config/cloudinary.config";

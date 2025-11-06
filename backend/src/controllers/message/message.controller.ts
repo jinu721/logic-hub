@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { IMessageService } from "../../services/interfaces/message.service.interface";
-import { HttpStatus } from "../../constants/http.status";
-import { uploadFile } from "../../utils/application/cloudnary.store";
+import { HttpStatus } from "../../shared/constants/http.status";
+import { uploadFile } from "../../shared/utils/application/cloudinary.store";
 import { IMessageController } from "../message/message.controller.interface";
-import { sendSuccess } from "../../utils/application/response.util";
-import { asyncHandler } from "../../utils/application/async.handler";
-import { AppError } from "../../utils/application/app.error";
+import { sendSuccess } from "../../shared/utils/application/response.util";
+import { asyncHandler } from "../../shared/utils/application/async.handler";
+import { AppError } from "../../shared/utils/application/app.error";
 
 export class MessageController implements IMessageController {
   constructor(private readonly _messageSvc: IMessageService) {}

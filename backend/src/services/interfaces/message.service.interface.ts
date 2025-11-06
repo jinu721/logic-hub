@@ -1,5 +1,5 @@
 import { PublicMessageDTO } from "../../mappers/message.dto";
-import { MessageIF } from "../../types/message.types";
+import { MessageIF } from "../../shared/types/message.types";
 
 export interface IMessageService {
     createMessage(data: MessageIF & { replyTo?: string },accessToken:string): Promise<PublicMessageDTO>;

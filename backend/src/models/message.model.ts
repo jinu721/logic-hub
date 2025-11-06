@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { MessageIF } from '../types/message.types';
+import { MessageIF } from '../shared/types/message.types';
 
 
 

@@ -1,5 +1,5 @@
 import { PublicUserDTO } from "../../mappers/user.dto";
-import { UserIF } from "../../types/user.types";
+import { UserIF } from "../../shared/types/user.types";
 
 export interface IUserService {
   register(username: string, email: string, password: string): Promise<{ email: string }>;

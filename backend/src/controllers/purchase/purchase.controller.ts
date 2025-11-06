@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { HttpStatus } from "../../constants/http.status";
+import { HttpStatus } from "../../shared/constants/http.status";
 import { IPurchaseController } from "./purchase.controller.interface";
 import { razorpay } from "../../config/razorpay.config";
 import { env } from "../../config/env";
 import { IPurchaseService } from "../../services/interfaces/purchase.service.interface";
-import { sendSuccess } from "../../utils/application/response.util";
-import { asyncHandler } from "../../utils/application/async.handler";
-import { AppError } from "../../utils/application/app.error";
+import { sendSuccess } from "../../shared/utils/application/response.util";
+import { asyncHandler } from "../../shared/utils/application/async.handler";
+import { AppError } from "../../shared/utils/application/app.error";
 
 export class PurchaseController implements IPurchaseController {
   constructor(private readonly _purchaseSvc: IPurchaseService) {}

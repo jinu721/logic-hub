@@ -1,4 +1,4 @@
-import { ReportIF } from "../types/report.types";
+import { ReportIF } from "../shared/types/report.types";
 import { PublicUserDTO} from "./user.dto";
 
 export interface PublicReportDTO {

@@ -1,11 +1,10 @@
 import { Server } from "socket.io";
-import { ExtendedSocket } from "../../types/socket.types";
-import { AppContainer } from "../../utils/socket/app.container";
-import { sendNotificationToAllUsers } from "../../utils/application/send.notification";
+import { ExtendedSocket } from "../../shared/types/socket.types";
+import { sendNotificationToAllUsers } from "../../shared/utils/application/send.notification";
 import redisClient from "../../config/redis.config";
 
 export class NotificationHandler {
-  constructor(private io: Server) {}
+  constructor(private io: Server, private container: any) {}
 
   public setupNotificationHandlers(socket: ExtendedSocket): void {
     socket.on("admin_add_domain", this.handleAdminAddDomain.bind(this, socket));
@@ -58,7 +57,7 @@ export class NotificationHandler {
           type: "gift",
           isRead: false
         });
-        await AppContainer.notificationService.create({
+        await this.container.notificationService.create({
           userId: userId,
           title: "You've received a gift!",
           itemData:item,

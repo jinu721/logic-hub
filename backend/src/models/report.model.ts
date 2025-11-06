@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { ReportIF } from "../types/report.types";
+import { ReportIF } from "../shared/types/report.types";
 
 const reportSchema = new Schema<ReportIF>({
     reporter: {

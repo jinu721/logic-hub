@@ -1,5 +1,5 @@
 import { PublicNotificationDTO } from "../../mappers/notification.dto";
-import { NotificationIF } from "../../types/notification.type";
+import { NotificationIF } from "../../shared/types/notification.type";
 
 export interface INotificationService {
   createNotification(data: NotificationIF): Promise<PublicNotificationDTO>;

@@ -104,6 +104,14 @@ export const getCrrentUserFriends = async () => {
 };
 
 
+export const changePassword = async (currentPassword: string, newPassword: string) => {
+  const response = await axiosInstance.post(ROUTES.USERS.CHANGE_PASSWORD, {
+    currentPassword,
+    newPassword,
+  });
+  return response.data;
+};
+
 // Group related calls
 
 

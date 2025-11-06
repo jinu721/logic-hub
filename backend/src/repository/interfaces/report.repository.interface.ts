@@ -1,4 +1,4 @@
-import { ReportIF, ReportStatus } from "../../types/report.types";
+import { ReportIF, ReportStatus } from "../../shared/types/report.types";
 
 export interface IReportRepository {
   createReport(data: ReportIF): Promise<ReportIF>;

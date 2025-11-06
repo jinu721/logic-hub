@@ -1,12 +1,12 @@
 import { INotificationService } from "../interfaces/notification.service.interface";
-import { NotificationIF } from "../../types/notification.type";
+import { NotificationIF } from "../../shared/types/notification.type";
 import {
   PublicNotificationDTO,
   toPublicNotificationDTO,
   toPublicNotificationDTOs,
 } from "../../mappers/notification.dto";
 import { INotificationRepository } from "../../repository/interfaces/notification.repository.interface";
-import { toObjectId } from "../../utils/application/objectId.convertion";
+import { toObjectId } from "../../shared/utils/application/objectId.convertion";
 
 export class NotificationService  implements INotificationService {
   constructor(private readonly _notifyRep: INotificationRepository) {}

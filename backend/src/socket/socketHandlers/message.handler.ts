@@ -4,13 +4,12 @@ import {
   MessageData,
   PollVoteData,
   TypingData,
-} from "../../types/socket.types";
-import { AppContainer } from "../../utils/socket/app.container";
+} from "../../shared/types/socket.types";
 import redisClient from "../../config/redis.config";
 import { PublicUserDTO } from "../../mappers/user.dto";
 
 export class MessageHandler {
-  constructor(private io: Server) {}
+  constructor(private io: Server, private container: any) {}
 
   public setupMessageHandlers(socket: ExtendedSocket): void {
     socket.on("send_message", this.handleSendMessage.bind(this, socket));
@@ -31,11 +30,11 @@ export class MessageHandler {
   ): Promise<void> {
     console.log(`Message Data`, data);
     try {
-      const msg: any = await AppContainer.messageService.createMessage(
+      const msg: any = await this.container.messageService.createMessage(
         data as any,
         accessToken
       );
-      await AppContainer.conversationService.updateLastMessage(
+      await this.container.conversationService.updateLastMessage(
         msg.conversationId,
         msg._id
       );
@@ -47,7 +46,7 @@ export class MessageHandler {
       this.io.to(data.conversationId).emit("update_conversation");
 
       const conversation =
-        await AppContainer.conversationService.getConversationById(
+        await this.container.conversationService.getConversationById(
           msg.conversationId
         );
 
@@ -64,7 +63,7 @@ export class MessageHandler {
       );
 
       const updatedConv =
-        await AppContainer.conversationService.addUnreadCountsForUsers(
+        await this.container.conversationService.addUnreadCountsForUsers(
           msg.conversationId,
           otherUserIds
         );
@@ -99,11 +98,11 @@ export class MessageHandler {
   ): Promise<void> {
     try {
       console.log("Marking User started",userId);
-      await AppContainer.messageService.markMessagesAsSeen(
+      await this.container.messageService.markMessagesAsSeen(
         conversationId,
         userId
       );
-      const conversations = await AppContainer.conversationService.markAsRead(
+      const conversations = await this.container.conversationService.markAsRead(
         conversationId,
         userId
       );
@@ -114,7 +113,7 @@ export class MessageHandler {
 
       console.log("Message Marked as Read");
 
-      const user = await AppContainer.userService.findUserById(userId);
+      const user = await this.container.userService.findUserById(userId);
 
       if (!user) {
         throw new Error("User not found");
@@ -145,7 +144,7 @@ export class MessageHandler {
     { messageId }: { messageId: string }
   ): Promise<void> {
     try {
-      const deleted = await AppContainer.messageService.deleteMessage(
+      const deleted = await this.container.messageService.deleteMessage(
         messageId
       );
       if (!deleted) {
@@ -167,7 +166,7 @@ export class MessageHandler {
     { messageId, newContent }: { messageId: string; newContent: string }
   ): Promise<void> {
     try {
-      const updated = await AppContainer.messageService.editMessage(
+      const updated = await this.container.messageService.editMessage(
         messageId,
         newContent
       );
@@ -194,7 +193,7 @@ export class MessageHandler {
   //   }: { messageId: string; userId: string; emoji: string }
   // ): Promise<void> {
   //   try {
-  //     const updated = await AppContainer.messageService.addReaction(
+  //     const updated = await this.container.messageService.addReaction(
   //       messageId,
   //       userId,
   //       emoji
@@ -223,7 +222,7 @@ export class MessageHandler {
   }: { messageId: string; userId: string; emoji: string }
 ): Promise<void> {
   try {
-    const updated = await AppContainer.messageService.toggleReaction(
+    const updated = await this.container.messageService.toggleReaction(
       messageId,
       userId,
       emoji
@@ -248,7 +247,7 @@ export class MessageHandler {
     { conversationId, userId }: TypingData
   ): Promise<void> {
     try {
-      const conversation = await AppContainer.conversationService.setTypingUser(
+      const conversation = await this.container.conversationService.setTypingUser(
         conversationId,
         userId
       );
@@ -270,7 +269,7 @@ export class MessageHandler {
   ): Promise<void> {
     try {
       const conversation =
-        await AppContainer.conversationService.removeTypingUser(
+        await this.container.conversationService.removeTypingUser(
           conversationId,
           userId
         );

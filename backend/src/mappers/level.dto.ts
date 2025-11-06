@@ -1,4 +1,4 @@
-import { LevelIF } from "../types/level.types";
+import { LevelIF } from "../shared/types/level.types";
 
 export interface PublicLevelDTO {
   _id: string;

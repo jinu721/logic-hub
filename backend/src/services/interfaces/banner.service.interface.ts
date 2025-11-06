@@ -1,5 +1,5 @@
 import { IPublicInventoryDTO } from "../../mappers/inventory.dto";
-import { InventoryIF } from "../../types/inventory.types";
+import { InventoryIF } from "../../shared/types/inventory.types";
 
 export interface IBannerService {
   createBanner(data: Partial<InventoryIF>): Promise<IPublicInventoryDTO>;

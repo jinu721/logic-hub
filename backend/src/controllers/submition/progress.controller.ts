@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { IChallengeProgressController } from "./progress.controller.interface";
 import { IChallengeProgressService } from "../../services/interfaces/progress.service.interface";
-import { HttpStatus } from "../../constants/http.status";
-import { sendSuccess } from "../../utils/application/response.util";
-import { asyncHandler } from "../../utils/application/async.handler";
-import { AppError } from "../../utils/application/app.error";
+import { HttpStatus } from "../../shared/constants/http.status";
+import { sendSuccess } from "../../shared/utils/application/response.util";
+import { asyncHandler } from "../../shared/utils/application/async.handler";
+import { AppError } from "../../shared/utils/application/app.error";
 
 export class ChallengeProgressController implements IChallengeProgressController {
   constructor(private readonly _progressSvc: IChallengeProgressService) {}

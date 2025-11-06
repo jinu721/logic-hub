@@ -1,7 +1,7 @@
 import { Level } from "../../models/level.model";
-import { BaseRepository } from "../base.repository";
+import { BaseRepository } from "../../shared/core/base.repository";
 import { ILevelRepository } from "../interfaces/level.repository.interface";
-import { LevelIF } from "../../types/level.types";
+import { LevelIF } from "../../shared/types/level.types";
 
 export class LevelRepository extends BaseRepository<LevelIF> implements ILevelRepository {
     constructor() {

@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { authMiddleware } from "../middlewares/auth.middleware";
-import { LEVEL_ROUTES } from "../constants/ROUTES/level.constants";
-import { container } from "../di/container";
+import { authMiddleware } from "../shared/middlewares/auth.middleware";
+import { LEVEL_ROUTES } from "../shared/constants/ROUTES/level.constants";
+import { container } from "../di/types";
 
 const router: Router = Router();
 

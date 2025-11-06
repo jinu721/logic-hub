@@ -2,11 +2,11 @@ import {
   IChallengeService,
   SubmitPayload,
 } from "../interfaces/challange.service.interface";
-import { ChallengeDomainIF, ChallengeType } from "../../types/challenge.types";
+import { ChallengeDomainIF, ChallengeType } from "../../shared/types/challenge.types";
 import { Types } from "mongoose";
 import { runInWorkerThread } from "../../worker/run.worker";
-import { generateExecutableCode } from "../../utils/execution/generate.executable.code";
-import { isEqual } from "../../utils/execution/compare.helper";
+import { generateExecutableCode } from "../../shared/utils/execution/generate.executable.code";
+import { isEqual } from "../../shared/utils/execution/compare.helper";
 import {
   PublicChallengeDTO,
   toPublicChallengeDTO,

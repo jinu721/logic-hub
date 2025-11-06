@@ -1,5 +1,5 @@
 import { Types, UpdateQuery } from "mongoose";
-import { NotificationIF } from "../../types/notification.type"; 
+import { NotificationIF } from "../../shared/types/notification.type"; 
 
 export interface INotificationRepository {
   createNotification(data: Partial<NotificationIF>): Promise<NotificationIF>;

@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { ConversationIF } from "../../types/conversation.types";
+import { ConversationIF } from "../../shared/types/conversation.types";
 
 export interface IConversationRepository {
     findOneToOne(userA: string, userB: string): Promise<ConversationIF | null>;

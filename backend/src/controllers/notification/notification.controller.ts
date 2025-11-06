@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { INotificationController } from "./notification.controller.interface";
-import { HttpStatus } from "../../constants/http.status";
-import { sendSuccess } from "../../utils/application/response.util";
+import { HttpStatus } from "../../shared/constants/http.status";
+import { sendSuccess } from "../../shared/utils/application/response.util";
 import { INotificationService } from "../../services/interfaces/notification.service.interface";
 import { IUserService } from "../../services/interfaces/user.services.interface";
-import { asyncHandler } from "../../utils/application/async.handler";
-import { AppError } from "../../utils/application/app.error";
+import { asyncHandler } from "../../shared/utils/application/async.handler";
+import { AppError } from "../../shared/utils/application/app.error";
 
 export class NotificationController implements INotificationController {
   constructor(

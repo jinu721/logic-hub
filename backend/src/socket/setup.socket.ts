@@ -1,15 +1,15 @@
 import { Server } from "socket.io";
-import { ExtendedSocket } from "../types/socket.types";
+import { ExtendedSocket } from "@shared/types/socket.types";
 import { MessageHandler } from "./socketHandlers/message.handler";
 import { GroupHandler } from "./socketHandlers/group.handler";
 import { NotificationHandler } from "./socketHandlers/notification.handler";
 import { UserHandler } from "./socketHandlers/user.handler";
 
-export const setupSocket = (io: Server) => {
-  const messageHandler = new MessageHandler(io);
-  const groupHandler = new GroupHandler(io);
-  const notificationHandler = new NotificationHandler(io);
-  const userHandler = new UserHandler(io);
+export const setupSocket = (io: Server,container: any) => {
+  const messageHandler = new MessageHandler(io,container);
+  const groupHandler = new GroupHandler(io,container);
+  const notificationHandler = new NotificationHandler(io,container);
+  const userHandler = new UserHandler(io,container);
 
   io.on("connection", (socket: ExtendedSocket) => {
     messageHandler.setupMessageHandlers(socket);

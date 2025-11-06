@@ -1,8 +1,8 @@
 import { UpdateQuery } from "mongoose";
-import { BaseRepository } from "../base.repository";
+import { BaseRepository } from "../../shared/core/base.repository";
 import { IMembershipRepository } from "../interfaces/membership.repository.interface";
 import { PremiumPlan } from "../../models/membership.model";
-import { MembershipIF } from "../../types/membership.types";
+import { MembershipIF } from "../../shared/types/membership.types";
 export class MembershipRepository
   extends BaseRepository<MembershipIF>
   implements IMembershipRepository

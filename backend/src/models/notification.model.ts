@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { NotificationIF } from '../types/notification.type';
+import { NotificationIF } from '../shared/types/notification.type';
 
 
 const notificationSchema = new Schema<NotificationIF>({

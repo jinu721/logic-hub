@@ -1,4 +1,4 @@
-import { SubmissionIF } from "../types/submission.types";
+import { SubmissionIF } from "../shared/types/submission.types";
 
 export interface PublicSubmissionDTO {
   _id: string;

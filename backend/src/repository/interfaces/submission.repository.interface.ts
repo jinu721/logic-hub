@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { SubmissionIF } from "../../types/submission.types";
+import { SubmissionIF } from "../../shared/types/submission.types";
 
 export interface ISubmissionRepository {
   createSubmission(data: SubmissionIF): Promise<SubmissionIF>;

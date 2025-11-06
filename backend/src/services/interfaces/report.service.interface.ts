@@ -1,5 +1,5 @@
 import { GroupedReportDTO, PublicReportDTO } from "../../mappers/report.dto";
-import { ReportIF, ReportStatus } from "../../types/report.types";
+import { ReportIF, ReportStatus } from "../../shared/types/report.types";
 
 export interface IReportService {
   createReport(data: ReportIF): Promise<PublicReportDTO>;

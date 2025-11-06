@@ -1,4 +1,4 @@
-import { InventoryIF } from "../../types/inventory.types";
+import { InventoryIF } from "../../shared/types/inventory.types";
 import { IBannerService } from "../interfaces/banner.service.interface";
 import { IBannerRepository } from "../../repository/interfaces/banner.repository.interface";
 import cloudinary from "../../config/cloudinary.config";

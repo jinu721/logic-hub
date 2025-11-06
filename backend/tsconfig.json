@@ -2,13 +2,39 @@
   "compilerOptions": {
     "target": "es2016",
     "module": "commonjs",
-    "rootDir": "./src",                                  
-    "outDir": "./dist",                                   
-    "esModuleInterop": true,                            
-    "preserveSymlinks": true,                           
-    "forceConsistentCasingInFileNames": true,           
-
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "esModuleInterop": true,
+    "preserveSymlinks": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@core": ["shared/core"],
+      "@core/*": ["shared/core/*"],
+      "@utils/*": ["shared/utils/*"],
+      "@constants": ["shared/constants"],
+      "@constants/*": ["shared/constants/*"],
+      "@config/*": ["config/*"],
+      "@providers": ["shared/providers"],
+      "@providers/*": ["shared/providers/*"],
+      "@middlewares": ["shared/middlewares"],
+      "@middlewares/*": ["shared/middlewares/*"],
+      "@modules": ["modules"],
+      "@modules/*": ["modules/*"],
+      "@di": ["di"],
+      "@di/*": ["di/*"],
+      "@routes": ["routes"],
+      "@routes/*": ["routes/*"]
+    },
+    "typeRoots": [
+      "./src/shared/types",
+      "./node_modules/@types"
+    ],
     "strict": true,
     "skipLibCheck": true
-  }
+  },
+  "include": [
+    "src"
+  ]
 }

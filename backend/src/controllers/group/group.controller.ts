@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { HttpStatus } from "../../constants/http.status";
+import { HttpStatus } from "../../shared/constants/http.status";
 import { IGroupController } from "./group.controller.interface";
 import { IGroupService } from "../../services/interfaces/group.service.interface";
 import cloudinary from "../../config/cloudinary.config";
-import { sendSuccess } from "../../utils/application/response.util";
-import { asyncHandler } from "../../utils/application/async.handler";
-import { AppError } from "../../utils/application/app.error";
+import { sendSuccess } from "../../shared/utils/application/response.util";
+import { asyncHandler } from "../../shared/utils/application/async.handler";
+import { AppError } from "../../shared/utils/application/app.error";
 
 export class GroupController implements IGroupController {
   constructor(private readonly _groupSvc: IGroupService) {}

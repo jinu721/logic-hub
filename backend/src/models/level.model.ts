@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { LevelIF } from "../types/level.types";
+import { LevelIF } from "../shared/types/level.types";
 
 const levelRewardSchema = new Schema(
   {

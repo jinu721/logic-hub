@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { IMembershipService } from "../../services/interfaces/membership.service.interface";
 import { IMembershipController } from "./membership.controller.interface";
-import { HttpStatus } from "../../constants/http.status";
-import { sendSuccess } from "../../utils/application/response.util";
-import { asyncHandler } from "../../utils/application/async.handler";
-import { AppError } from "../../utils/application/app.error";
+import { HttpStatus } from "../../shared/constants/http.status";
+import { sendSuccess } from "../../shared/utils/application/response.util";
+import { asyncHandler } from "../../shared/utils/application/async.handler";
+import { AppError } from "../../shared/utils/application/app.error";
 
 export class MembershipController implements IMembershipController {
   constructor(private readonly _membershipSvc: IMembershipService) {}

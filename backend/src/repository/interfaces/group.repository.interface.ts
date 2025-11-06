@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { GroupIF } from '../../types/group.types';
+import { GroupIF } from '../../shared/types/group.types';
 
 export interface IGroupRepository {
   createGroup(data: Partial<GroupIF>): Promise<GroupIF>;

@@ -1,4 +1,4 @@
-import { MessageIF } from "../types/message.types";
+import { MessageIF } from "../shared/types/message.types";
 import { PublicUserDTO, toPublicUserDTO } from "./user.dto";
 
 export interface PublicMessageDTO {

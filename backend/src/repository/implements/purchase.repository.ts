@@ -1,7 +1,7 @@
 import {  MembershipPurchase } from "../../models/purchase.model";
-import { BaseRepository } from "../base.repository";
+import { BaseRepository } from "../../shared/core/base.repository";
 import { IPurchaseRepository } from "../interfaces/purchase.repository.interface";
-import { PurchaseIF } from "../../types/purchase.types";
+import { PurchaseIF } from "../../shared/types/purchase.types";
 
 
 export class PurchaseRepository extends BaseRepository<PurchaseIF> implements IPurchaseRepository{

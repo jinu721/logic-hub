@@ -1,6 +1,6 @@
 
 import { PublicLevelDTO } from "../../mappers/level.dto";
-import { LevelIF } from "../../types/level.types";
+import { LevelIF } from "../../shared/types/level.types";
 
 export interface ILevelService {
     createLevel(data: LevelIF): Promise<PublicLevelDTO>;

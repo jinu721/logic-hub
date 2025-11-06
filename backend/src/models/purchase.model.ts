@@ -1,5 +1,5 @@
 import mongoose, { Model, Schema } from 'mongoose';
-import { IMembershipPurchase } from '../types/purchase.types';
+import { IMembershipPurchase } from '../shared/types/purchase.types';
 
 
 

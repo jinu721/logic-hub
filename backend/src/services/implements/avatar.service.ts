@@ -1,4 +1,4 @@
-import { InventoryIF } from "../../types/inventory.types";
+import { InventoryIF } from "../../shared/types/inventory.types";
 import { IAvatarService } from "../interfaces/avatar.service.interface";
 import { IAvatarRepository } from "../../repository/interfaces/avatar.repository.interface";
 import cloudinary from "../../config/cloudinary.config";

@@ -1,4 +1,4 @@
-import { GroupIF } from "../types/group.types";
+import { GroupIF } from "../shared/types/group.types";
 import { PublicUserDTO, toPublicUserDTO, toPublicUserDTOs } from "./user.dto";
 
 export interface PublicGroupDTO {

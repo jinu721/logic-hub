@@ -1,5 +1,5 @@
 import { PublicMembershipDTO } from "../../mappers/membership.dto";
-import { MembershipIF } from "../../types/membership.types";
+import { MembershipIF } from "../../shared/types/membership.types";
 
 export interface IMembershipService {
   createPlan(data: Partial<MembershipIF>): Promise<PublicMembershipDTO>;

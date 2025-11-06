@@ -1,4 +1,4 @@
-import { MembershipIF } from "../../types/membership.types"; 
+import { MembershipIF } from "../../shared/types/membership.types"; 
 import { IMembershipService } from "../interfaces/membership.service.interface"; 
 import { PublicMembershipDTO, toPublicMembershipDTO, toPublicMembershipDTOs } from "../../mappers/membership.dto";
 import { IMembershipRepository } from "../../repository/interfaces/membership.repository.interface";

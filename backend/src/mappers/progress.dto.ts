@@ -1,4 +1,4 @@
-import { ChallengeProgressIF } from "../types/progress.types";
+import { ChallengeProgressIF } from "../shared/types/submission.types";
 
 export interface PublicChallengeProgressDTO {
   _id: string;

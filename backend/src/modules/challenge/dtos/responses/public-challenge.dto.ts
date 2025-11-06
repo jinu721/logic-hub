@@ -1,0 +1,29 @@
+export interface PublicChallengeDTO {
+  _id: string;
+  title: string;
+  description: string;
+  instructions: string;
+  type: "code" | "cipher";
+  level: "novice" | "adept" | "master";
+  testCases: {
+    input: any[];
+    output: any;
+    isHidden?: boolean;
+  }[];
+  timeLimit: number;
+  tags: string[];
+  hints: string[];
+  requiredSkills: string[];
+  isPremium: boolean;
+  isKeyRequired: boolean;
+  functionSignature?: string;
+  initialCode?: string | { [language: string]: string };
+  solutionCode?: string | { [language: string]: string };
+  status: "active" | "inactive" | "draft" | "archived";
+  isActive: boolean;
+  startTime?: Date;
+  endTime?: Date;
+  xpRewards: number;
+  createdAt?: Date;
+}
+

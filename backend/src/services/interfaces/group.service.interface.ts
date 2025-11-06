@@ -1,4 +1,4 @@
-import { GroupIF } from "../../types/group.types";
+import { GroupIF } from "../../shared/types/group.types";
 import { Types } from "mongoose";
 import { PublicGroupDTO } from "../../mappers/group.dto";
 import { PublicConversationDTO } from "../../mappers/conversation.dto";

@@ -2,10 +2,10 @@ import { Types } from "mongoose";
 import { PublicChallengeProgressDTO, toPublicProgressDTO, toPublicProgressDTOs } from "../../mappers/progress.dto";
 import { IChallengeProgressRepository } from "../../repository/interfaces/progress.repository.interface";
 import { IUserRepository } from "../../repository/interfaces/user.repository.interface";
-import { ChallengeProgressIF } from "../../types/progress.types";
-import { UserIF } from "../../types/user.types";
+import { ChallengeProgressIF } from "../../shared/types/submission.types";
+import { UserIF } from "../../shared/types/user.types";
 import { IChallengeProgressService } from "../interfaces/progress.service.interface";
-import { toObjectId } from "../../utils/application/objectId.convertion";
+import { toObjectId } from "../../shared/utils/application/objectId.convertion";
 
 export class ChallengeProgressService implements IChallengeProgressService {
 

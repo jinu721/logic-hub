@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { SolutionIF } from "../types/solutions.types";
+import { SolutionIF } from "../shared/types/solutions.types";
 
 const solutionSchema = new Schema<SolutionIF>({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },

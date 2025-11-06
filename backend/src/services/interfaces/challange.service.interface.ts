@@ -1,5 +1,5 @@
 import { PublicChallengeDTO } from "../../mappers/challenge.dto";
-import { ChallengeDomainIF } from "../../types/challenge.types"; 
+import { ChallengeDomainIF } from "../../shared/types/challenge.types"; 
 import { Types } from "mongoose";
 
 

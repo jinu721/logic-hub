@@ -1,5 +1,5 @@
 import { UpdateQuery } from "mongoose";
-import { MarketItemIF } from "../../types/market.types";
+import { MarketItemIF } from "../../shared/types/market.types";
 
 export interface IMarketRepository {
   createItem(data: Partial<MarketItemIF>): Promise<MarketItemIF>;

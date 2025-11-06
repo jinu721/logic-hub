@@ -1,4 +1,4 @@
-import { UserIF } from "../types/user.types";
+import { UserIF } from "../shared/types/user.types";
 import { IPublicInventoryDTO, toPublicInventoryDTO, toPublicInventoryDTOs } from "./inventory.dto";
 
 export interface PublicUserDTO {

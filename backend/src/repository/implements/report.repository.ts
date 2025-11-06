@@ -1,8 +1,8 @@
 import { Report } from "../../models/report.model";
-import { BaseRepository } from "../base.repository";
+import { BaseRepository } from "../../shared/core/base.repository";
 import { IReportRepository } from "../interfaces/report.repository.interface";
-import { ReportIF, ReportStatus } from "../../types/report.types";
-import { toLean, toLeanMany } from "../../utils/database/query.utils";
+import { ReportIF, ReportStatus } from "../../shared/types/report.types";
+import { toLean, toLeanMany } from "../../shared/utils/database/query.utils";
 
 export class ReportRepository
   extends BaseRepository<ReportIF>

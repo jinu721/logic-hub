@@ -3,7 +3,7 @@ import {
   PublicConversationDTO,
   toPublicConversationDTO,
 } from "../../mappers/conversation.dto";
-import { ConversationIF } from "../../types/conversation.types";
+import { ConversationIF } from "../../shared/types/conversation.types";
 import { toPublicGroupDTO } from "../../mappers/group.dto";
 import { toPublicUserDTO, toPublicUserDTOs } from "../../mappers/user.dto";
 import { IConversationRepository } from "../../repository/interfaces/conversation.repository.interface";

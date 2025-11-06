@@ -1,6 +1,6 @@
 import { IReportService } from "../interfaces/report.service.interface";
 import { IReportRepository } from "../../repository/interfaces/report.repository.interface";
-import { ReportIF, ReportStatus } from "../../types/report.types";
+import { ReportIF, ReportStatus } from "../../shared/types/report.types";
 import {
   GroupedReportDTO,
   PublicReportDTO,

@@ -1,7 +1,7 @@
 import { IConversationRepository } from "../interfaces/conversation.repository.interface";
 import { Conversation } from "../../models/conversation.model";
-import { BaseRepository } from "../base.repository";
-import { ConversationIF } from "../../types/conversation.types";
+import { BaseRepository } from "../../shared/core/base.repository";
+import { ConversationIF } from "../../shared/types/conversation.types";
 import { ObjectId, Types } from "mongoose";
 
 export class ConversationRepository

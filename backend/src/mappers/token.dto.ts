@@ -1,4 +1,4 @@
-import { TokenIF } from "../types/token.types";
+import { TokenIF } from "../shared/types/token.types";
 
 export interface PublicTokenDTO {
     accessToken: string;

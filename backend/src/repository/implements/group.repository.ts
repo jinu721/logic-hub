@@ -1,7 +1,7 @@
 import { Group } from "../../models/group.model";
 import { IGroupRepository } from "../interfaces/group.repository.interface";
-import { GroupIF } from "../../types/group.types";
-import { BaseRepository } from "../base.repository";
+import { GroupIF } from "../../shared/types/group.types";
+import { BaseRepository } from "../../shared/core/base.repository";
 import { Types } from "mongoose";
 
 export class GroupRepository

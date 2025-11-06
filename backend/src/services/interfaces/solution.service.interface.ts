@@ -1,4 +1,4 @@
-import { SolutionIF } from "../../types/solutions.types";
+import { SolutionIF } from "../../shared/types/solutions.types";
 import { PublicSolutionDTO } from "../../mappers/solution.dto";
 
 export interface ISolutionService {

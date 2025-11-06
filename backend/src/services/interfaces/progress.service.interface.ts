@@ -1,5 +1,5 @@
 import { PublicChallengeProgressDTO } from "../../mappers/progress.dto";
-import { ChallengeProgressIF } from "../../types/progress.types";
+import { ChallengeProgressIF } from "../../shared/types/submission.types";
 
 export interface IChallengeProgressService {
   createProgress(data: ChallengeProgressIF): Promise<PublicChallengeProgressDTO>;

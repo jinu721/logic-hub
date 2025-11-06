@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
-import { MembershipIF } from "../types/membership.types";
+import { MembershipIF } from "../shared/types/membership.types";
 
 
 

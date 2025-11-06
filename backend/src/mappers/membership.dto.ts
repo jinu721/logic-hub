@@ -1,4 +1,4 @@
-import { MembershipIF } from "../types/membership.types";
+import { MembershipIF } from "../shared/types/membership.types";
 
 export interface PublicDiscountDTO {
   active: boolean;

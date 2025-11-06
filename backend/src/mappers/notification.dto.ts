@@ -1,4 +1,4 @@
-import { NotificationIF } from "../types/notification.type";
+import { NotificationIF } from "../shared/types/notification.type";
 
 export interface PublicNotificationDTO {
   _id: string;

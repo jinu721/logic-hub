@@ -1,7 +1,7 @@
 import {  Types } from "mongoose";
 import { IGroupService } from "../interfaces/group.service.interface";
-import { GroupIF } from "../../types/group.types";
-import { ConversationIF } from "../../types/conversation.types";
+import { GroupIF } from "../../shared/types/group.types";
+import { ConversationIF } from "../../shared/types/conversation.types";
 import cloudinary from "../../config/cloudinary.config";
 import {
   PublicGroupDTO,

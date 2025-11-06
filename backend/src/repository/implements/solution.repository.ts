@@ -1,7 +1,7 @@
 import { ISolutionRepository } from "../interfaces/solution.repository.interface";
 import SolutionModel from "../../models/solution.model";
-import { SolutionIF } from "../../types/solutions.types";
-import { BaseRepository } from "../base.repository";
+import { SolutionIF } from "../../shared/types/solutions.types";
+import { BaseRepository } from "../../shared/core/base.repository";
 
 export class SolutionRepository
   extends BaseRepository<SolutionIF>

@@ -1,6 +1,6 @@
 import { ILevelService } from "../interfaces/level.service.interface";
-import { LevelIF } from "../../types/level.types";
-import { UserIF } from "../../types/user.types";
+import { LevelIF } from "../../shared/types/level.types";
+import { UserIF } from "../../shared/types/user.types";
 import {
   PublicLevelDTO,
   toPublicLevelDTO,

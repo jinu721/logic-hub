@@ -1,4 +1,4 @@
-import { MarketItemIF } from "../types/market.types";
+import { MarketItemIF } from "../shared/types/market.types";
 import { IPublicInventoryDTO, toPublicInventoryDTO } from "./inventory.dto";
 
 export interface PublicMarketItemDTO {

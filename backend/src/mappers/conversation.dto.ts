@@ -1,4 +1,4 @@
-import { ConversationIF } from "../types/conversation.types";
+import { ConversationIF } from "../shared/types/conversation.types";
 import { PublicUserDTO } from "./user.dto";
 
 export interface PublicConversationDTO {

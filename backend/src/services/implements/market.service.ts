@@ -1,5 +1,5 @@
 import { IMarketService } from "../interfaces/market.service.interface";
-import { MarketItemIF } from "../../types/market.types";
+import { MarketItemIF } from "../../shared/types/market.types";
 import { PublicMarketItemDTO, toPublicMarketItemDTO, toPublicMarketItemDTOs } from "../../mappers/market.dto";
 import { IMarketRepository } from "../../repository/interfaces/market.repository.interface";
 import { IUserRepository } from "../../repository/interfaces/user.repository.interface";

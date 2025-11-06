@@ -1,5 +1,5 @@
 import { UpdateQuery } from "mongoose";
-import { MembershipIF } from "../../types/membership.types";
+import { MembershipIF } from "../../shared/types/membership.types";
 
 export interface IMembershipRepository {
   createPlan(data: Partial<MembershipIF>): Promise<MembershipIF>;

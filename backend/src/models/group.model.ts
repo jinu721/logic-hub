@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { GroupIF } from '../types/group.types';
+import { GroupIF } from '../shared/types/group.types';
 
 
 const GroupSchema = new Schema<GroupIF>(

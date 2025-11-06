@@ -1,10 +1,10 @@
 import { IChallengeController } from "./challange.controller.interface";
 import { Request, Response } from "express";
-import { HttpStatus } from "../../constants/http.status";
+import { HttpStatus } from "../../shared/constants/http.status";
 import { IChallengeService } from "../../services/interfaces/challange.service.interface";
-import { sendSuccess } from "../../utils/application/response.util";
-import { asyncHandler } from "../../utils/application/async.handler";
-import { AppError } from "../../utils/application/app.error";
+import { sendSuccess } from "../../shared/utils/application/response.util";
+import { asyncHandler } from "../../shared/utils/application/async.handler";
+import { AppError } from "../../shared/utils/application/app.error";
 
 interface RunCodeRequest {
   challengeId: string;

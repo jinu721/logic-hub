@@ -1,5 +1,5 @@
 import { model, Schema, Types } from "mongoose";
-import { MarketItemIF } from "../types/market.types";
+import { MarketItemIF } from "../shared/types/market.types";
 
 const marketItemSchema = new Schema<MarketItemIF>({
   name: {

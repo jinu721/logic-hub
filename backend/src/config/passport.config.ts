@@ -1,8 +1,8 @@
 import passport from 'passport';
 import {Strategy as GoogleStrategy,Profile as GoogleProfile, VerifyCallback} from 'passport-google-oauth20';
 import {Strategy as GithubStrategy,Profile as GithubProfile} from 'passport-github2';
-import User from '../models/user.model';
-import { generateUsername } from '../utils/application/generate.username';
+import { UserModel } from '@modules/user';
+import { generateUsername } from '../shared/utils/application/generate.username';
 import { env } from './env';
 
 
@@ -18,7 +18,7 @@ passport.use(
             const email = profile?.emails?.[0]?.value;
             if (!email) return done(new Error("Google did not provide an email."));
 
-            let user = await User.findOne({email});
+            let user = await UserModel.findOne({email});
 
             if(user){
                 if(!user.googleId){
@@ -26,7 +26,7 @@ passport.use(
                     await user.save();
                 }
             }else{
-                user = await User.create({
+                user = await UserModel.create({
                     username:await generateUsername(profile.displayName as string || profile.username as string),
                     email,
                     loginType:"google",
@@ -57,7 +57,7 @@ passport.use(
             }
 
 
-            let user = await User.findOne({ email });
+            let user = await UserModel.findOne({ email });
 
             if(user){
                 if(!user.githubId){
@@ -65,7 +65,7 @@ passport.use(
                     await user.save();
                 }
             }else{
-                user = await User.create({
+                user = await UserModel.create({
                     username: await generateUsername(profile.displayName as string || profile.username as string),
                     email,
                     loginType: "github",

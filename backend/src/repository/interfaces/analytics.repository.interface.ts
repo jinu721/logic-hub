@@ -1,4 +1,4 @@
-import { UserAnalytics, ChallengeStats, LeaderboardTrends } from "../../types/analytics.types";
+import { UserAnalytics, ChallengeStats, LeaderboardTrends } from "../../shared/types/analytics.types";
 
 export interface IAdminAnalyticsRepository {
   getUserAnalytics(): Promise<UserAnalytics>;

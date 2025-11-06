@@ -1,5 +1,5 @@
 import { ISolutionService } from "../interfaces/solution.service.interface";
-import { SolutionIF } from "../../types/solutions.types";
+import { SolutionIF } from "../../shared/types/solutions.types";
 import { PublicSolutionDTO, toPublicSolutionDTO, toPublicSolutionDTOs } from "../../mappers/solution.dto";
 import { ISolutionRepository } from "../../repository/interfaces/solution.repository.interface";
 

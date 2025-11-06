@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { IUserService } from "../interfaces/user.services.interface";
-import { UserIF } from "../../types/user.types";
+import { UserIF } from "../../shared/types/user.types";
 import {
   PublicUserDTO,
   toPublicUserDTO,
@@ -10,14 +10,14 @@ import {
 import { env } from "../../config/env";
 import { IUserRepository } from "../../repository/interfaces/user.repository.interface";
 import { IChallengeProgressRepository } from "../../repository/interfaces/progress.repository.interface";
-import { toObjectId } from "../../utils/application/objectId.convertion";
+import { toObjectId } from "../../shared/utils/application/objectId.convertion";
 import { ITokenProvider } from "../../providers/token/auth.token.interface";
 import { IEmailProvider } from "../../providers/email/email.sender.interface";
 import { IHashProvider } from "../../providers/hashing/secure.hasher.interface";
-import { IPendingUserRepository } from "../../repository/interfaces/pending-user.repository.interface";
-import { generateOTP } from "../../utils/application/generate.otp";
-import { BaseService } from "../base.service";
-import { AppError } from "../../utils/application/app.error";
+import { IPendingUserRepository } from "../../modules/user/interfaces/pending.user.repository.interface";
+import { generateOTP } from "../../shared/utils/application/generate.otp";
+import { BaseService } from "../../shared/core/base.service";
+import { AppError } from "../../shared/utils/application/app.error";
 
 type UserData = PublicUserDTO & {
   userRank: number;

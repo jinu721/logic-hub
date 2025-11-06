@@ -1,7 +1,7 @@
 import express from "express";
-import { authMiddleware } from "../middlewares/auth.middleware";
-import { NOTIFICATION_ROUTES } from "../constants/ROUTES/notify.constants";
-import { container } from "../di/container";
+import { authMiddleware } from "../shared/middlewares/auth.middleware";
+import { NOTIFICATION_ROUTES } from "../shared/constants/ROUTES/notify.constants";
+import { container } from "../di/types";
 
 const router = express.Router();
 

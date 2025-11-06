@@ -1,5 +1,5 @@
 
-import { LevelIF } from "../../types/level.types";
+import { LevelIF } from "../../shared/types/level.types";
 
 export interface ILevelRepository {
     createLevel(data: LevelIF): Promise<LevelIF>;

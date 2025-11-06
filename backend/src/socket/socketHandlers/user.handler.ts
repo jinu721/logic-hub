@@ -1,11 +1,10 @@
 import { Server } from "socket.io";
-import { ExtendedSocket, ChallengeData } from "../../types/socket.types";
-import { AppContainer } from "../../utils/socket/app.container";
-import { verifyAccessToken } from "../../utils/token/verify.token";
+import { ExtendedSocket, ChallengeData } from "../../shared/types/socket.types";
+import { verifyAccessToken } from "../../shared/utils/token/verify.token";
 import redisClient from "../../config/redis.config";
 
 export class UserHandler {
-  constructor(private io: Server) {}
+  constructor(private io: Server, private container: any) {}
 
   public setupUserHandlers(socket: ExtendedSocket): void {
     socket.on("register_user", this.handleRegisterUser.bind(this, socket));
@@ -35,7 +34,7 @@ export class UserHandler {
   ): Promise<void> {
     try {
       const user = verifyAccessToken(accessToken);
-      await AppContainer.userService.updateUser(user?.userId as string, { isOnline: true });
+      await this.container.userService.updateUser(user?.userId as string, { isOnline: true });
       await redisClient.set(`user:online:${String(user?.userId)}`, "true");
       this.io.emit("user-status", { userId: user?.userId, status: true });
       // await redisClient.set(`socket:user:${socket.id}`, userId);
@@ -115,7 +114,7 @@ export class UserHandler {
     console.log(`User ${userId} disconnected and marked offline`);
 
     try {
-      await AppContainer.userService.updateUser(userId, {
+      await this.container.userService.updateUser(userId, {
         isOnline: false,
         lastSeen: new Date(),
       });

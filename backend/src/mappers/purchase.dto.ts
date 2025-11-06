@@ -1,4 +1,4 @@
-import { PurchaseIF } from "../types/purchase.types";
+import { PurchaseIF } from "../shared/types/purchase.types";
 
 export interface PublicPurchaseDTO {
   _id: string;

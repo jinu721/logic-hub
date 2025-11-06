@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { ConversationIF } from '../types/conversation.types';
+import { ConversationIF } from '../shared/types/conversation.types';
 
 
 
