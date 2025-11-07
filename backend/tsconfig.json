@@ -25,7 +25,9 @@
       "@di": ["di"],
       "@di/*": ["di/*"],
       "@routes": ["routes"],
-      "@routes/*": ["routes/*"]
+      "@routes/*": ["routes/*"],
+      "@worker": ["worker"],
+      "@worker/*": ["worker/*"]
     },
     "typeRoots": [
       "./src/shared/types",

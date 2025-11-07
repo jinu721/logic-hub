@@ -18,3 +18,4 @@ export * from "./socket.types";
 export * from "./solutions.types";
 export * from "./token.types";
 export * from "./user.types";
+export * from "./order.types"

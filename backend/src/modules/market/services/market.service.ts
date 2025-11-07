@@ -1,0 +1,107 @@
+import { BaseService } from "@core";
+import { AppError } from "@utils/application";
+import { HttpStatus } from "@constants";
+import {
+  PublicMarketItemDTO,
+  toPublicMarketItemDTO,
+  toPublicMarketItemDTOs,
+  IMarketService,
+  IMarketRepository
+} from "@modules/market";
+
+import {
+  IUserRepository
+} from "@modules/user";
+
+import { MarketItemIF } from "@shared/types";
+
+export class MarketService
+  extends BaseService<MarketItemIF, PublicMarketItemDTO>
+  implements IMarketService
+{
+  constructor(
+    private readonly marketRepo: IMarketRepository,
+    private readonly userRepo: IUserRepository
+  ) {
+    super();
+  }
+
+  protected toDTO(item: MarketItemIF): PublicMarketItemDTO {
+    return toPublicMarketItemDTO(item);
+  }
+
+  protected toDTOs(items: MarketItemIF[]): PublicMarketItemDTO[] {
+    return toPublicMarketItemDTOs(items);
+  }
+
+  async createItem(data: Partial<MarketItemIF>) {
+    const created = await this.marketRepo.createItem(data);
+    return this.mapOne(created);
+  }
+
+  async getAllItems(filter: any = {}, page: number = 1, limit: number = 10) {
+    const query: any = {};
+    const sort: any = {};
+
+    if (filter.category) query.category = filter.category;
+    if (filter.searchQuery) query.name = { $regex: filter.searchQuery, $options: "i" };
+
+    if (filter.sortOption === "limited") query.limitedTime = true;
+    else if (filter.sortOption === "exclusive") query.isExclusive = true;
+    else if (filter.sortOption === "price-asc") sort.price = 1;
+    else if (filter.sortOption === "price-desc") sort.price = -1;
+
+    const skip = (page - 1) * limit;
+
+    const items = await this.marketRepo.getAllItems(query, sort, skip, limit);
+    const totalItems = await this.marketRepo.countMarketItems(query);
+
+    return { marketItems: this.mapMany(items), totalItems };
+  }
+
+  async getItemById(id: string) {
+    const item = await this.marketRepo.getItemById(id);
+    if (!item) throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
+    return this.mapOne(item);
+  }
+
+  async updateItem(id: string, data: Partial<MarketItemIF>) {
+    const updated = await this.marketRepo.updateItem(id, data);
+    if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
+    return this.mapOne(updated);
+  }
+
+  async deleteItem(id: string) {
+    const deleted = await this.marketRepo.deleteItem(id);
+    if (!deleted) throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
+    return true;
+  }
+
+  async purchaseMarketItem(id: string, userId: string) {
+    const item = await this.marketRepo.getItemById(id);
+    if (!item) throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
+
+    const user = await this.userRepo.getUserById(userId);
+    if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
+
+    if (user.stats.xpPoints < item.costXP) {
+      throw new AppError(HttpStatus.FORBIDDEN, "Not enough XP");
+    }
+
+    user.stats.xpPoints -= item.costXP;
+
+    const itemId = item.itemId.toString();
+
+    if (item.category === "avatar") {
+      user.inventory.ownedAvatars.push(itemId);
+    } else if (item.category === "banner") {
+      user.inventory.ownedBanners.push(itemId);
+    } else {
+      user.inventory.badges.push(itemId as any);
+    }
+
+    await this.userRepo.save(user);
+
+    return this.mapOne(item);
+  }
+}

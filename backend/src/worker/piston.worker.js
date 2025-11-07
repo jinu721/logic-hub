@@ -1,4 +1,4 @@
-const { runCodeWithPiston } = require("../utils/execution/piston.helper");
+const { runCodeWithPiston } = require("../shared/utils/execution/piston.helper");
 
 module.exports = async function ({ language, code, input }) {
   try {
