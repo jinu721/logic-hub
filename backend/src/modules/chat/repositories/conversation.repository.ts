@@ -1,15 +1,15 @@
-import { IConversationRepository } from "../interfaces/conversation.repository.interface";
-import { Conversation } from "../../models/conversation.model";
-import { BaseRepository } from "../../shared/core/base.repository";
-import { ConversationIF } from "../../shared/types/conversation.types";
-import { ObjectId, Types } from "mongoose";
+import { Types } from "mongoose";
+import { IConversationRepository, ConversationModel } from "@modules/chat";
+import { BaseRepository } from "@core";
+import { ConversationIF } from "@shared/types";
+
 
 export class ConversationRepository
   extends BaseRepository<ConversationIF>
   implements IConversationRepository
 {
   constructor() {
-    super(Conversation);
+    super(ConversationModel);
   }
 
   async findOneToOne(

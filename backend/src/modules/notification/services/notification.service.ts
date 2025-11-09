@@ -40,7 +40,7 @@ export class NotificationService
     return this.mapMany(notifications)
   }
 
-  async getById(id: string): Promise<PublicNotificationDTO> {
+  async getNotificationById(id: string): Promise<PublicNotificationDTO> {
     const notification = await this.notifyRepo.getNotificationById(toObjectId(id))
     if (!notification) {
       throw new AppError(HttpStatus.NOT_FOUND, "Notification not found")
@@ -48,7 +48,7 @@ export class NotificationService
     return this.mapOne(notification)
   }
 
-  async update(id: string, data: Partial<NotificationIF>): Promise<PublicNotificationDTO> {
+  async updateNotification(id: string, data: Partial<NotificationIF>): Promise<PublicNotificationDTO> {
     const updated = await this.notifyRepo.updateNotification(toObjectId(id), data)
     if (!updated) {
       throw new AppError(HttpStatus.NOT_FOUND, "Notification not found")
@@ -60,11 +60,11 @@ export class NotificationService
     return await this.notifyRepo.markAllAsRead(toObjectId(userId))
   }
 
-  async deleteAll(userId: string): Promise<boolean> {
+  async deleteAllNotification(userId: string): Promise<boolean> {
     return await this.notifyRepo.deleteAllNotifications(toObjectId(userId))
   }
 
-  async delete(id: string): Promise<boolean> {
+  async deleteNotification(id: string): Promise<boolean> {
     return await this.notifyRepo.deleteNotification(toObjectId(id))
   }
 

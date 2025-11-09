@@ -9,10 +9,18 @@ import Database from './config/db.config';
 import { redisConnect } from './config/redis.config';
 
 
-import { Container } from "@di"
-import { authRoutes } from '@modules/user/routes/auth.routes'
-import { userRoutes } from '@modules/user/routes/user.routes'
-import { inventoryRoutes } from '@modules/inventory/routes/inventory.routes'
+import { Container } from "@di";
+import { authRoutes, userRoutes } from '@modules/user';
+import { inventoryRoutes } from '@modules/inventory';
+import { levelsRoutes } from '@modules/level';
+import { marketRoutes } from '@modules/market';
+import { reportRoutes } from '@modules/report';
+import { conversationRoutes, messageRoutes, groupRoutes } from '@modules/chat';
+import { notificationRoutes } from '@modules/notification';
+import { challengeRoutes } from '@modules/challenge';
+import { purchaseRoutes } from '@modules/purchase';
+import { membershipRoutes } from '@modules/membership';
+import { analyticsRoutes } from '@modules/analytics';
 
 import { errorHandler } from './shared/middlewares/err.middleware';
 import { env } from './config/env';
@@ -47,19 +55,17 @@ export const createApp = (container: Container) => {
      app.use('/auth', authRoutes(container));
      app.use('/users', userRoutes(container));
      app.use('/inventory', inventoryRoutes(container));
-     // app.use('/membership',membershipRoutes);
-     // app.use("/conversations", conversationRoutes);
-     // app.use("/messages", messageRoutes);
-     // app.use("/groups", groupRoutes);
-     // app.use("/purchase",purchaseRoutes);
-     // app.use("/reports",reportRoutes);
-     // app.use("/challanges",challangeRoutes);
-     // app.use("/levels",levelsRoutes);
-     // app.use("/progresses",progressRoutes);
-     // app.use("/market",marketRoutes);
-     // app.use("/notifications",notificationRoutes);
-     // app.use("/analytics",analyticsRoutes);
-     // app.use("/solutions",solutionRoutes);
+     app.use('/levels', levelsRoutes(container));
+     app.use('/market', marketRoutes(container));
+     app.use('/reports', reportRoutes(container));
+     app.use('/conversations', conversationRoutes(container));
+     app.use('/messages', messageRoutes(container));
+     app.use('/groups', groupRoutes(container));
+     app.use('/notifications', notificationRoutes(container));
+     app.use('/challenges', challengeRoutes(container));
+     app.use('/purchases', purchaseRoutes(container));
+     app.use('/memberships', membershipRoutes(container));
+     app.use('/analytics', analyticsRoutes(container));
      
      
      app.use(errorHandler);    

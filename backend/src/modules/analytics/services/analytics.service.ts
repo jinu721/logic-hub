@@ -1,16 +1,14 @@
-import { IAdminAnalyticsService } from "../interfaces/analytics.service.interface";
-import { IAdminAnalyticsRepository } from "../../repository/interfaces/analytics.repository.interface";
+import { IAnalyticsService, IAnalyticsRepository, ILeaderboardRepository } from "@modules/analytics";
 import {
   UserAnalytics,
   ChallengeStats,
-} from "../../shared/types/analytics.types";
-import { LeaderboardRepository } from "../../repository/implements/leaderboard.repostory";
-import { toPublicUserDTO } from "../../mappers/user.dto";
+} from "@shared/types";
+import { toPublicUserDTO } from "@modules/user";
 
-export class AdminAnalyticsService implements IAdminAnalyticsService {
+export class AnalyticsService implements IAnalyticsService {
   constructor(
-    private analyticsRepo: IAdminAnalyticsRepository,
-    private leaderboardRepository: LeaderboardRepository
+    private analyticsRepo: IAnalyticsRepository,
+    private leaderboardRepository: ILeaderboardRepository
   ) {}
 
   async fetchUserAnalytics(): Promise<UserAnalytics> {

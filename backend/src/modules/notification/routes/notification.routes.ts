@@ -4,10 +4,10 @@ import { NOTIFICATION_ROUTES } from "@constants";
 import { Container } from "@di";
 
 
-export const notificationRoutes = (container: Container) => () => {
+export const notificationRoutes = (container: Container) => {
     const router = express.Router();
     
-    const notificationController = container.notifyCtrl;
+    const notificationController = container.notificationCtrl;
     
     router.use(authMiddleware);
     
@@ -19,7 +19,6 @@ export const notificationRoutes = (container: Container) => () => {
     router.get(NOTIFICATION_ROUTES.USER_ME, notificationController.getNotificationByUser.bind(notificationController));
     router.post(NOTIFICATION_ROUTES.MARK_ALL, notificationController.markAllAsRead.bind(notificationController));
     router.delete(NOTIFICATION_ROUTES.DELETE_ALL, notificationController.deleteAllNotifications.bind(notificationController));
-    router.patch(NOTIFICATION_ROUTES.TOGGLE_USER, notificationController.toggleUserNotification.bind(notificationController));
     
     return router;
 }

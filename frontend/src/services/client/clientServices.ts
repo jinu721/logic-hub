@@ -9,9 +9,13 @@ import { AdminUpdateIF, GroupDataIF, MemberUpdateIF, UpdateGroupIF } from "@/typ
 // Auth & User related calls
 
 export const register = async (userData: RegisterIF) => {
+  console.log("Reg started")
   const response = await axiosInstance.post(ROUTES.AUTH.REGISTER, userData);
-  localStorage.setItem("userEmail", response.data.data.email);
-  return response.data;
+  console.log("Reg ended", response.data);
+  const result = response.data.result;
+  localStorage.setItem("userEmail", result.email);
+
+  return result;
 };
 
 export const login = async (userData: LoginIF) => {
@@ -33,7 +37,7 @@ export const login = async (userData: LoginIF) => {
 export const checkUser = async (userData: CheckUserIF) => {
   const response = await axiosInstance.post(ROUTES.USERS.CHECK, userData);
   console.log(`Check User Response: ${JSON.stringify(response.data)}`);
-  return response.data.data;
+  return response.data.result;
 };
 
 export const verifyOtp = async (email: string, otp: string) => {

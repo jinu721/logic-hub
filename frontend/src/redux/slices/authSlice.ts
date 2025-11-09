@@ -8,7 +8,9 @@ export const userRegister = createAsyncThunk<
   { rejectValue: string }
 >("auth/register", async (userData: RegisterIF, { rejectWithValue }) => {
   try {
+    console.log("Registering user with data:", userData);
     await register(userData);
+    console.log("User registered successfully");
     return "Registration successful! Please verify your email.";
   } catch (err: any) {
     return rejectWithValue(err.response.data.message);

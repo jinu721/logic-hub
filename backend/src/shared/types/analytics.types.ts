@@ -12,8 +12,8 @@ export interface UserAnalytics {
   }
   
   export interface LeaderboardTrends {
-    leaderboardData: any[];
-    stats: any;
-    topPerformers: any[];
+    topUsers: any[];
+    xpDistribution: { range: string; count: number }[];
+    badgesUnlocked: { date: string; count: number }[];
   }
   

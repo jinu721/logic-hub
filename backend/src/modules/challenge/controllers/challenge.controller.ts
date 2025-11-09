@@ -42,12 +42,6 @@ export class ChallengeController implements IChallengeController {
     sendSuccess(res, HttpStatus.OK, result);
   });
 
-  // ... SAME for all other READ endpoints ...
-  // They now call querySvc.* instead of _challengeSvc.*
-
-
-  // --- WRITE AREA -----------------------------------------------
-
   createChallenge = asyncHandler(async (req, res) => {
     const data = req.body;
     const result = await this.commandSvc.createChallenge(data);

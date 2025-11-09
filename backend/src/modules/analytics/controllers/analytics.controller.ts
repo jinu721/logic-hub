@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
 import { IAnalyticsController, IAnalyticsService } from "@modules/analytics";
-import { HttpStatus } from "@constants/http.status";
-import { sendSuccess } from "@utils/application/response.util";
-import { asyncHandler } from "@utils/application/async.handler";
+import { HttpStatus } from "@constants";
+import { sendSuccess, asyncHandler } from "@utils/application";
 
 export class AnalyticsController implements IAnalyticsController {
   constructor(private readonly _analyticsSvc: IAnalyticsService) {}

@@ -1,10 +1,10 @@
 import { IAnalyticsRepository } from "@modules/analytics";
 import { UserAnalytics, ChallengeStats, LeaderboardTrends } from "@shared/types";
 import { UserModel } from "@modules/user";
-import { ChallengeProgress } from "@modules/submission";
+import { SubmissionModel } from "@modules/challenge";
 
 
-export class AdminAnalyticsRepository implements IAnalyticsRepository {
+export class AnalyticsRepository implements IAnalyticsRepository {
   async getUserAnalytics(): Promise<UserAnalytics> {
     const totalUsers = await UserModel.countDocuments();
     const activeUsersToday = await UserModel.countDocuments({
@@ -18,7 +18,7 @@ export class AdminAnalyticsRepository implements IAnalyticsRepository {
   }
 
   async getChallengeStats(): Promise<ChallengeStats> {
-    const mostPlayedRooms = await ChallengeProgress.aggregate([
+    const mostPlayedRooms = await SubmissionModel.aggregate([
       {
         $group: {
           _id: "$challengeId",
@@ -44,7 +44,7 @@ export class AdminAnalyticsRepository implements IAnalyticsRepository {
       { $limit: 5 },
     ]);
 
-    const completionRates = await ChallengeProgress.aggregate([
+    const completionRates = await SubmissionModel.aggregate([
       {
         $group: {
           _id: "$challengeId",
@@ -69,7 +69,7 @@ export class AdminAnalyticsRepository implements IAnalyticsRepository {
       },
     ]);
 
-    const averageCompletionTime = await ChallengeProgress.aggregate([
+    const averageCompletionTime = await SubmissionModel.aggregate([
       {
         $match: { passed: true },
       },
@@ -96,7 +96,7 @@ export class AdminAnalyticsRepository implements IAnalyticsRepository {
       },
     ]);
 
-    const attemptsVsSuccess = await ChallengeProgress.aggregate([
+    const attemptsVsSuccess = await SubmissionModel.aggregate([
       {
         $group: {
           _id: "$challengeId",

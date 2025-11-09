@@ -1,4 +1,4 @@
-import { MessageIF } from "../../shared/types/message.types";
+import { MessageIF } from "@shared/types";
 
 export interface IMessageRepository {
   createMessage(data: MessageIF & { replyTo?: string }): Promise<MessageIF>

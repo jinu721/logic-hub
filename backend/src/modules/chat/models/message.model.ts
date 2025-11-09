@@ -1,5 +1,5 @@
-import mongoose, { Schema } from 'mongoose';
-import { MessageIF } from '../shared/types/message.types';
+import { Schema, model } from 'mongoose';
+import { MessageIF } from '@shared/types';
 
 
 
@@ -67,4 +67,4 @@ const MessageSchema = new Schema<MessageIF>(
   { timestamps: true }
 );
 
-export const Message = mongoose.model<MessageIF>('Message', MessageSchema);
+export const MessageModel = model<MessageIF>('Message', MessageSchema);

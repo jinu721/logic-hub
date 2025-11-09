@@ -11,7 +11,7 @@ import {
 import {
   IMessageEngagementService,
   IMessageRepository,
-} from "@modules/chat/interfaces";
+} from "@modules/chat";
 
 import { MessageIF } from "@shared/types";
 import { Types } from "mongoose";

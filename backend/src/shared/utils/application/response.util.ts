@@ -3,13 +3,13 @@ import { Response } from "express";
 export const sendSuccess = (
   res: Response,
   status: number,
-  data: any,
+  result: any,
   message?: string
 ) => {
   return res.status(status).json({
     success: true,
     message,
-    data,
+    result,
   });
 };
 
@@ -17,7 +17,7 @@ export const sendError = (
   res: Response,
   status: number,
   error: unknown,
-  data?: any
+  result?: any
 ) => {
   const message =
     error instanceof Error
@@ -29,6 +29,6 @@ export const sendError = (
   return res.status(status).json({
     success: false,
     message,
-    data,
+    result,
   });
 };

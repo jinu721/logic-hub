@@ -1,8 +1,8 @@
-import { Group } from "../../models/group.model";
-import { IGroupRepository } from "../interfaces/group.repository.interface";
-import { GroupIF } from "../../shared/types/group.types";
-import { BaseRepository } from "../../shared/core/base.repository";
 import { Types } from "mongoose";
+import { Group, IGroupRepository } from "@modules/chat";
+import { GroupIF } from "@shared/types";
+import { BaseRepository } from "@core";
+
 
 export class GroupRepository
   extends BaseRepository<GroupIF>

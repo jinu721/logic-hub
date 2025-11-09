@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { userRegister } from "@/redux/slices/authSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useToast } from "@/context/Toast";
-import { Github, Terminal } from "lucide-react";
+import { Github } from "lucide-react";
 import RegisterForm from "./RegisterForm";
 import { RegisterIF } from "@/types/auth.types";
 import Link from "next/link";
@@ -69,15 +69,15 @@ const Register: React.FC = () => {
   ) => {
     try {
       const response = await checkUser({ type, value });
-      console.log("response", response);
+      console.log("responsemmmmmmm", response);
       setAvailability((prev) => ({
         ...prev,
-        [type]: response.status,
+        [type]: response.available,
       }));
-      if (!response.status) {
+      if (!response.available) {
         setErrors((prev) => ({
           ...prev,
-          [response.type]: `${response.type} Already exist`,
+          [type]: `${type} Already exist`,
         }));
       }
     } catch (err) {
@@ -186,6 +186,7 @@ const Register: React.FC = () => {
         });
       }
     } catch (err) {
+      console.error("Error registering user:", err);
       const message =
         err instanceof Error ? err.message : "Registration failed";
       showToast({ type: "error", message, duration: 3000 });

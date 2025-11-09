@@ -1,5 +1,5 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
-import { GroupIF } from '../shared/types/group.types';
+import { Schema, model } from 'mongoose';
+import { GroupIF } from '@shared/types';
 
 
 const GroupSchema = new Schema<GroupIF>(
@@ -59,4 +59,4 @@ const GroupSchema = new Schema<GroupIF>(
   { timestamps: true }
 );
 
-export const Group = mongoose.model<GroupIF>('Group', GroupSchema);
+export const GroupModel = model<GroupIF>('Group', GroupSchema);

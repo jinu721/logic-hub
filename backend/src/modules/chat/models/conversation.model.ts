@@ -1,5 +1,5 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
-import { ConversationIF } from '../shared/types/conversation.types';
+import { Schema, model } from 'mongoose';
+import { ConversationIF } from '@shared/types';
 
 
 
@@ -48,4 +48,4 @@ const ConversationSchema = new Schema<ConversationIF>(
   { timestamps: true }
 );
 
-export const Conversation = mongoose.model<ConversationIF>('Conversation', ConversationSchema);
+export const ConversationModel = model<ConversationIF>('Conversation', ConversationSchema);

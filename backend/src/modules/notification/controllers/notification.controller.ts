@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { INotificationController, INotificationService } from "@modules/notification";
-import { IUserService } from "@modules/user";
 import { HttpStatus } from "@constants/http.status";
 import { sendSuccess, asyncHandler, AppError } from "@utils/application";
 
@@ -8,7 +7,6 @@ import { sendSuccess, asyncHandler, AppError } from "@utils/application";
 export class NotificationController implements INotificationController {
   constructor(
     private readonly _notifySvc: INotificationService,
-    private readonly _userSvc: IUserService
   ) {}
 
   createNotification = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -16,12 +14,12 @@ export class NotificationController implements INotificationController {
       throw new AppError(HttpStatus.BAD_REQUEST, "Notification data is required");
     }
 
-    const result = await this._notifySvc.create(req.body);
+    const result = await this._notifySvc.createNotification(req.body);
     sendSuccess(res, HttpStatus.CREATED, result, "Notification created successfully");
   });
 
   getAllNotifications = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const result = await this._notifySvc.getAll();
+    const result = await this._notifySvc.getAllNotifications();
     sendSuccess(res, HttpStatus.OK, result, "Notifications fetched successfully");
   });
 
@@ -31,7 +29,7 @@ export class NotificationController implements INotificationController {
       throw new AppError(HttpStatus.BAD_REQUEST, "Notification ID is required");
     }
 
-    const result = await this._notifySvc.getById(id);
+    const result = await this._notifySvc.getNotificationById(id);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Notification not found");
     }
@@ -48,7 +46,7 @@ export class NotificationController implements INotificationController {
       throw new AppError(HttpStatus.BAD_REQUEST, "Update data is required");
     }
 
-    const result = await this._notifySvc.update(id, req.body);
+    const result = await this._notifySvc.updateNotification(id, req.body);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Notification not found");
     }
@@ -62,7 +60,7 @@ export class NotificationController implements INotificationController {
       throw new AppError(HttpStatus.BAD_REQUEST, "Notification ID is required");
     }
 
-    const result = await this._notifySvc.delete(id);
+    const result = await this._notifySvc.deleteNotification(id);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Notification not found");
     }
@@ -98,17 +96,8 @@ export class NotificationController implements INotificationController {
       throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
-    const result = await this._notifySvc.deleteAll(userId);
+    const result = await this._notifySvc.deleteAllNotification(userId);
     sendSuccess(res, HttpStatus.OK, result, "All notifications deleted successfully");
   });
 
-  toggleUserNotification = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = (req as any).user?.userId;
-    if (!userId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-    }
-
-    const result = await this._userSvc.toggleUserNotification(userId);
-    sendSuccess(res, HttpStatus.OK, { message: "Notification toggled successfully", result });
-  });
 }

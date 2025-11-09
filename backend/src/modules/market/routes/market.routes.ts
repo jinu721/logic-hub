@@ -4,7 +4,7 @@ import { MARKET_ROUTES } from "@constants/ROUTES/market.constants";
 import { Container } from "@di/types";
 
 
-const marketRoutes = (container: Container) => {
+export const marketRoutes = (container: Container) => {
     const router = express.Router();
     
     const marketController = container.marketCtrl;
