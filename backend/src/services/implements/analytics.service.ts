@@ -73,7 +73,6 @@ export class AdminAnalyticsService implements IAdminAnalyticsService {
       matchConditions
     );
     const statistics =  await this.leaderboardRepository.getStatistics()
-    console.log("Statistics: ", statistics);
     return {users,totalItems,statistics};
   }
 }

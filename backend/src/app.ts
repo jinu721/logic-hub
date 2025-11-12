@@ -17,7 +17,7 @@ import { marketRoutes } from '@modules/market';
 import { reportRoutes } from '@modules/report';
 import { conversationRoutes, messageRoutes, groupRoutes } from '@modules/chat';
 import { notificationRoutes } from '@modules/notification';
-import { challengeRoutes } from '@modules/challenge';
+import { challengeRoutes, submissionRoutes, solutionRoutes } from '@modules/challenge';
 import { purchaseRoutes } from '@modules/purchase';
 import { membershipRoutes } from '@modules/membership';
 import { analyticsRoutes } from '@modules/analytics';
@@ -63,6 +63,8 @@ export const createApp = (container: Container) => {
      app.use('/groups', groupRoutes(container));
      app.use('/notifications', notificationRoutes(container));
      app.use('/challenges', challengeRoutes(container));
+     app.use('/submissions', submissionRoutes(container));
+     app.use('/solutions', solutionRoutes(container));
      app.use('/purchases', purchaseRoutes(container));
      app.use('/memberships', membershipRoutes(container));
      app.use('/analytics', analyticsRoutes(container));

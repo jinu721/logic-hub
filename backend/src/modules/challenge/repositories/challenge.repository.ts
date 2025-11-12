@@ -17,7 +17,7 @@ export class ChallengeRepository
     return await this.model.create(challengeData);
   }
 
-  async getChallengeById(id: string): Promise<ChallengeIF | null> {
+  async getChallengeById(id: Types.ObjectId): Promise<ChallengeIF | null> {
     return await this.model.findById(id);
   }
 
@@ -38,28 +38,12 @@ export class ChallengeRepository
     return result !== null;
   }
 
-  async getChallengesByStatus(
-    status: "active" | "inactive" | "draft" | "archived"
-  ): Promise<ChallengeIF[]> {
-    return await this.model.find({ status });
-  }
-
   async getAllChallenges(search:string, skip:number, limit:number): Promise<ChallengeIF[]> {
     return await this.model.find({title:{$regex:search,$options:"i"}}).skip(skip).limit(limit).sort({_id:-1});
   }
-
 
   async countAllChallenges(search: string): Promise<number> {
     return await this.model.countDocuments({ title: { $regex: search, $options: "i" } });
   }
 
-  async getChallengesByTags(tags: string[]): Promise<ChallengeIF[]> {
-    return await this.model.find({ tags: { $in: tags } });
-  }
-
-  async getChallengesByDifficulty(
-    difficulty: "novice" | "adept" | "master"
-  ): Promise<ChallengeIF[]> {
-    return await this.model.find({ level: difficulty });
-  }
 }

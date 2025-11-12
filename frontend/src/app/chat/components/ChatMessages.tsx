@@ -69,11 +69,11 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
         className="flex-1 overflow-y-auto p-4 space-y-4"
         ref={chatContainerRef}
       >
-        {messages.length > 0 ? (
+        {messages && messages.length > 0 ? (
           <>
             {messages.map((message, index) => {
               const isOther =
-                message.sender?._id !== currentConversationData.currentUserId;
+                message.sender?.userId !== currentConversationData.currentUserId;
 
               return (
                 <div

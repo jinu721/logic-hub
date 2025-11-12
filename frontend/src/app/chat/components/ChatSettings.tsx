@@ -33,8 +33,8 @@ const ChatSettings: React.FC<ChatSettingsProps> = ({
         <button
           onClick={() =>
             isBlocked
-              ? handleMemberAction(otherUser._id, "unblock")
-              : handleMemberAction(otherUser._id, "block")
+              ? handleMemberAction(otherUser.userId, "unblock")
+              : handleMemberAction(otherUser.userId, "block")
           }
           className="flex items-center w-full p-2 rounded-lg hover:bg-gray-700 text-red-400 hover:text-red-300"
         >

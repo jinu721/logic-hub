@@ -77,31 +77,4 @@ export class MarketService
     return true;
   }
 
-  async purchaseMarketItem(id: string, userId: string) {
-    const item = await this.marketRepo.getItemById(id);
-    if (!item) throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
-
-    const user = await this.userRepo.getUserById(userId);
-    if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
-
-    if (user.stats.xpPoints < item.costXP) {
-      throw new AppError(HttpStatus.FORBIDDEN, "Not enough XP");
-    }
-
-    user.stats.xpPoints -= item.costXP;
-
-    const itemId = item.itemId.toString();
-
-    if (item.category === "avatar") {
-      user.inventory.ownedAvatars.push(itemId);
-    } else if (item.category === "banner") {
-      user.inventory.ownedBanners.push(itemId);
-    } else {
-      user.inventory.badges.push(itemId as any);
-    }
-
-    await this.userRepo.save(user);
-
-    return this.mapOne(item);
-  }
 }

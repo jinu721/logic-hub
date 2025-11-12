@@ -4,10 +4,7 @@ import { HttpStatus } from "@constants";
 import {
   PublicConversationDTO,
   toPublicConversationDTO,
-  toPublicUserDTO,
-  toPublicUserDTOs,
   toPublicMessageDTO,
-  PublicUserDTO,
   PublicMessageDTO,
   PublicGroupDTO,
   toPublicGroupDTO,
@@ -21,8 +18,11 @@ import {
   IConversationQueryService,
   IConversationRepository,
   IGroupRepository,
-  IUserRepository,
 } from "@modules/chat";
+import {
+  IUserRepository,
+} from "@modules/user";
+
 import { ConversationIF } from "@shared/types";
 
 
@@ -116,11 +116,10 @@ export class ConversationQueryService
   async findConversations(userId: string, search: any) {
     if (!userId) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
 
-    // (Optional) text search can be applied at repo level later if needed
     const convs = await this.conversationRepo.findConversationsByUser(userId);
     if (!convs || convs.length === 0) return [];
 
-    // strict mapping + enrich per conversation
+    
     const result = await Promise.all(
       convs.map(async (conv: any) => {
         let group: PublicGroupDTO | undefined;

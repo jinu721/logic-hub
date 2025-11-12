@@ -1,3 +1,4 @@
+import { PublicMarketItemDTO } from "@modules/market";
 import { PublicUserDTO } from "@modules/user/dtos";
 
 export interface IUserEngagementService {
@@ -5,4 +6,5 @@ export interface IUserEngagementService {
   cancelMembership(userId: string): Promise<boolean>;
   giftItem(userId: string, itemId: string, type: string): Promise<PublicUserDTO>;
   setUserOnline(userId: string, isOnline: boolean): Promise<PublicUserDTO>;
+  purchaseMarketItem(id: string,userId:string): Promise<PublicMarketItemDTO | null>;
 }

@@ -111,7 +111,7 @@ export default function ChatPage() {
 
   const safeConversationData = conversationData ?? null;
   const safeCurrentUsersChatsList = currentUsersChatsList ?? [];
-  const currentUserId = currentUser ? currentUser._id : null;
+  const currentUserId = currentUser ? currentUser.userId : null;
 
   const {
     typingUsers,
@@ -139,9 +139,9 @@ export default function ChatPage() {
       setIsConversationLoading(true);
       const conversation = await getConversationData(conversationId);
       const messages = await getInitialMessages(conversationId, 50);
-      console.log("conversation", conversation);
-      console.log("Messages", messages);
-      setMessages(messages.data);
+      console.log("USER CONVERESATION", conversation);
+      console.log("USER MESSAGES", messages);
+      setMessages(messages);
       setConversationData(conversation.data);
       setActiveTab(
         conversation.data.type === "one-to-one" ? "personal" : "groups"
@@ -157,6 +157,7 @@ export default function ChatPage() {
     try {
       setIsChatsLoading(true);
       const chats = await getCurrentUserChats({ search, activeTab });
+      console.log("USER CHATS", chats);
       setCurrentUsersChatsList(chats.data);
     } catch (error) {
       console.log(error);
@@ -187,6 +188,7 @@ export default function ChatPage() {
       try {
         setIsChatsLoading(true);
         const user = await getMyProfile();
+        console.log("CURRENT USER",user);
         await fetchCurrentUsersChats();
         setCurrentUser(user.user);
         setIsChatsLoading(false);
@@ -238,14 +240,14 @@ export default function ChatPage() {
     console.log("groups Admin", currentConversationData.group.admins);
 
     if (
-      currentConversationData.group.createdBy._id.toString() === currentUserId
+      currentConversationData.group.createdBy.userId.toString() === currentUserId
     ) {
       return "owner";
     }
 
     if (
       currentConversationData.group.admins.some(
-        (usr: any) => usr._id.toString() === currentUserId
+        (usr: any) => usr.userId.toString() === currentUserId
       )
     ) {
       return "admin";
@@ -427,7 +429,7 @@ export default function ChatPage() {
   const canManageMember = (member: UserIF): boolean => {
     if (!isGroupChat || !currentConversationData.group) return false;
 
-    const memberId = member._id?.toString();
+    const memberId = member.userId?.toString();
 
     if (userRole === "owner") {
       return memberId !== currentUserId;
@@ -450,11 +452,11 @@ export default function ChatPage() {
   };
 
   const handleRemoveUser = (userId: string) => {
-    setSelectedUsersAdd((prev) => prev.filter((user) => user._id !== userId));
+    setSelectedUsersAdd((prev) => prev.filter((user) => user.userId !== userId));
   };
 
   const handleAddSelectedMembers = async () => {
-    const membersIds = selectedUsersAdd.map((user) => user._id);
+    const membersIds = selectedUsersAdd.map((user) => user.userId);
     updateGroup({
       type: "add_members",
       conversationId: selectedChatId,
@@ -833,7 +835,7 @@ export default function ChatPage() {
 
               <div className="flex-1 flex overflow-hidden">
                 <div className="flex-1 flex flex-col">
-                  {currentConversationData && currentUserId && (
+                  { (
                     <ChatMessages
                       messages={messages}
                       currentUserId={currentUserId}
@@ -865,7 +867,7 @@ export default function ChatPage() {
                       />
                     ) : isRemoved ||
                       !conversationData.participants.some(
-                        (p) => p._id === currentUserId
+                        (p) => p.userId === currentUserId
                       ) ? (
                       <AccessBlockedPanel
                         isGroupChat={isGroup}
@@ -956,7 +958,12 @@ export default function ChatPage() {
                 </div>
               </div>
             </>
-          ) : null}
+          ) : <div>
+            Loading...
+            <div>
+              {JSON.stringify(currentUserId)}
+            </div>
+            </div>}
         </div>
       </div>
 

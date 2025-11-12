@@ -61,14 +61,14 @@ const AddMembers: React.FC<AddMembersProps> = ({
         <div className="flex flex-wrap gap-2">
           {selectedUsersAdd.map((user) => (
             <div
-              key={user._id}
+              key={user.userId}
               className="bg-gray-600 rounded-full px-3 py-1 flex items-center"
             >
               <span className="text-xs text-gray-200 mr-1">
                 {user.username}
               </span>
               <button
-                onClick={() => handleRemoveUser(user._id)}
+                onClick={() => handleRemoveUser(user.userId)}
                 className="text-gray-400 hover:text-white"
               >
                 <X size={12} />
@@ -84,15 +84,15 @@ const AddMembers: React.FC<AddMembersProps> = ({
         .filter((user) => user.type === "one-to-one")
         .map((chat) => {
           const isAlreadyMember = currentConversationData.participants.some(
-            (member) => member._id === chat.otherUser._id
+            (member) => member.userId === chat.otherUser.userId
           );
           const isSelected = selectedUsersAdd.some(
-            (selected) => selected._id === chat.otherUser._id
+            (selected) => selected.userId === <chat className="otherUser use"></chat>
           );
 
           return (
             <div
-              key={chat.otherUser._id}
+              key={chat.otherUser.userId}
               className={`flex items-center justify-between p-2 hover:bg-gray-600 rounded-md ${
                 isAlreadyMember ? "opacity-60" : "cursor-pointer"
               }`}
@@ -110,7 +110,7 @@ const AddMembers: React.FC<AddMembersProps> = ({
                 </span>
               ) : isSelected ? (
                 <button
-                  onClick={() => handleRemoveUser(chat.otherUser._id)}
+                  onClick={() => handleRemoveUser(chat.otherUser.userId)}
                   className="text-red-400 hover:text-red-300"
                 >
                   <Minus size={16} />

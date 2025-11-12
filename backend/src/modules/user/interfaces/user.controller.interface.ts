@@ -13,4 +13,5 @@ export interface IUserController {
     claimDailyReward(req: Request, res: Response,next: NextFunction): Promise<void>;
     verifyAdmin(req: Request, res: Response,next: NextFunction): Promise<void>;
     toggleUserNotification(req: Request, res: Response,next: NextFunction): Promise<void>;
+    purchaseMarketItem(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

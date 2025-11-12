@@ -1,47 +1,46 @@
 import { BaseService } from "@core";
-import { AppError } from "@utils/application";
+import { AppError, toObjectId } from "@utils/application";
 import { HttpStatus } from "@constants";
 import {
-  IChallengeQueryService,
   PublicChallengeDTO,
   toPublicChallengeDTO,
   toPublicChallengeDTOs
 } from "@modules/challenge/dtos";
 import {
+  IChallengeQueryService,
   IChallengeRepository,
-  IChallengeProgressRepository
+  ISubmissionRepository
 } from "@modules/challenge/interfaces";
-import { ChallengeDomainIF } from "@shared/types";
+import { ChallengeIF } from "@shared/types";
 
 export class ChallengeQueryService
-  extends BaseService<ChallengeDomainIF, PublicChallengeDTO>
+  extends BaseService<ChallengeIF, PublicChallengeDTO>
   implements IChallengeQueryService
 {
   constructor(
-    private readonly challengeRepo: IChallengeRepository,
-    private readonly progressRepo: IChallengeProgressRepository
+    private readonly _challengeRepo: IChallengeRepository,
+    private readonly _submissionRepo: ISubmissionRepository
   ) {
     super();
   }
 
-  protected toDTO(challenge: ChallengeDomainIF): PublicChallengeDTO {
+  protected toDTO(challenge: ChallengeIF): PublicChallengeDTO {
     return toPublicChallengeDTO(challenge);
   }
 
-  protected toDTOs(challenges: ChallengeDomainIF[]): PublicChallengeDTO[] {
+  protected toDTOs(challenges: ChallengeIF[]): PublicChallengeDTO[] {
     return toPublicChallengeDTOs(challenges);
   }
 
   async findChallengeById(id: string) {
-    const challenge = await this.challengeRepo.getChallengeById(id);
+    const challenge = await this._challengeRepo.getChallengeById(id);
     return challenge;
   }
 
   async getChallengeById(id: string, userId?: string) {
-    const challenge = await this.challengeRepo.getChallengeById(id);
+    const challenge = await this._challengeRepo.getChallengeById(id);
     if (!challenge) throw new AppError(HttpStatus.NOT_FOUND, "Challenge not found");
 
-    // HERE: only minimal data (we keep execution detail for ExecutionService)
     return {
       ...this.mapOne(challenge),
       userId
@@ -63,20 +62,19 @@ export class ChallengeQueryService
     if (filter.tags) query.tags = { $in: filter.tags };
     if (filter.searchQuery) query.title = { $regex: filter.searchQuery, $options: "i" };
 
-    const challenges = await this.challengeRepo.getChallenges(query, skip, limit);
-    const totalItems = await this.challengeRepo.countAllChallenges("");
+    const challenges = await this._challengeRepo.getChallenges(query, skip, limit);
+    const totalItems = await this._challengeRepo.countAllChallenges("");
 
     return {
       challenges: this.mapMany(challenges),
-      popularChallange: null,
       totalItems
     };
   }
 
   async getAllChallenges(search: string, page: number, limit: number) {
     const skip = (page - 1) * limit;
-    const challenges = await this.challengeRepo.getAllChallenges(search, skip, limit);
-    const totalItems = await this.challengeRepo.countAllChallenges(search);
+    const challenges = await this._challengeRepo.getAllChallenges(search, skip, limit);
+    const totalItems = await this._challengeRepo.countAllChallenges(search);
 
     return {
       challenges: this.mapMany(challenges),
@@ -84,18 +82,137 @@ export class ChallengeQueryService
     };
   }
 
-  async getChallengesByStatus(status: "active" | "inactive" | "draft" | "archived") {
-    const challenges = await this.challengeRepo.getChallengesByStatus(status);
-    return this.mapMany(challenges);
+  async getUserHomeChallenges(
+    filter: any,
+    userId: string
+  ): Promise<{
+    challenges: PublicChallengeDTO[];
+    popularChallange: PublicChallengeDTO | null;
+  }> {
+
+
+    console.log("Filter received in service:", filter);
+
+
+    let query:any = {};
+
+    if(filter.type){
+      query.type = filter.type;
+    }
+    if(filter.isPremium){
+      query.isPremium = filter.isPremium;
+    }
+    if(filter.level){
+      query.level = filter.level;
+    }
+    if(filter.tags){
+      query.tags = { $in: filter.tags };
+    }
+    if(filter.searchQuery){
+      query.title = { $regex: filter.searchQuery, $options: "i" };
+    }
+
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const popularChallangeId =
+      await this._submissionRepo.getMostCompletedChallengeOfWeek(
+        oneWeekAgo
+      );
+
+
+
+    let popularChallange = null;
+
+    if (popularChallangeId) {
+      popularChallange = await this._challengeRepo.getChallengeById(popularChallangeId);
+    }
+
+    if (!userId)
+      return {
+        challenges: [],
+        popularChallange: popularChallange ? this.mapOne(popularChallange) : null,
+      };
+
+    const challenges = await this._challengeRepo.getChallenges(query, 0, 20);
+
+    const submissionList =
+      await this._submissionRepo.getAllSubmissions();
+    const userSubmissionList =
+      await this._submissionRepo.getAllSubmissionsByUser(toObjectId(userId));
+
+    const userSubmissionMap = new Map();
+    userSubmissionList.forEach((p) =>
+      userSubmissionMap.set(p.challengeId.toString(), p)
+    );
+
+    const challengeSubmissionMap = new Map<
+      string,
+      { total: number; completed: number }
+    >();
+
+    if(submissionList && submissionList.length !== 0){      
+        for (const p of submissionList) {
+          const id = p.challengeId._id.toString();
+          if (!challengeSubmissionMap.has(id)) {
+            challengeSubmissionMap.set(id, { total: 0, completed: 0 });
+          }
+          const stats = challengeSubmissionMap.get(id)!;
+          stats.total += 1;
+          if (p.status === "completed") stats.completed += 1;
+        }
+    }
+
+    const challengesData = challenges.map((challenge) => {
+      const challengeId = challenge._id ? challenge._id.toString() : "";
+      const progress = userSubmissionMap.get(challengeId);
+      if (!progress) return challenge;
+      let userStatus = "not attempted";
+      if (progress) userStatus = progress.status;
+
+      const stats = challengeSubmissionMap.get(challengeId);
+      const totalAttempts = stats?.total || 0;
+      const completedUsers = stats?.completed || 0;
+      const successRate =
+        totalAttempts > 0
+          ? Math.round((completedUsers / totalAttempts) * 100)
+          : 0;
+
+      return {
+        ...toPublicChallengeDTO(challenge),
+        userStatus,
+        completedUsers,
+        successRate,
+      };
+    });
+
+    if (popularChallange) {
+      const popId = popularChallange._id ? popularChallange._id.toString() : "";
+      const progress = userSubmissionMap.get(popId);
+      let userStatus = "not attempted";
+      if (progress) userStatus = progress.status;
+
+      const stats = challengeSubmissionMap.get(popId);
+      const totalAttempts = stats?.total || 0;
+      const completedUsers = stats?.completed || 0;
+      const successRate =
+        totalAttempts > 0
+          ? Math.round((completedUsers / totalAttempts) * 100)
+          : 0;
+
+      popularChallange = {
+        ...popularChallange.toObject(),
+        userStatus,
+        completedUsers,
+        successRate,
+      };
+    }
+
+    return {
+      challenges: challengesData as PublicChallengeDTO[],
+      popularChallange: popularChallange as PublicChallengeDTO,
+    };
   }
 
-  async getChallengesByTags(tags: string[]) {
-    const challenges = await this.challengeRepo.getChallengesByTags(tags);
-    return this.mapMany(challenges);
-  }
 
-  async getChallengesByDifficulty(difficulty: "novice" | "adept" | "master") {
-    const challenges = await this.challengeRepo.getChallengesByDifficulty(difficulty);
-    return this.mapMany(challenges);
-  }
 }

@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 import { MembershipIF } from "./membership.types";
 
 export enum UserRole {
@@ -12,19 +12,19 @@ export enum LoginType {
   GITHUB = "github",
 }
 
-interface Badge {
-  name: string;
-  description: string;
-  imageUrl: string;
-  category: string;
-  requirements: {
-    type: string;
-    value: number;
-  };
-  rarity: string;
-  isActive: boolean;
-  timestamp: Date;
-}
+// interface Badge {
+//   name: string;
+//   description: string;
+//   imageUrl: string;
+//   category: string;
+//   requirements: {
+//     type: string;
+//     value: number;
+//   };
+//   rarity: string;
+//   isActive: boolean;
+//   timestamp: Date;
+// }
 
 
 export interface UserIF extends Document {
@@ -50,9 +50,9 @@ export interface UserIF extends Document {
   };
   inventory: {
     keys: number;
-    badges: [Badge];
-    ownedAvatars: [string];
-    ownedBanners: [string];
+    badges: [Types.ObjectId];
+    ownedAvatars: [Types.ObjectId];
+    ownedBanners: [Types.ObjectId];
   };
   isBanned: boolean;
   isVerified: boolean;

@@ -38,8 +38,8 @@ const PurchasePremium: React.FC<IPremiumPlanProps> = ({ type }) => {
     const fetchPremiumPlans = async () => {
       try {
         const response = await getTwoActivePlans();
-        console.log("Response", response);
-        setData(response.data);
+        console.log("MEMBERSHIPP", response);
+        setData(response);
       } catch (error) {
         console.error(error);
         showToast({ type: "error", message: "Error fetching plans" });
@@ -259,7 +259,7 @@ const PurchasePremium: React.FC<IPremiumPlanProps> = ({ type }) => {
         key: orderRespose.key,
         amount: orderRespose.amount,
         currency: orderRespose.currency,
-        name: "CodeMaze",
+        name: "Logic Hub",
         description: "Explore You Wisdome",
         order_id: orderRespose.orderId,
         handler: async (data) => {
@@ -271,8 +271,7 @@ const PurchasePremium: React.FC<IPremiumPlanProps> = ({ type }) => {
             razorpaySignature: data.razorpay_signature,
           };
           const membershipResponse = await purchasePlan(planData);
-          console.log(membershipResponse);
-          router.push(`/premiumplans/success/${membershipResponse.data._id}`);
+          router.push(`/premiumplans/success/${membershipResponse.data.result._id}`);
         },
       };
 

@@ -18,6 +18,7 @@ export const userRoutes = (container: any) => {
   router.post(USER_ROUTES.GIFT_ITEM, authMiddleware, userController.giftItem.bind(userController));
   router.post(USER_ROUTES.CANCEL_MEMBERSHIP, authMiddleware, userController.cancelMembership.bind(userController));
   router.post(USER_ROUTES.CLAIM_DAILY_REWARD, authMiddleware, userController.claimDailyReward.bind(userController));
+  router.post(USER_ROUTES.PURCHASE_MARKET, authMiddleware, userController.purchaseMarketItem.bind(userController));
 
   return router;
 }

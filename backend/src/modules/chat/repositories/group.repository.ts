@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { Group, IGroupRepository } from "@modules/chat";
+import { GroupModel, IGroupRepository } from "@modules/chat";
 import { GroupIF } from "@shared/types";
 import { BaseRepository } from "@core";
 
@@ -9,7 +9,7 @@ export class GroupRepository
   implements IGroupRepository
 {
   constructor() {
-    super(Group);
+    super(GroupModel);
   }
   async createGroup(data: Partial<GroupIF>): Promise<GroupIF> {
     return this.model.create(data);

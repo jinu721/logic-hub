@@ -7,9 +7,10 @@ import {
 } from "../../shared/types/socket.types";
 import redisClient from "../../config/redis.config";
 import { PublicUserDTO } from "../../mappers/user.dto";
+import { Container } from "@di";
 
 export class MessageHandler {
-  constructor(private io: Server, private container: any) {}
+  constructor(private io: Server, private container: Container) {}
 
   public setupMessageHandlers(socket: ExtendedSocket): void {
     socket.on("send_message", this.handleSendMessage.bind(this, socket));
@@ -28,26 +29,28 @@ export class MessageHandler {
     socket: ExtendedSocket,
     { data, accessToken }: { data: MessageData; accessToken: string }
   ): Promise<void> {
-    console.log(`Message Data`, data);
     try {
-      const msg: any = await this.container.messageService.createMessage(
+      const msg: any = await this.container.messageCommandSvc.createMessage(
         data as any,
         accessToken
       );
-      await this.container.conversationService.updateLastMessage(
+      await this.container.conversationCommandSvc.updateLastMessage(
         msg.conversationId,
         msg._id
       );
+
 
       this.io.to(data.conversationId).emit("recive_message", {
         conversationId: data.conversationId,
         message: msg,
       });
-      this.io.to(data.conversationId).emit("update_conversation");
+      this.io.to(data.conversationId).emit("conversation_updated");
+
+      console.log("MESSAGE SEND :- ",msg);
 
       const conversation =
-        await this.container.conversationService.getConversationById(
-          msg.conversationId
+        await this.container.conversationQuerySvc.getConversationById(
+          msg.conversationId.toString()
         );
 
       if (!conversation) {
@@ -56,17 +59,20 @@ export class MessageHandler {
       }
 
       const participantIds = conversation.participants.map((p) =>
-        p._id.toString()
+        p.userId.toString()
       );
       const otherUserIds = participantIds.filter(
-        (id) => id !== msg.sender?._id.toString()
+        (id) => id !== msg.sender?.userId
       );
 
       const updatedConv =
-        await this.container.conversationService.addUnreadCountsForUsers(
-          msg.conversationId,
+        await this.container.conversationCommandSvc.addUnreadCounts(
+          msg.conversationId.toString(),
           otherUserIds
         );
+
+
+        console.log("UPDATED CONV", updatedConv);
 
       if (!updatedConv) {
         console.log("Conversation not found");
@@ -74,11 +80,11 @@ export class MessageHandler {
       }
 
       updatedConv.participants.forEach(async (user: PublicUserDTO) => {
-        const socketId = await redisClient.get(`socket:${user._id}`);
+        const socketId = await redisClient.get(`socket:${user}`);
         console.log("SocketId", socketId);
         if (socketId) {
           this.io.to(socketId).emit("conversation_updated", {
-            conversationId: msg.conversationId,
+            conversationId: msg.conversationId.toString(),
             lastMessage: conversation.latestMessage,
             unreadCounts: conversation.unreadCounts,
           });
@@ -98,11 +104,11 @@ export class MessageHandler {
   ): Promise<void> {
     try {
       console.log("Marking User started",userId);
-      await this.container.messageService.markMessagesAsSeen(
+      await this.container.messageEngagementSvc.markMessagesAsSeen(
         conversationId,
         userId
       );
-      const conversations = await this.container.conversationService.markAsRead(
+      const conversations = await this.container.conversationCommandSvc.markAsRead(
         conversationId,
         userId
       );
@@ -113,7 +119,11 @@ export class MessageHandler {
 
       console.log("Message Marked as Read");
 
-      const user = await this.container.userService.findUserById(userId);
+      console.log("UserId )))))", userId);
+
+      const user = await this.container.userQuerySvc.findUserById(userId);
+
+      console.log("User Found", user);
 
       if (!user) {
         throw new Error("User not found");
@@ -123,14 +133,14 @@ export class MessageHandler {
         conversationId,
         seenBy:user,
       });
-      // const socketId = await redisClient.get(`socket:${userId}`);
-      // if (socketId) {
-      //   this.io.to(socketId).emit("conversation_updated", {
-      //     conversationId: conversationId,
-      //     lastMessage: conversations.latestMessage,
-      //     unreadCounts: null,
-      //   });
-      // }
+      const socketId = await redisClient.get(`socket:${userId}`);
+      if (socketId) {
+        this.io.to(socketId).emit("conversation_updated", {
+          conversationId: conversationId,
+          lastMessage: conversations.latestMessage,
+          unreadCounts: null,
+        });
+      }
     } catch (err) {
       console.log(`Error in mark_all_conv_as_read: ${err}`);
       socket.emit("send_error", {
@@ -144,9 +154,12 @@ export class MessageHandler {
     { messageId }: { messageId: string }
   ): Promise<void> {
     try {
-      const deleted = await this.container.messageService.deleteMessage(
+      const deleted = await this.container.messageCommandSvc.deleteMessage(
         messageId
       );
+
+      console.log("Message Deleted", deleted);
+
       if (!deleted) {
         throw new Error("Message not found");
       }
@@ -166,7 +179,7 @@ export class MessageHandler {
     { messageId, newContent }: { messageId: string; newContent: string }
   ): Promise<void> {
     try {
-      const updated = await this.container.messageService.editMessage(
+      const updated = await this.container.messageCommandSvc.editMessage(
         messageId,
         newContent
       );
@@ -222,7 +235,7 @@ export class MessageHandler {
   }: { messageId: string; userId: string; emoji: string }
 ): Promise<void> {
   try {
-    const updated = await this.container.messageService.toggleReaction(
+    const updated = await this.container.messageEngagementSvc.toggleReaction(
       messageId,
       userId,
       emoji
@@ -247,7 +260,7 @@ export class MessageHandler {
     { conversationId, userId }: TypingData
   ): Promise<void> {
     try {
-      const conversation = await this.container.conversationService.setTypingUser(
+      const conversation = await this.container.conversationTypingSvc.setTypingUser(
         conversationId,
         userId
       );
@@ -269,7 +282,7 @@ export class MessageHandler {
   ): Promise<void> {
     try {
       const conversation =
-        await this.container.conversationService.removeTypingUser(
+        await this.container.conversationTypingSvc.removeTypingUser(
           conversationId,
           userId
         );

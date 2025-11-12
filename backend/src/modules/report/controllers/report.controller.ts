@@ -13,6 +13,7 @@ export class ReportController implements IReportController {
       throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
+
     const report = await this._reportSvc.createReport({
       reporter: userId,
       ...req.body,

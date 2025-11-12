@@ -22,6 +22,8 @@ export default function useChat({
 
   console.log("CurrentUser CHat ARGS", currentUsersChatsList);
 
+  console.log("CURRENT USER ID", currentUserId);
+
   const [messages, setMessages] = useState<MessageIF[]>([]);
   const [currentUsersChats, setCurrentUsersChats] = useState<ConversationIF[]>(
     []
@@ -68,7 +70,6 @@ export default function useChat({
       conversationId: string;
       seenBy: UserIF;
     }) => {
-      console.log("Message seen by", seenBy);
       if (conversationId === selectedChatIdRef.current) {
         setMessages((prevMsgs: any) =>
           prevMsgs.map((msg: MessageIF) => {
@@ -118,7 +119,7 @@ export default function useChat({
       userId: string;
       status: boolean;
     }) => {
-      console.log("Current Users Chats", setCurrentUsersChats);
+      console.log("Current Users Chats", currentUsersChats);
       console.log("Status Back Called", userId);
 
       if (userId === anothorUserId) {
@@ -126,7 +127,7 @@ export default function useChat({
       }
       setCurrentUsersChats((prevChats) =>
         prevChats.map((chat) =>
-          chat.otherUser?._id === userId
+          chat.otherUser?.userId === userId
             ? {
                 ...chat,
                 otherUser: {
@@ -154,6 +155,9 @@ export default function useChat({
       lastMessage,
       unreadCounts,
     }: any) => {
+
+      console.log("Conversation Updated", conversationId, lastMessage,unreadCounts);
+
       setCurrentUsersChats((prevChats: any) => {
         const updated = [...prevChats];
         const existingChatIndex = updated.findIndex(
@@ -221,7 +225,7 @@ export default function useChat({
         setMessages((prev) => {
           const updatedMessage = [...prev, message];
 
-          if (!message.seenBy?.some((u) => u._id === currentUserId)) {
+          if (!message.seenBy?.some((u) => u.userId === currentUserId)) {
             socket.emit("mark-all-conv-as-read", {
               conversationId,
               userId: currentUserId,
@@ -348,6 +352,7 @@ export default function useChat({
       conversationId: string;
       typingUsers: UserIF[];
     }) => {
+      console.log("Typing Users", typingUsers);
       if (conversationId === selectedChatIdRef.current) {
         setTypingUsers(typingUsers);
         setCurrentUsersChats((prevChats) => {

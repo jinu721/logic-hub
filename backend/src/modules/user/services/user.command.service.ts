@@ -32,6 +32,8 @@ export class UserCommandService
   }
 
   async updateUser(userId: string, data: UpdateUserDTO) {
+    console.log("UPDATE UPDATE DATA", userId);
+    console.log("UPDATE UPDATE DATA", data);
     const updated = await this.userRepo.updateUser(toObjectId(userId), data);
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
     return this.mapOne(updated);

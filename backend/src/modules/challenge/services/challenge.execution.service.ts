@@ -1,5 +1,5 @@
 import { BaseService } from "@core";
-import { AppError } from "@utils/application";
+import { AppError, toObjectId } from "@utils/application";
 import { HttpStatus } from "@constants";
 import {
   IChallengeExecutionService,
@@ -35,6 +35,30 @@ export class ChallengeExecutionService
     return toPublicChallengeDTOs(challenges);
   }
 
+  private mapBatchToUiResults(testCases: any[], batchResults: any[]) {
+    return testCases.map((testCase, index) => {
+      const batch = batchResults[index] || { success: false, error: "No result" };
+
+      let passed = false;
+      let actualOutput = "";
+
+      if (batch.success) {
+        const expected = String(testCase.output).trim();
+        actualOutput = String(batch.result || "").trim();
+        passed = isEqual(expected, actualOutput);
+      } else {
+        actualOutput = batch.error || "Execution failed";
+      }
+
+      return {
+        input: testCase.input,
+        expectedOutput: testCase.output,
+        actualOutput,
+        passed
+      };
+    });
+  }
+
   async runChallengeCode(
     challengeId: string,
     language: string,
@@ -42,7 +66,7 @@ export class ChallengeExecutionService
     input: string,
     userId: string
   ) {
-    const challenge = await this.challengeRepo.getChallengeById(challengeId);
+    const challenge = await this.challengeRepo.getChallengeById(toObjectId(challengeId));
     if (!challenge) throw new AppError(HttpStatus.NOT_FOUND, "Challenge not found");
     if (challenge.type !== "code")
       throw new AppError(HttpStatus.BAD_REQUEST, "Challenge is not code type");
@@ -73,18 +97,17 @@ export class ChallengeExecutionService
       }));
     }
 
+    const results = this.mapBatchToUiResults(testCases, parsed);
+
     return {
       userId,
       challengeId,
       language,
-      results: parsed
+      results
     };
   }
 
   async submitChallenge(data: any, userId: string) {
-    // THIS VERSION ONLY EXECUTES CODE + RETURNS RESULT
-    // STATS (xp, streak) WILL BE IN ChallengeStatsService
-
     const { challengeId, userCode, language } = data;
 
     const challenge = await this.challengeRepo.getChallengeById(challengeId);
@@ -94,6 +117,9 @@ export class ChallengeExecutionService
       throw new AppError(HttpStatus.BAD_REQUEST, "Unsupported challenge type");
 
     const funcName = challenge.functionSignature?.split("(")[0];
+    
+    if(!funcName) throw new AppError(HttpStatus.BAD_REQUEST, "Function signature missing");
+    
     const fullSource = generateExecutableCode(language, userCode, funcName, challenge.testCases);
 
     const executionResult = await runInWorkerThread(language, fullSource, "");
@@ -109,26 +135,7 @@ export class ChallengeExecutionService
       }));
     }
 
-    const results = challenge.testCases.map((testCase, index) => {
-      const batch = batchResults[index];
-      let passed = false;
-      let actualOutput = "";
-
-      if (batch.success) {
-        const expected = String(testCase.output).trim();
-        actualOutput = String(batch.result || "").trim();
-        passed = isEqual(expected, actualOutput);
-      } else {
-        actualOutput = batch.error || "Execution failed";
-      }
-
-      return {
-        input: testCase.input,
-        expectedOutput: testCase.output,
-        actualOutput,
-        passed
-      };
-    });
+    const results = this.mapBatchToUiResults(challenge.testCases, batchResults);
 
     return {
       challengeId,

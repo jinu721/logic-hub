@@ -7,18 +7,18 @@ import { env } from "./config/env"
 
 export const bootstrap = async () => {
 
-  const container = createContainer()
+  const container = createContainer();
 
-  const app = createApp(container)
+  const app = createApp(container);
 
-  const httpServer = createServer(app)
+  const httpServer = createServer(app);
 
   const io = new Server(httpServer, {
     cors: { origin: env.FRONTEND_URL, credentials: true }
-  })
+  });
 
-  setupSocket(io, container)
+  setupSocket(io, container);
 
-  httpServer.listen(env.PORT, () => console.log("Server Started"))
+  httpServer.listen(env.PORT, () => console.log("Server Started"));
 
 }

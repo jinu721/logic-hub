@@ -176,7 +176,7 @@ const Home = () => {
   };
 
   const statusColor = getStatusColor(
-    highlightedDomain?.userStatus ? highlightedDomain?.userStatus : "pending"
+    highlightedDomain?.userStatus ? highlightedDomain?.userStatus : "pending",
   );
 
   const handleClosePopup = () => {
@@ -213,7 +213,7 @@ const Home = () => {
       debounce((cb) => {
         cb();
       }, 500),
-    []
+    [],
   );
 
   const handleSearchChange = (searchQuery: string) => {
@@ -247,15 +247,16 @@ const Home = () => {
                           {getStatusIcon(
                             highlightedDomain?.userStatus
                               ? highlightedDomain?.userStatus
-                              : "pending"
+                              : "pending",
                           )}
                           {highlightedDomain?.userStatus === "completed"
                             ? "Completed"
                             : highlightedDomain?.userStatus === "failed-timeout"
-                            ? "Timed Out"
-                            : highlightedDomain?.userStatus === "failed-output"
-                            ? "Failed"
-                            : "Available"}
+                              ? "Timed Out"
+                              : highlightedDomain?.userStatus ===
+                                  "failed-output"
+                                ? "Failed"
+                                : "Available"}
                         </span>
                         <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">
                           {highlightedDomain.level}
@@ -335,7 +336,7 @@ const Home = () => {
                         {getButtonText(
                           highlightedDomain?.userStatus
                             ? highlightedDomain?.userStatus
-                            : "pending"
+                            : "pending",
                         )}
                       </span>
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
@@ -359,7 +360,7 @@ const Home = () => {
           ) : (
             <>
               <div className="min-h-screen ">
-                <GeometricBackground/>
+                <GeometricBackground />
                 <div className="container mx-auto px-4 py-8">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div className="lg:col-span-3 xl:col-span-2">
@@ -403,7 +404,7 @@ const Home = () => {
         />
       )}
       {showGiftRecive && <GiftReceivedModal />}
-      {/* {showDailyReward && <DailyReward user={user} />} */}
+      {showDailyReward && <DailyReward user={user} />} 
     </>
   );
 };

@@ -17,9 +17,9 @@ export default function SearchUsers() {
   useEffect(() => {
     console.log("Search Query:", searchQuery);
     async function getUsers() {
-      const data = await searchUser(searchQuery);
-      console.log("Users", data.users.users);
-      setSearchResults(data.users.users);
+      const result = await searchUser(searchQuery);
+      console.log("Search Results:", result);
+      setSearchResults(result.users);
     }
     getUsers();
   }, [searchQuery]);

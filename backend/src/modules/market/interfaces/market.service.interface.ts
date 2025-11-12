@@ -7,5 +7,4 @@ export interface IMarketService {
   getItemById(id: string): Promise<PublicMarketItemDTO | null>;
   updateItem(id: string, data: Partial<MarketItemIF>): Promise<PublicMarketItemDTO | null>;
   deleteItem(id: string): Promise<boolean>;
-  purchaseMarketItem(id: string,userId:string): Promise<PublicMarketItemDTO | null>;
 }

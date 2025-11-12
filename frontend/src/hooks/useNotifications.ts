@@ -12,6 +12,7 @@ export default function useNotifications() {
     const loadInitial = async () => {
       try {
         const data = await getCurrentNotifications();
+        console.log("NOFIFFFF",data)
         setNotifications(data);
       } catch (error) {
         console.error("Failed to load notifications", error);

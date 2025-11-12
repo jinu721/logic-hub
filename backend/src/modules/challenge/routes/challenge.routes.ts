@@ -11,10 +11,10 @@ export const challengeRoutes = (container: Container) => {
     
     router.use(authMiddleware);
     
-    // router.get(CHALLENGE_ROUTES.BASE, challengeController.getAllChallenges.bind(challengeController));
+    router.get(CHALLENGE_ROUTES.BASE, challengeController.getUserHomeChallenges.bind(challengeController));
     router.post(CHALLENGE_ROUTES.CREATE, challengeController.createChallenge.bind(challengeController));
     router.get(CHALLENGE_ROUTES.BY_ID, challengeController.getChallengeById.bind(challengeController));
-    router.get(CHALLENGE_ROUTES.GET_ALL, challengeController.getChallenges.bind(challengeController));
+    router.get(CHALLENGE_ROUTES.GET_ALL, challengeController.getAllChallenges.bind(challengeController));
     router.put(CHALLENGE_ROUTES.UPDATE, challengeController.updateChallenge.bind(challengeController));
     router.delete(CHALLENGE_ROUTES.DELETE, challengeController.deleteChallenge.bind(challengeController));
     

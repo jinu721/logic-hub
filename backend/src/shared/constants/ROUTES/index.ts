@@ -9,7 +9,7 @@ export * from "./purchase.constants";
 export * from "./report.constants";
 export * from "./solution.constants";
 export * from "./user.constants";
-export * from "./proggress.constants";
+export * from "./submission.constants";
 export * from "./conversation.constants";
 export * from "./challenge.constants";
 export * from "./membership.constants";

@@ -12,4 +12,5 @@ export const USER_ROUTES = {
   GIFT_ITEM: "/:userId/gift/:type",
   CANCEL_MEMBERSHIP: "/membership/cancel",
   CLAIM_DAILY_REWARD: "/daily-reward/claim",
+  PURCHASE_MARKET: "/purchase/market/:id",
 };

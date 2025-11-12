@@ -196,10 +196,8 @@ export class GroupService implements IGroupService {
       group.members.push(userObjectId);
       updatedGroup = (await this._groupRepo.saveGroup(group)) as GroupIF;
 
-      console.log("GroupID ", groupId);
 
       const conv = await this._conversationRepo.findConversationByGroup(groupId);
-      console.log("Conversation ", conv);
       if (!conv) throw new Error("Conversation not found");
       conv.participants = Array.from(
         new Set([...conv.participants, userObjectId])

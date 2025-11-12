@@ -29,7 +29,6 @@ export class SubmissionRepository
   }
 
   async findCompletedDomainsByUser(userId: Types.ObjectId): Promise<number> {
-    console.log("userId", userId);
     const uniqueCompleted = await this.model.distinct("challengeId", {
       userId,
       passed: true,

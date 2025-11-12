@@ -156,4 +156,7 @@ export class UserRepository
       )
     );
   }
+  saveUser(user: UserIF): Promise<UserIF> {
+    return new this.model(user).save();
+  }
 }

@@ -102,7 +102,7 @@ const GroupCreationModal: React.FC<GroupCreationModalProps> = ({ isOpen, onClose
         member?.otherUser?.username
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) &&
-        !selectedMembers.some((sel) => sel._id === member.otherUser._id)
+        !selectedMembers.some((sel) => sel.userId === member.otherUser.userId)
     )
     .map((member) => member.otherUser);
 
@@ -111,7 +111,7 @@ const GroupCreationModal: React.FC<GroupCreationModalProps> = ({ isOpen, onClose
   };
 
   const removeMember = (id: string) => {
-    setSelectedMembers((prev) => prev.filter((m) => m._id !== id));
+    setSelectedMembers((prev) => prev.filter((m) => m.userId !== id));
   };
 
   const nextStep = () => {
@@ -269,7 +269,7 @@ const GroupCreationModal: React.FC<GroupCreationModalProps> = ({ isOpen, onClose
                   {filteredMembers.length > 0 ? (
                     filteredMembers.map((member) => (
                       <div
-                        key={member._id}
+                        key={member.userId}
                         className="flex items-center justify-between bg-gray-800 p-3 rounded-md hover:bg-gray-700 cursor-pointer transition-colors"
                         onClick={() => addMember(member)}
                       >
@@ -300,12 +300,12 @@ const GroupCreationModal: React.FC<GroupCreationModalProps> = ({ isOpen, onClose
                   <div className="flex flex-wrap gap-2">
                     {selectedMembers.map((member) => (
                       <div
-                        key={member._id}
+                        key={member.userId}
                         className="flex items-center bg-purple-800 px-3 py-1 rounded-full text-sm gap-2"
                       >
                         <span>{member.username}</span>
                         <button 
-                          onClick={() => removeMember(member._id)}
+                          onClick={() => removeMember(member.userI)}
                           className="hover:bg-purple-700 rounded-full p-1 transition-colors"
                         >
                           <X size={12} />

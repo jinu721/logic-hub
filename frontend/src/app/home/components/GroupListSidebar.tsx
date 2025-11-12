@@ -35,7 +35,7 @@ const GroupsSidebar = ({ user }: Params) => {
     socket.emit("update_group", {
       type: "join_group",
       groupId,
-      userId: user?._id as string,
+      userId: user?.userId as string,
       members: [],
     });
     socket.on("group_updated", ({}) => {});
@@ -50,8 +50,8 @@ const GroupsSidebar = ({ user }: Params) => {
         page: currentPage,
         limit: itemsPerPage,
       });
-      setGroupData(data.data.groups);
-      setTotalItems(data.data.totalItems);
+      setGroupData(data.groups);
+      setTotalItems(data.totalItems);
     } catch (error) {
       showToast({
         title: "Error",
@@ -164,7 +164,7 @@ const GroupsSidebar = ({ user }: Params) => {
             </div>
           ) : groupData.length > 0 ? (
             groupData.map((group: GroupIF) => {
-              const userId = user?._id;
+              const userId = user?.userId;
               const hasPendingRequest =
                 group.groupType === "public-approval" &&
                 (group.userRequests?.some(
@@ -173,8 +173,8 @@ const GroupsSidebar = ({ user }: Params) => {
                   requestedGroups.includes(group._id || ""));
 
               const isAlreadyMember =
-                group.members?.some((member) => member._id === user._id) ||
-                group.admins?.some((admin) => admin._id === user._id);
+                group.members?.some((member) => member.userId === user.userId) ||
+                group.admins?.some((admin) => admin.userId === user.userId);
 
               const hasJoined =
                 joinedGroups.includes(group._id || "") || isAlreadyMember;
@@ -227,7 +227,7 @@ const GroupsSidebar = ({ user }: Params) => {
                           .slice(0, 3)
                           .map((user, i) => (
                             <div
-                              key={user._id || i}
+                              key={user.userId || i}
                               className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium border-2 border-gray-900 ${
                                 i === 0
                                   ? "bg-indigo-500 text-white"

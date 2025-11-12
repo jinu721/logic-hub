@@ -14,8 +14,9 @@ export class ReportRepository
 
   async createReport(data: ReportIF): Promise<ReportIF> {
     const report = new this.model(data);
-    return toLean<ReportIF>(report.save());
+    return report.save();
   }
+
 
   async getAllReports(query: any, skip: number, limit: number): Promise<any[]> {
     const reports = await this.model.aggregate([

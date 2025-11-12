@@ -24,6 +24,8 @@ export class PurchaseController implements IPurchaseController {
 
     const order = await this.paymentSvc.createOrder(amount)
 
+
+
     sendSuccess(res, HttpStatus.OK, order, "Order created successfully")
   })
 

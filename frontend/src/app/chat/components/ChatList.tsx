@@ -30,7 +30,8 @@ const ChatList: React.FC<Props> = ({
     activeTab === "groups" ? chat.type === "group" : chat.type === "one-to-one"
   );
 
-  console.log("Filtered Chats", filteredChats);
+  console.log("FILTERED CHATS", filteredChats);
+
 
   return (
     <>
@@ -181,7 +182,7 @@ const ChatList: React.FC<Props> = ({
                         {chat.typingUsers.length > 0 ? (
                           <p className="text-sm text-purple-400 font-medium truncate">
                             {chat.typingUsers.map((user, index) => (
-                              <span key={user._id}>
+                              <span key={user.userId}>
                                 {user.username}
                                 {index < chat.typingUsers.length - 1
                                   ? ", "

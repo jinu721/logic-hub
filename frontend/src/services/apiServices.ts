@@ -27,7 +27,7 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    // console.log("RESPONSE FROM BACKEND ::: ",response)
+    console.log("RESPONSE FROM BACKEND ::: ",response)
     return response;
   },
   async (error) => {
@@ -42,7 +42,10 @@ axiosInstance.interceptors.response.use(
         const res = await axiosInstance.post("/auth/refresh-token");
 
 
-        const newToken = res.data.accessToken;
+        console.log("REFRESH TOKEN RESPONSE", res);
+
+
+        const newToken = res.data.result.accessToken;
         localStorage.setItem("accessToken", newToken);
         originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
 

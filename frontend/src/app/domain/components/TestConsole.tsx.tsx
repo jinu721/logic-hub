@@ -52,6 +52,9 @@ const TestConsole: React.FC<Props> = ({
     return Array.isArray(data) ? data : [];
   }, [previewResults, challenge?.testCases]);
 
+  console.log("PREV RESULT", previewResults);
+  console.log("DATA TEST DATA", testData);
+
   useEffect(() => {
     if (testData.length > 0 && selectedTestCase >= testData.length) {
       setSelectedTestCase(0);
@@ -141,7 +144,7 @@ const TestConsole: React.FC<Props> = ({
               <div className="h-full flex flex-col">
                 <div className="flex-shrink-0 bg-[#0e1117] border-b border-[#1c1f26]">
                   <div className="flex items-center px-4 py-2 space-x-2 overflow-x-auto">
-                    {testData.map((test, index) => {
+                    {testData.slice(0,3).map((test, index) => {
                       const passed = test.passed;
                       return (
                         <button

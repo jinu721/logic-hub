@@ -17,4 +17,6 @@ export interface IGroupRepository {
   saveGroup(group: GroupIF): Promise<GroupIF | null>;
   sendJoinRequest(groupId: string, userId: string): Promise<GroupIF | null>;
   leaveGroup(groupId: string, userId: string): Promise<GroupIF | null>;
+  findGroupById(groupId: string): Promise<GroupIF | null>;
+  countAllGroups(query: any): Promise<number>;
 }

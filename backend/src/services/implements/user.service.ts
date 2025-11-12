@@ -121,10 +121,6 @@ export class UserService extends BaseService<UserIF, PublicUserDTO> implements I
     const accessToken = this._tokenProv.generateAccessToken(this.mapOne(user));
     const refreshToken = this._tokenProv.generateRefreshToken(this.mapOne(user));
 
-    console.log("User logged in successfully");
-    console.log("Access Token:", accessToken);
-    console.log("Refresh Token:", refreshToken);
-
     return {
       security: false,
       isVerified: true,
@@ -142,20 +138,14 @@ export class UserService extends BaseService<UserIF, PublicUserDTO> implements I
     refreshToken: string;
     userData: PublicUserDTO;
   }> {
-    console.log("Email: ", email, "OTP: ", otp);
     const user = await this._pendingUserRepo.findPendingUserByEmail(email);
     if (!user) throw new Error("User Not Found");
     const { username, password, otp: userOtp } = user;
     if (userOtp !== Number(otp)) throw new Error("Invalid OTP");
-    console.log("User verified successfully");
-    console.log("User Creation Started");
     await this._userRepo.createUser({ username, email, password });
-    console.log("User created successfully");
     const userData = await this._userRepo.getByEmailOrUsername(email);
-    console.log("User Data: ", userData);
     if (!userData) throw new Error("User Not Found");
     await this._pendingUserRepo.deletePendingUser(email);
-    console.log("User deleted successfully");
     const accessToken = this._tokenProv.generateAccessToken(
       this.mapOne(userData)
     );

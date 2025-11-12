@@ -39,7 +39,7 @@ const BlackMarketPage = () => {
   const fetchItems = async (filter?: {category: string; searchQuery: string; sortOption: string}) => {
     try {
       setIsLoading(true);
-      const itemData = await getMarketItems(filter);
+      const itemData = await getMarketItems(filter,1,100);
       console.log("Items:", itemData);
       setItems(itemData.marketItems);
     } catch (error) {

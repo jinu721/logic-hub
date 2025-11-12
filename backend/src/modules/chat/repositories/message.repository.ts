@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { Message, IMessageRepository } from "@modules/chat";
+import { MessageModel, IMessageRepository } from "@modules/chat";
 import { MessageIF } from "@shared/types";
 import { BaseRepository } from "@core";
 
@@ -9,7 +9,7 @@ export class MessageRepository
   implements IMessageRepository
 {
   constructor() {
-    super(Message);
+    super(MessageModel);
   }
   async createMessage(
     data: MessageIF & { replyTo?: string }

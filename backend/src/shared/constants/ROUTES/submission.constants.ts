@@ -1,6 +1,6 @@
 import { COMMON_ROUTES } from "./commen.routes";
 
-export const PROGRESS_ROUTES = {
+export const SUBMISSION_ROUTES = {
   BASE: COMMON_ROUTES.BASE,
   BY_ID: "/:id",
   UPDATE: "/:id",

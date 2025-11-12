@@ -81,7 +81,7 @@ const MarketItem: React.FC<MarketItemProps> = ({
       )}
 
       {item.isExclusive && (
-        <div className="absolute top-3 right-3 z-10">
+        <div className="absolute top-3 right-3 z-6">
           <div className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full flex items-center backdrop-blur-sm">
             <Gem className="h-3 w-3 mr-1" />
             Exclusive

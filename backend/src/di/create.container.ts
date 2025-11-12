@@ -105,6 +105,7 @@ import {
   AnalyticsRepository,
   AnalyticsService,
   AnalyticsController,
+  LeaderboardRepository,
 } from "@modules/analytics";
 
 import { Container } from "./types";
@@ -141,6 +142,7 @@ export const createContainer = () => {
   container.membershipRepo = new MembershipRepository();
   container.purchaseRepo = new PurchaseRepository();
   container.analyticsRepo = new AnalyticsRepository();
+  container.leaderboardRepo = new LeaderboardRepository();
 
   container.tokenSvc = new TokenService(
     container.tokenRepo,
@@ -158,8 +160,12 @@ export const createContainer = () => {
     container.userRepo,
     container.hashProv
   );
-  container.userQuerySvc = new UserQueryService(container.userRepo);
-  container.userEngagementSvc = new UserEngagementService(container.userRepo);
+  container.userQuerySvc = new UserQueryService(container.userRepo,container.submissionRepo);
+    container.marketSvc = new MarketService(
+    container.marketRepo,
+    container.userRepo
+  );
+  container.userEngagementSvc = new UserEngagementService(container.userRepo,container.marketSvc);
   container.avatarInventorySvc = new InventoryService(
     container.avatarRepo,
     container.imageUploader
@@ -200,7 +206,7 @@ export const createContainer = () => {
   container.conversationQuerySvc = new ConversationQueryService(
     container.conversationRepo,
     container.groupRepo,
-    container.groupRepo
+    container.userRepo
   );
   container.conversationTypingSvc = new ConversationTypingService(
     container.conversationRepo
@@ -231,10 +237,6 @@ export const createContainer = () => {
   );
   container.reportSvc = new ReportService(
     container.reportRepo,
-  );
-  container.marketSvc = new MarketService(
-    container.marketRepo,
-    container.userRepo
   );
   container.notificationSvc = new NotificationService(
     container.notificationRepo

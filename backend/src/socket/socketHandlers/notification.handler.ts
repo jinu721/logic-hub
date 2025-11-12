@@ -2,9 +2,10 @@ import { Server } from "socket.io";
 import { ExtendedSocket } from "../../shared/types/socket.types";
 import { sendNotificationToAllUsers } from "../../shared/utils/application/send.notification";
 import redisClient from "../../config/redis.config";
+import { Container } from "@di";
 
 export class NotificationHandler {
-  constructor(private io: Server, private container: any) {}
+  constructor(private io: Server, private container: Container) {}
 
   public setupNotificationHandlers(socket: ExtendedSocket): void {
     socket.on("admin_add_domain", this.handleAdminAddDomain.bind(this, socket));

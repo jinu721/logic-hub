@@ -25,8 +25,8 @@ const EditProfile = () => {
     bio: "",
     twoFactorEnabled: false,
     notifications: true,
-    avatar: "",
-    banner: "",
+    avatar: null,
+    banner: null,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,6 +48,7 @@ const EditProfile = () => {
       try {
         const response = await getMyProfile();
         const user = response.user;
+        console.log("USER", user);
         setUserData(user);
         setUser({
           username: user.username || "",
@@ -56,8 +57,8 @@ const EditProfile = () => {
           twoFactorEnabled: user.twoFactorEnabled || false,
           notifications:
             user.notifications !== undefined ? user.notifications : true,
-          avatar: user.avatar?._id || "",
-          banner: user.banner?._id || "",
+          avatar: user.avatar?._id || null,
+          banner: user.banner?._id || null,
         });
         setCurrentAvatar(user.avatar?.image);
         setCurrentBanner(user.banner?.image);

@@ -3,6 +3,7 @@ import { HttpStatus } from "@constants";
 import * as crypto from "crypto";
 import { AppError } from "@utils/application";
 import { IPurchasePaymentService } from "@modules/purchase";
+import { env } from "@config/env";
 
 export class PurchasePaymentService implements IPurchasePaymentService {
   constructor(private razorpayInstance: any, private secretKey: string) {}
@@ -20,6 +21,7 @@ export class PurchasePaymentService implements IPurchasePaymentService {
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
+      key: env.RAZORPAY_KEY_ID
     };
   }
 

@@ -162,4 +162,20 @@ export class UserController implements IUserController {
       });
     }
   );
+  
+  purchaseMarketItem = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = (req as any).user?.userId;
+    const itemId = req.params.id;
+
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+    }
+
+    if (!itemId) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Item ID is required");
+    }
+
+    const result = await this.engagementSvc.purchaseMarketItem(itemId, userId);
+    sendSuccess(res, HttpStatus.OK, result, "Item purchased successfully");
+  });
 }

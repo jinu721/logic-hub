@@ -46,4 +46,4 @@ const marketItemSchema = new Schema<MarketItemIF>({
   },
 });
 
-export const MarketItem =  model<MarketItemIF>('MarketItem', marketItemSchema);
+export const MarketModel =  model<MarketItemIF>('MarketItem', marketItemSchema);

@@ -18,6 +18,7 @@ export const ROUTES = {
     SEARCH: "/users",
     GIFT: (userId: Id, type: string) => `/users/${userId}/gift/${type}`,
     CHANGE_PASSWORD: "/users/change-password",
+    PURCHASE_MARKET_ITEM: (id: Id) => `/users/purchase/market/${id}`,
   },
 
   GROUPS: {
@@ -42,17 +43,17 @@ export const ROUTES = {
   },
 
   MEMBERSHIP: {
-    BASE: "/membership",
-    ID: (id: Id) => `/membership/${id}`,
-    ACTIVE: "/membership/active",
-    CANCEL: "/membership/cancel",
+    BASE: "/memberships",
+    ID: (id: Id) => `/memberships/${id}`,
+    ACTIVE: "/memberships/active",
+    CANCEL: "/memberships/cancel",
   },
 
   PURCHASE: {
-    CREATE_ORDER: "/purchase/create-order",
-    BASE: "/purchase",
-    HISTORY: (id: Id) => `/purchase/history/${id}`,
-    FULL_HISTORY: "/purchase/history",
+    CREATE_ORDER: "/purchases/create-order",
+    BASE: "/purchases",
+    HISTORY: (id: Id) => `/purchases/history/${id}`,
+    FULL_HISTORY: "/purchases/history",
   },
 
   REPORTS: {
@@ -61,11 +62,11 @@ export const ROUTES = {
   },
 
   CHALLENGES: {
-    BASE: "/challanges",
-    ID: (id: Id) => `/challanges/${id}`,
-    RUN: "/challanges/run",
-    SUBMIT: "/challanges/submit",
-    ADMIN_ALL: "/challanges/admin/all",
+    BASE: "/challenges",
+    ID: (id: Id) => `/challenges/${id}`,
+    RUN: "/challenges/run",
+    SUBMIT: "/challenges/submit",
+    ADMIN_ALL: "/challenges/admin/all",
   },
 
   LEVELS: {
@@ -76,7 +77,6 @@ export const ROUTES = {
   MARKET: {
     BASE: "/market",
     ID: (id: Id) => `/market/${id}`,
-    PURCHASE: (id: Id) => `/market/${id}/purchase`,
   },
 
   NOTIFICATIONS: {
@@ -105,10 +105,10 @@ export const ROUTES = {
     LEADERBOARD: "/analytics/leaderboard",
   },
 
-  PROGRESS: {
-    USER_ME: "/progresses/recent/user/me",
-    USER: (username: string) => `/progresses/recent/user/${username}`,
-    HEATMAP: (uid: Id) => `/progresses/user/heatmap/${uid}`,
+  SUBMISSION: {
+    USER_ME: "/submissions/recent/user/me",
+    USER: (username: string) => `/submissions/recent/user/${username}`,
+    HEATMAP: (uid: Id, year?: number) => `/submissions/user/heatmap/${uid}${year ? `?year=${year}` : ''}`,
   },
   
   REWARD: {

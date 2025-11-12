@@ -94,7 +94,7 @@ const DomainLeftPanel: FC<DomainLeftPanelProps> = ({
 
                 <div className="space-y-5">
                   {
-                    challenge.testCases?.map((testCase, index) => (
+                    challenge.testCases?.slice(0,3).map((testCase, index) => (
                       <div key={index} className="border-slate-700/30 bg-gradient-to-r from-slate-800/30 to-slate-700/20 backdrop-blur-md rounded-lg overflow-hidden">
                         <div className="grid grid-cols-2 divide-x divide-slate-700/50">
                           <div className="p-4">

@@ -13,4 +13,5 @@ export interface IUserRepository {
     getUserById(userId:string): Promise<UserIF| null>;
     searchUsers(search:string): Promise<UserIF[]| null>;
     cancelMembership(userId: Types.ObjectId): Promise<UserIF | null>;
+    saveUser(user: UserIF): Promise<UserIF>;
 }

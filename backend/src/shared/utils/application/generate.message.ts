@@ -1,5 +1,7 @@
+import { Container } from "@di";
+
 export const generateSystemMessage = async (
-  container: any,
+  container: Container,
   type: string,
   conversationId: string,
   userId: string,
@@ -8,7 +10,7 @@ export const generateSystemMessage = async (
   removeMember: string
 ) => {
   let content = "";
-  const actingUser = await container.userSrv.findUserById(userId);
+  const actingUser = await container.userQuerySvc.findUserById(userId);
   console.log("ActingUser:- ", type);
   if (!actingUser) {
     console.error("actingUser is null");
@@ -17,11 +19,11 @@ export const generateSystemMessage = async (
 
   let removedMember;
   if (removeMember) {
-    removedMember = await container.userSrv.findUserById(removeMember);
+    removedMember = await container.userQuerySvc.findUserById(removeMember);
   }
 
   const memberUsers = await Promise.all(
-    members?.map((id) => container.userSrv.findUserById(id))
+    members?.map((id) => container.userQuerySvc.findUserById(id))
   );
 
   switch (type) {
@@ -66,5 +68,5 @@ export const generateSystemMessage = async (
   } as any;
 
 
-  return await container.messageSvc.createMessage(systemMessageData, null);
+  return await container.messageCommandSvc.createMessage(systemMessageData, null);
 };

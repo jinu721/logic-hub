@@ -73,14 +73,12 @@ export class NotificationController implements INotificationController {
   });
 
   getNotificationByUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    console.log("Req.user ", req.user);
-    console.log("Req: ", req);
-    // const userId = (req as any).user?.userId;
-    // if (!userId) {
-    //   throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-    // }
+    const userId = (req as any).user?.userId;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+    }
 
-    // const result = await this._notifySvc.getNotificationByUserId(userId);
+    const result = await this._notifySvc.getNotificationByUserId(userId);
     sendSuccess(res, HttpStatus.OK, {data:[]}, "User notifications fetched successfully");
   });
 

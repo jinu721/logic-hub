@@ -73,8 +73,6 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
         setIsLoading(true);
         const challenge = await getDomain(challengeId);
         const user = await getMyProfile();
-        console.log("Challenge", challenge);
-        console.log("User", user);
         setChallenge(challenge);
         setCurrentLanguage(Object.keys(challenge.initialCode)[0] as Language);
         setCodeToShow(() => {
@@ -250,11 +248,11 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
         userId: user?._id,
       });
 
+
       setConsoleOutput([
         { type: "success", message: data.results[0].actualOutput },
       ]);
 
-      console.log("Preview Results :- ", data.results);
       setPreviewResults(data.results);
     } catch (err) {
       setConsoleOutput([

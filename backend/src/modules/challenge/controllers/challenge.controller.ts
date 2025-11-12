@@ -34,11 +34,20 @@ export class ChallengeController implements IChallengeController {
     sendSuccess(res, HttpStatus.OK, result);
   });
 
-  getChallenges = asyncHandler(async (req, res) => {
+  getUserHomeChallenges = asyncHandler(async (req, res) => {
     const userId = (req as any).user?.userId;
     if (!userId) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
 
-    const result = await this.querySvc.getChallenges(req.query, userId);
+    const result = await this.querySvc.getUserHomeChallenges(req.query, userId);
+    sendSuccess(res, HttpStatus.OK, result);
+  });
+
+  getAllChallenges = asyncHandler(async (req, res) => {
+    const search = (req.query.search as string) || "";
+    const page = parseInt((req.query.page as string) || "1", 10);
+    const limit = parseInt((req.query.limit as string) || "10", 10);
+
+    const result = await this.querySvc.getAllChallenges(search, page, limit);
     sendSuccess(res, HttpStatus.OK, result);
   });
 
@@ -62,8 +71,6 @@ export class ChallengeController implements IChallengeController {
   });
 
 
-  // --- CODE EXECUTION -------------------------------------------
-
   runChallengeCode = asyncHandler(async (req, res) => {
     const userId = (req as any).user?.userId;
     if (!userId) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
@@ -81,8 +88,6 @@ export class ChallengeController implements IChallengeController {
     sendSuccess(res, HttpStatus.OK, result);
   });
 
-
-  // --- SUBMIT (EXECUTE + APPLY XP/STATS) -------------------------
 
   submitChallenge = asyncHandler(async (req, res) => {
     const userId = (req as any).user?.userId;

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import { PublicUserDTO } from "../../../mappers/user.dto";
-import { env } from "../../../config/env";
+import { PublicUserDTO } from "@modules/user/dtos";
+import { env } from "@config/env";
 
 export const generateAccessToken = (user: PublicUserDTO) => {
   const payload = {

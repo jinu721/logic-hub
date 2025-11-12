@@ -43,8 +43,12 @@ export class GroupQueryService
       query.name = { $regex: filter.search, $options: "i" }
     }
 
+    console.log("GROUP FETCHING STARTED WITH QUERY: ", query)
+
     const groups = await this.groupRepo.getAllGroups(query, skip, limit)
     const totalItems = await this.groupRepo.countAllGroups(query)
+
+    console.log("GROUP FETCHING ENDED")
 
     return {
       groups: this.mapMany(groups),
