@@ -27,7 +27,9 @@
       "@routes": ["routes"],
       "@routes/*": ["routes/*"],
       "@worker": ["worker"],
-      "@worker/*": ["worker/*"]
+      "@worker/*": ["worker/*"],
+      "@execution": ["execution"],
+      "@execution/*": ["execution/*"],
     },
     "typeRoots": [
       "./src/shared/types",

@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: logichub-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      - piston
+    restart: always
+
+  piston:
+    image: ghcr.io/engineer-man/piston:latest
+    container_name: piston-engine
+    ports:
+      - "2000:2000"
+    environment:
+      - PISTON_RUN_MEMORY_LIMIT=134217728
+      - PISTON_COMPILE_MEMORY_LIMIT=268435456
+      - PISTON_OUTPUT_MAX_SIZE=8192
+      - PISTON_RUN_TIMEOUT=7000
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 512m
+    cpus: 1
+    restart: always

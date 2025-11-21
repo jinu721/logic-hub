@@ -4,7 +4,7 @@ import { ITokenProvider } from "./auth.token.interface";
 
 export class TokenProvider implements ITokenProvider {
   generateAccessToken(payload: any): string {
-    return jwt.sign(payload, env.ACCESS_TOKEN_SECRET!, { expiresIn: "15m" });
+    return jwt.sign(payload, env.ACCESS_TOKEN_SECRET!, { expiresIn: "1d" });
   }
   generateRefreshToken(payload: any): string {
     return jwt.sign(payload, env.REFRESH_TOKEN_SECRET!, { expiresIn: "7d" });
