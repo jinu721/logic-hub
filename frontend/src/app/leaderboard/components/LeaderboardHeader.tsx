@@ -1,8 +1,8 @@
 import { Trophy, BarChart3, Filter, ChevronDown } from "lucide-react";
 
 interface Props {
-  selectedView: string;
-  setSelectedView: (view: string) => void;
+  selectedView: "leaderboard" | "stats";
+  setSelectedView: (view: "leaderboard" | "stats") => void;
   showFilters: boolean;
   setShowFilters: (value: boolean) => void;
 }

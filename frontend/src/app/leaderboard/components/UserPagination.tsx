@@ -13,7 +13,7 @@ const UserPagination: React.FC<UserPaginationProps> = ({
   itemsPerPage,
   totalItems,
 }) => {
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -22,8 +22,8 @@ const UserPagination: React.FC<UserPaginationProps> = ({
       <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-400">
-            Showing <span className="font-medium">{startItem}</span> to{" "}
-            <span className="font-medium">{endItem}</span> of{" "}
+            Showing <span className="font-medium">{totalItems === 0 ? 0 : startItem}</span> to{" "}
+            <span className="font-medium">{totalItems === 0 ? 0 : endItem}</span> of{" "}
             <span className="font-medium">{totalItems}</span> users
           </p>
         </div>
@@ -35,7 +35,7 @@ const UserPagination: React.FC<UserPaginationProps> = ({
           >
             <button
               type="button"
-              onClick={() => setCurrentPage(currentPage - 1)}
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
               className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700 disabled:opacity-50"
               aria-label="Previous"
@@ -67,7 +67,7 @@ const UserPagination: React.FC<UserPaginationProps> = ({
 
             <button
               type="button"
-              onClick={() => setCurrentPage(currentPage + 1)}
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
               className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700 disabled:opacity-50"
               aria-label="Next"

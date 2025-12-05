@@ -32,118 +32,100 @@ const ChallengeFormCode = ({
   errors,
   handleCodeChange,
 }: Props) => {
+  const getCodeValue = (codeField: string | Record<string, string>): string => {
+    if (typeof codeField === "string") {
+      return codeField || "";
+    }
+    if (typeof codeField === "object" && codeField !== null) {
+      return codeField[selectedLanguage] || "";
+    }
+    return "";
+  };
+
+  const getCurrentLanguageName = (): string => {
+    return languageOptions.find((l) => l.id === selectedLanguage)?.name || selectedLanguage;
+  };
+
+  const getLanguagesWithTemplates = (): string => {
+    if (typeof formData.initialCode !== "object" || formData.initialCode === null) {
+      return "None";
+    }
+
+    const langs = Object.keys(formData.initialCode)
+      .filter((lang) => formData.initialCode[lang]?.trim())
+      .map((lang) => languageOptions.find((l) => l.id === lang)?.name || lang);
+
+    return langs.length > 0 ? langs.join(", ") : "None";
+  };
+
+  const isMultiLanguage = formData.type === "code";
+  const initialCodeValue = getCodeValue(formData.initialCode);
+  const solutionCodeValue = getCodeValue(formData.solutionCode);
+
   return (
     <>
       <div className="mb-4">
-        <label className="block text-gray-300 mb-1 font-medium">
+        <label className="block text-gray-300 mb-2 font-medium">
           Programming Language
         </label>
-        <div className="flex flex-wrap gap-2">
+        <select
+          value={selectedLanguage}
+          onChange={(e) => setSelectedLanguage(e.target.value)}
+          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+        >
           {languageOptions.map((lang) => (
-            <button
-              key={lang.id}
-              type="button"
-              onClick={() => setSelectedLanguage(lang.id)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                selectedLanguage === lang.id
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-              }`}
-            >
+            <option key={lang.id} value={lang.id}>
               {lang.name}
-            </button>
+            </option>
           ))}
-        </div>
+        </select>
       </div>
 
       <div className="mb-4">
-        <label className="block text-gray-300 mb-1 font-medium">
-          {formData.type === "code"
-            ? `Initial Code (${
-                languageOptions.find((l) => l.id === selectedLanguage)?.name
-              })`
+        <label className="block text-gray-300 mb-2 font-medium">
+          {isMultiLanguage
+            ? `Initial Code (${getCurrentLanguageName()})`
             : "Initial Code"}
-          <span className="text-red-500">*</span>
+          <span className="text-red-500 ml-1">*</span>
         </label>
         <textarea
           name="initialCode"
-          value={
-            formData.type === "code" && typeof formData.initialCode === "object"
-              ? formData.initialCode[selectedLanguage] || ""
-              : typeof formData.initialCode === "string"
-              ? formData.initialCode || ""
-              : ""
-          }
+          value={initialCodeValue}
           onChange={handleCodeChange}
           className={`w-full bg-gray-800 border ${
             errors.initialCode ? "border-red-500" : "border-gray-700"
-          } rounded-lg p-2.5 text-white font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
-          rows={8}
-          placeholder={
-            formData.type === "code"
-              ? `// ${
-                  languageOptions.find((l) => l.id === selectedLanguage)?.name
-                } template for the challenge`
-              : "// Code template for the challenge"
-          }
+          } rounded-lg p-3 text-white font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
+          rows={10}
+          placeholder={`// ${getCurrentLanguageName()} template for the challenge`}
         />
         {errors.initialCode && (
           <p className="text-sm text-red-500 mt-1">{errors.initialCode}</p>
         )}
 
-        {formData.type === "code" &&
-          typeof formData.initialCode === "object" && (
-            <div className="mt-2 p-2 bg-gray-800/50 rounded-lg border border-gray-700">
-              <p className="text-xs text-gray-400">
-                Languages with templates:{" "}
-                {typeof formData.initialCode === "object" &&
-                formData.initialCode !== null
-                  ? Object.keys(formData.initialCode as Record<string, string>)
-                      .filter((lang) =>
-                        (formData.initialCode as Record<string, string>)[
-                          lang
-                        ]?.trim()
-                      )
-                      .map(
-                        (lang) =>
-                          languageOptions.find((l) => l.id === lang)?.name ||
-                          lang
-                      )
-                      .join(", ") || "None"
-                  : "None"}
-              </p>
-            </div>
-          )}
+        {isMultiLanguage && typeof formData.initialCode === "object" && (
+          <div className="mt-2 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+            <p className="text-xs text-gray-400">
+              <span className="font-medium">Languages with templates:</span>{" "}
+              {getLanguagesWithTemplates()}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="mb-4">
-        <label className="block text-gray-300 mb-1 font-medium">
-          {formData.type === "code"
-            ? `Solution Code (${
-                languageOptions.find((l) => l.id === selectedLanguage)?.name
-              })`
+        <label className="block text-gray-300 mb-2 font-medium">
+          {isMultiLanguage
+            ? `Solution Code (${getCurrentLanguageName()})`
             : "Solution Code"}
+          <span className="text-xs text-gray-500 ml-2">(Admin only)</span>
         </label>
         <textarea
           name="solutionCode"
-          value={
-            formData.type === "code" &&
-            typeof formData.solutionCode === "object"
-              ? formData.solutionCode?.[selectedLanguage] || ""
-              : typeof formData.solutionCode === "string"
-              ? formData.solutionCode || ""
-              : ""
-          }
+          value={solutionCodeValue}
           onChange={handleCodeChange}
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          rows={8}
-          placeholder={
-            formData.type === "code"
-              ? `// ${
-                  languageOptions.find((l) => l.id === selectedLanguage)?.name
-                } solution code (only visible to admins)`
-              : "// Solution code (only visible to admins)"
-          }
+          className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+          rows={10}
+          placeholder={`// ${getCurrentLanguageName()} solution code (only visible to admins)`}
         />
       </div>
     </>

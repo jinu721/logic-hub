@@ -31,7 +31,6 @@ export interface SubmissionIF {
 export interface ChallengeDomainIF {
   _id?: string | undefined;
   title: string;
-  description: string;
   instructions: string;
   type: "code" | "cipher";
   level: "novice" | "adept" | "master";
@@ -47,7 +46,9 @@ export interface ChallengeDomainIF {
   userStatus?:"completed" | "failed-timeout" | "failed-output" | "pending"
   completedUsers?:number;
   successRate?:number;
-  functionSignature?: string;
+  functionName?: string;
+  parameters?: { name: string; type: string }[];
+  returnType?: string;
   initialCode?: any;
   solutionCode?: any;
   status: "active" | "inactive" | "draft" | "archived";

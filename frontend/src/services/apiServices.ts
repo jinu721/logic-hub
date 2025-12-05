@@ -2,8 +2,7 @@ import axios from "axios";
 import { store } from "@/redux/store";
 import { logout } from "@/redux/slices/authSlice";
 
-// const baseURL = "https://api.jinu.site/"; 
-const baseURL = "http://localhost:5000/"; 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export const axiosInstance = axios.create({
   baseURL,
@@ -27,23 +26,18 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log("RESPONSE FROM BACKEND ::: ",response)
+    console.log("RESPONSE FROM BACKEND ::: ", response);
     return response;
   },
   async (error) => {
     const originalRequest = error.config;
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
         const res = await axiosInstance.post("/auth/refresh-token");
 
-
         console.log("REFRESH TOKEN RESPONSE", res);
-
 
         const newToken = res.data.result.accessToken;
         localStorage.setItem("accessToken", newToken);
@@ -58,7 +52,7 @@ axiosInstance.interceptors.response.use(
         store.dispatch(logout());
         window.location.href = "/auth/login";
       }
-    }else if(error.response?.status === 403){
+    } else if (error.response?.status === 403) {
       store.dispatch(logout());
       localStorage.clear();
       window.location.href = "/auth/login";

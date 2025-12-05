@@ -2,10 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Terminal,
   FileCheck,
-  Play,
   RefreshCw,
-  ChevronRight,
-  ChevronDown,
 } from "lucide-react";
 
 interface ConsoleOutput {
@@ -14,13 +11,13 @@ interface ConsoleOutput {
 }
 
 interface TestCase {
-  input: string;
-  output?: string;
-  expectedOutput?: string;
-  actualOutput?: string | null;
+  input: any[];
+  output?: any;
+  expected?: any;
+  actual?: any;
+  error?: string | null;
   passed?: boolean;
-  stdout?: string;
-  target?: string;
+  isHidden?: boolean;
 }
 
 interface Props {
@@ -32,6 +29,16 @@ interface Props {
   consoleOutput: ConsoleOutput[];
   previewResults: TestCase[];
   challenge: any;
+}
+
+function formatValue(value: any): string {
+  try {
+    if (value === null) return "null";
+    if (value === undefined) return "undefined";
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
 }
 
 const TestConsole: React.FC<Props> = ({
@@ -46,14 +53,33 @@ const TestConsole: React.FC<Props> = ({
 }) => {
   const [selectedTestCase, setSelectedTestCase] = useState(0);
 
-  const testData = useMemo(() => {
-    const data =
-      previewResults.length > 0 ? previewResults : challenge?.testCases || [];
-    return Array.isArray(data) ? data : [];
-  }, [previewResults, challenge?.testCases]);
+  const hasRunTests = previewResults.length > 0;
 
-  console.log("PREV RESULT", previewResults);
-  console.log("DATA TEST DATA", testData);
+  const testData = useMemo(() => {
+    if (hasRunTests) {
+      return previewResults.map((result) => ({
+        input: result.input || [],
+        expected: result.expected,
+        actual: result.actual,
+        error: result.error,
+        passed: result.passed,
+      }));
+    } else {
+      const cases = challenge?.testCases || [];
+      return cases
+        .filter((tc: any) => !tc.isHidden)
+        .map((tc: any) => ({
+          input: tc.input || [],
+          expected: tc.output,
+          actual: undefined, 
+          error: null,
+          passed: undefined, 
+        }));
+    }
+  }, [previewResults, challenge?.testCases, hasRunTests]);
+
+  console.log("Has Run Tests:", hasRunTests);
+  console.log("Test Data:", testData);
 
   useEffect(() => {
     if (testData.length > 0 && selectedTestCase >= testData.length) {
@@ -144,7 +170,7 @@ const TestConsole: React.FC<Props> = ({
               <div className="h-full flex flex-col">
                 <div className="flex-shrink-0 bg-[#0e1117] border-b border-[#1c1f26]">
                   <div className="flex items-center px-4 py-2 space-x-2 overflow-x-auto">
-                    {testData.slice(0,3).map((test, index) => {
+                    {testData.map((test, index) => {
                       const passed = test.passed;
                       return (
                         <button
@@ -167,59 +193,43 @@ const TestConsole: React.FC<Props> = ({
                         </button>
                       );
                     })}
-                    <button className="px-3 py-1.5 text-gray-400 hover:text-gray-200 hover:bg-[#1a1e25] rounded-md text-sm transition-colors">
-                      +
-                    </button>
                   </div>
                 </div>
 
-                <div className="flex-1 p-4">
+                <div className="flex-1 p-4 overflow-auto">
                   {currentTestCase ? (
                     <div className="space-y-4">
                       <div>
-                        <div className="text-sm text-gray-400 mb-2">INPUTS =</div>
-                        {currentTestCase.input.map((inp:any, idx:number) => {
-                          return (
-                            <div
-                              key={idx}
-                              className="bg-[#1c1f26] border border-[#2a2f3a] rounded-md p-3 mb-3"
-                            >
-                              <code className="text-sm text-white font-mono">
-                                {inp || "No input available"}
-                              </code>
-                            </div>
-                          );
-                        })}
+                        <div className="text-sm text-gray-400 mb-2 font-semibold">
+                          INPUT
+                        </div>
+                        {currentTestCase.input.map((inp: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-[#1c1f26] border border-[#2a2f3a] rounded-md p-3 mb-2"
+                          >
+                            <code className="text-sm text-white font-mono whitespace-pre-wrap">
+                              {formatValue(inp)}
+                            </code>
+                          </div>
+                        ))}
                       </div>
 
                       <div>
-                        <div className="text-sm text-gray-400 mb-2">
-                          OUTPUT =
+                        <div className="text-sm text-gray-400 mb-2 font-semibold">
+                          EXPECTED OUTPUT
                         </div>
                         <div className="bg-[#1c1f26] border border-[#2a2f3a] rounded-md p-3">
-                          <code className="text-sm text-white font-mono">
-                            {currentTestCase.output || "9"}
+                          <code className="text-sm text-green-400 font-mono whitespace-pre-wrap">
+                            {formatValue(currentTestCase.expected)}
                           </code>
                         </div>
                       </div>
 
-                      <div>
-                        <div className="text-sm text-gray-400 mb-2">
-                          Expected Output
-                        </div>
-                        <div className="bg-[#1c1f26] border border-[#2a2f3a] rounded-md p-3">
-                          <code className="text-sm text-green-400 font-mono">
-                            {currentTestCase.expectedOutput ||
-                              currentTestCase.output ||
-                              "No expected output"}
-                          </code>
-                        </div>
-                      </div>
-
-                      {currentTestCase.actualOutput !== undefined && (
+                      {hasRunTests && currentTestCase.actual !== undefined && (
                         <div>
-                          <div className="text-sm text-gray-400 mb-2">
-                            Actual Output
+                          <div className="text-sm text-gray-400 mb-2 font-semibold">
+                            ACTUAL OUTPUT
                           </div>
                           <div
                             className={`border rounded-md p-3 ${
@@ -229,41 +239,41 @@ const TestConsole: React.FC<Props> = ({
                             }`}
                           >
                             <code
-                              className={`text-sm font-mono ${
+                              className={`text-sm font-mono whitespace-pre-wrap ${
                                 currentTestCase.passed
                                   ? "text-green-300"
                                   : "text-red-300"
                               }`}
                             >
-                              {currentTestCase.actualOutput}
+                              {formatValue(currentTestCase.actual)}
                             </code>
                           </div>
                         </div>
                       )}
 
-                      {currentTestCase.stdout && (
+                      {hasRunTests && currentTestCase.error && (
                         <div>
-                          <div className="text-sm text-gray-400 mb-2">
-                            Stdout
+                          <div className="text-sm text-red-400 mb-2 font-semibold">
+                            ERROR
                           </div>
-                          <div className="bg-gray-900 rounded-md p-3">
-                            <pre className="text-sm text-green-400 font-mono whitespace-pre-wrap">
-                              {currentTestCase.stdout}
+                          <div className="bg-red-900/20 border border-red-700 rounded-md p-3">
+                            <pre className="text-sm text-red-300 font-mono whitespace-pre-wrap">
+                              {currentTestCase.error}
                             </pre>
                           </div>
                         </div>
                       )}
 
-                      {currentTestCase.passed !== undefined && (
+                      {hasRunTests && currentTestCase.passed !== undefined && (
                         <div className="flex items-center space-x-2">
                           <div
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium ${
                               currentTestCase.passed
-                                ? "bg-green-700 text-white"
-                                : "bg-red-700 text-white"
+                                ? "bg-green-600 text-white"
+                                : "bg-red-600 text-white"
                             }`}
                           >
-                            {currentTestCase.passed ? "Passed" : "Failed"}
+                            {currentTestCase.passed ? "✓ Passed" : "✗ Failed"}
                           </div>
                         </div>
                       )}

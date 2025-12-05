@@ -1,19 +1,16 @@
 import { Document } from "mongoose";
 
-// Req Query Params : {"type":["code"],"isPremium":"false",,"timeLimit":"[object Object]","xpRewards":"[object Object]","searchQuery":""}
-
 export type ChallengeLevel = "novice" | "adept" | "master";
 export type ChallengeType = "code" | "cipher";
 
 export interface TestCaseIF {
-  input: any[];
-  output: any;
-  isHidden?: boolean;
+  input: unknown[];
+  output: unknown;
+  isHidden: boolean;
 }
 
 export interface ChallengeIF extends Document {
   title: string;
-  description: string;
   instructions: string;
   type: ChallengeType;
   level: ChallengeLevel;
@@ -24,7 +21,9 @@ export interface ChallengeIF extends Document {
   requiredSkills: string[];
   isPremium: boolean;
   isKeyRequired: boolean;
-  functionSignature?: string;
+  functionName?: string;
+  parameters?: { name: string; type: string }[];
+  returnType?: string;
   initialCode?: string | { [language: string]: string };
   solutionCode?: string | { [language: string]: string };
   status: "active" | "inactive" | "draft" | "archived";

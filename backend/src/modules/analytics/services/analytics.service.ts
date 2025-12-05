@@ -1,8 +1,9 @@
-import { IAnalyticsService, IAnalyticsRepository, ILeaderboardRepository } from "@modules/analytics";
 import {
-  UserAnalytics,
-  ChallengeStats,
-} from "@shared/types";
+  IAnalyticsService,
+  IAnalyticsRepository,
+  ILeaderboardRepository,
+} from "@modules/analytics";
+import { UserAnalytics, ChallengeStats } from "@shared/types";
 import { toPublicUserDTO } from "@modules/user";
 
 export class AnalyticsService implements IAnalyticsService {
@@ -28,30 +29,33 @@ export class AnalyticsService implements IAnalyticsService {
     limit: number
   ): Promise<any> {
     const sortFieldMap: Record<string, string> = {
-      txp: "stats.totalXpPoints",
+      txp: "totalXp",
+      score: "totalScore",
       fastest: "avgTimeTaken",
-      streak: "stats.currentStreak",
-      level: "stats.level",
-      rank: "stats.level",
+      memory: "avgMemoryUsed",
+      cpu: "avgCpuTime",
+      attempts: "submissionsCount",
     };
 
-    const sortField = sortFieldMap[based] || "stats.totalXpPoints";
+    const sortField = sortFieldMap[based] || "totalXp";
     const sortOrder = order === "asc" ? 1 : -1;
 
-    const now = new Date();
-    let fromDate = new Date();
-    if (period === "day") fromDate.setDate(now.getDate() - 1);
-    if (period === "week") fromDate.setDate(now.getDate() - 7);
-    else if (period === "month") fromDate.setMonth(now.getMonth() - 1);
-    else if (period === "year") fromDate.setFullYear(now.getFullYear() - 1);
+    let fromDate: Date | null = null;
+    if (period !== "all") {
+      const now = new Date();
+      fromDate = new Date(now);
 
-    const matchConditions: any = {
-      submittedAt: { $gte: fromDate },
-      passed: true,
-    };
-    if (category && category !== "all") {
-      matchConditions.level = category;
+      if (period === "day") fromDate.setDate(now.getDate() - 1);
+      else if (period === "week") fromDate.setDate(now.getDate() - 7);
+      else if (period === "month") fromDate.setMonth(now.getMonth() - 1);
+      else if (period === "year") fromDate.setFullYear(now.getFullYear() - 1);
     }
+
+    const matchConditions: any = { passed: true };
+    if (fromDate) matchConditions.submittedAt = { $gte: fromDate };
+    if (category && category !== "all") matchConditions.level = category;
+
+
     const rawData = await this.leaderboardRepository.getLeaderboardData(
       matchConditions,
       sortField,
@@ -60,18 +64,40 @@ export class AnalyticsService implements IAnalyticsService {
       limit
     );
 
-    const users = rawData.map((item: any) => ({
-      ...toPublicUserDTO(item.user),
-      avgTimeTaken: item.avgTimeTaken,
-      totalXp: item.totalXp,
-      count: item.count,
-    }));
-
     const totalItems = await this.leaderboardRepository.coutAllLeaderboardData(
       matchConditions
     );
-    const statistics =  await this.leaderboardRepository.getStatistics()
-    console.log("Statistics: ", statistics);
-    return {users,totalItems,statistics};
+
+    const statistics = await this.leaderboardRepository.getStatistics();
+
+
+    const users = rawData.map((item: any, index: number) => ({
+      rank: (page - 1) * limit + index + 1,
+      user: toPublicUserDTO(item.user),
+      avgTimeTaken: item.avgTimeTaken ?? 0,
+      avgMemoryUsed: item.avgMemoryUsed ?? 0,
+      avgCpuTime: item.avgCpuTime ?? 0,
+      totalXp: item.totalXp ?? 0,
+      totalScore: item.totalScore ?? 0,
+      submissionsCount: item.submissionsCount ?? 0,
+    }));
+
+    const totalPages = Math.max(1, Math.ceil(totalItems / limit));
+
+    return {
+      users,
+      meta: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        sortBy: based,
+        sortField,
+        order,
+        period,
+        category,
+      },
+      statistics,
+    };
   }
 }

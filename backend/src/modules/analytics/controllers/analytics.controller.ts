@@ -17,14 +17,22 @@ export class AnalyticsController implements IAnalyticsController {
   });
 
   getLeaderboardData = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const based = req.query.based?.toString() || "txp";
-    const category = req.query.category?.toString() || "";
-    const period = req.query.period?.toString() || "week";
-    const order = req.query.order?.toString() || "desc";
+    const based = req.query.based?.toString() || "txp";      
+    const category = req.query.category?.toString() || "";  
+    const period = req.query.period?.toString() || "week";  
+    const order = req.query.order?.toString() || "desc";    
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
 
-    const data = await this._analyticsSvc.getLeaderboardData(based, category, period, order, page, limit);
+    const data = await this._analyticsSvc.getLeaderboardData(
+      based,
+      category,
+      period,
+      order,
+      page,
+      limit
+    );
+
     sendSuccess(res, HttpStatus.OK, { success: true, data }, "Leaderboard trends fetched successfully");
   });
 }

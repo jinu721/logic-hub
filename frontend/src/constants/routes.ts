@@ -66,7 +66,7 @@ export const ROUTES = {
     ID: (id: Id) => `/challenges/${id}`,
     RUN: "/challenges/run",
     SUBMIT: "/challenges/submit",
-    ADMIN_ALL: "/challenges/admin/all",
+    ADMIN_ALL: "/challenges/all",
   },
 
   LEVELS: {

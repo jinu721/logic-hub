@@ -13,9 +13,8 @@ import {
 import ChallengeForm from "./ChallengeForm";
 import { ChallengeDomainIF } from "@/types/domain.types";
 
-
 interface ChallengeModalProps {
-    challenge?: ChallengeDomainIF | null;
+  challenge?: ChallengeDomainIF | null;
   onClose: () => void;
   onSave: (data: ChallengeDomainIF, id?: string) => void;
 }
@@ -28,14 +27,15 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
   const [activeTab, setActiveTab] = useState("details");
   const [formData, setFormData] = useState<ChallengeDomainIF>({
     title: "",
-    description: "",
     instructions: "",
     type: "code",
     level: "novice",
     timeLimit: 30,
     tags: [],
     requiredSkills: [],
-    functionSignature: "",
+    functionName: "",
+    parameters: [],
+    returnType: "",
     isPremium: false,
     isKeyRequired: false,
     initialCode: "",
@@ -53,8 +53,10 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
   const [languageOptions] = useState([
     { id: "javascript", name: "JavaScript" },
     { id: "python", name: "Python" },
-    { id: "java", name: "Java" },
-    { id: "cpp", name: "C++" },
+    { id: "typescript", name: "TypeScript" },
+    { id: "ruby", name: "Ruby" },
+    { id: "php", name: "PHP" },
+    { id: "dart", name: "Dart" },
   ]);
 
   const [tagsInput, setTagsInput] = useState("");
@@ -69,8 +71,16 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
   ];
 
   const challengeTypes = [
-    { id: "code", name: "Code Challenge", icon: <Code size={16} className="mr-2" /> },
-    { id: "cipher", name: "Cipher Challenge", icon: <BookOpen size={16} className="mr-2" /> },
+    {
+      id: "code",
+      name: "Code Challenge",
+      icon: <Code size={16} className="mr-2" />,
+    },
+    {
+      id: "cipher",
+      name: "Cipher Challenge",
+      icon: <BookOpen size={16} className="mr-2" />,
+    },
   ];
 
   const statuses = [
@@ -83,7 +93,10 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
       const initialCode = challenge.initialCode;
       const solutionCode = challenge.solutionCode;
 
-      if (challenge.type === "code" && typeof challenge.initialCode === "object") {
+      if (
+        challenge.type === "code" &&
+        typeof challenge.initialCode === "object"
+      ) {
         const languages = Object.keys(challenge.initialCode);
         if (languages.length > 0) {
           setSelectedLanguage(languages[0]);
@@ -93,7 +106,9 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
       setFormData({
         ...challenge,
         tags: Array.isArray(challenge.tags) ? challenge.tags : [],
-        requiredSkills: Array.isArray(challenge.requiredSkills) ? challenge.requiredSkills : [],
+        requiredSkills: Array.isArray(challenge.requiredSkills)
+          ? challenge.requiredSkills
+          : [],
         testCases: challenge.testCases || [],
         hints: Array.isArray(challenge.hints) ? challenge.hints : [],
         initialCode: initialCode || (challenge.type === "code" ? {} : ""),
@@ -106,7 +121,9 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
           : null,
       });
 
-      setTagsInput(Array.isArray(challenge.tags) ? challenge.tags.join(", ") : "");
+      setTagsInput(
+        Array.isArray(challenge.tags) ? challenge.tags.join(", ") : ""
+      );
       setSkillsInput(
         Array.isArray(challenge.requiredSkills)
           ? challenge.requiredSkills.join(", ")
@@ -115,28 +132,37 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
     }
   }, [challenge]);
 
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, type } = e.target;
+    const checked =
+      type === "checkbox" && e.target instanceof HTMLInputElement
+        ? e.target.checked
+        : undefined;
 
-const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-  const { name, value, type } = e.target;
-  const checked = type === "checkbox" && e.target instanceof HTMLInputElement ? e.target.checked : undefined;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
 
-  setFormData({
-    ...formData,
-    [name]: type === "checkbox" ? checked : value,
-  });
-
-  validateForm();
-};
-
+    validateForm();
+  };
 
   const handleTagsChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const tags = e.target.value.split(",").map((tag) => tag.trim()).filter(Boolean);
+    const tags = e.target.value
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
     setFormData({ ...formData, tags });
     setTagsInput(e.target.value);
   };
 
   const handleSkillsChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const skills = e.target.value.split(",").map((skill) => skill.trim()).filter(Boolean);
+    const skills = e.target.value
+      .split(",")
+      .map((skill) => skill.trim())
+      .filter(Boolean);
     setFormData({ ...formData, requiredSkills: skills });
     setSkillsInput(e.target.value);
   };
@@ -144,11 +170,12 @@ const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.title) newErrors.title = "Challenge title is required";
-    if (!formData.description) newErrors.description = "Description is required";
-    if (!formData.instructions) newErrors.instructions = "Instructions are required";
+    if (!formData.instructions)
+      newErrors.instructions = "Instructions are required";
     if (formData.type === "code" && !isInitialCodeValid())
-      newErrors.initialCode = "Initial code template is required for at least one language";
-    if (formData.type === "code" && !formData.functionSignature)
+      newErrors.initialCode =
+        "Initial code template is required for at least one language";
+    if (formData.type === "code" && !formData.functionName)
       newErrors.functionSignature = "functionSignature required";
     if (!formData.timeLimit || formData.timeLimit <= 0)
       newErrors.timeLimit = "Valid time limit is required";
@@ -172,7 +199,7 @@ const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement
   const handleCodeChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (formData.type === "code") {
-      setFormData((prev:any) => ({
+      setFormData((prev: any) => ({
         ...prev,
         [name]: {
           ...(typeof prev[name] === "object" ? prev[name] : {}),
@@ -190,7 +217,9 @@ const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement
     if (typeof formData.initialCode === "object") {
       return (
         Object.keys(formData.initialCode).length > 0 &&
-        Object.values(formData.initialCode).some((code:any) => code.trim() !== "")
+        Object.values(formData.initialCode).some(
+          (code: any) => code.trim() !== ""
+        )
       );
     }
     return false;
@@ -216,7 +245,11 @@ const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement
               </>
             )}
           </h2>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-800 transition-colors" aria-label="Close">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
+            aria-label="Close"
+          >
             <X size={20} className="text-gray-400" />
           </button>
         </div>
@@ -225,7 +258,10 @@ const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement
           {[
             { tab: "details", icon: <BookOpen size={16} className="mr-2" /> },
             { tab: "code", icon: <Code size={16} className="mr-2" /> },
-            { tab: "testCases", icon: <FlaskConical size={16} className="mr-2" /> },
+            {
+              tab: "testCases",
+              icon: <FlaskConical size={16} className="mr-2" />,
+            },
             { tab: "settings", icon: null },
             { tab: "rewards", icon: <Award size={16} className="mr-2" /> },
           ].map(({ tab, icon }) => (

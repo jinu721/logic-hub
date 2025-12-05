@@ -1,10 +1,10 @@
 import { Types } from "mongoose";
-import { SubmissionModel, ISubmissionRepository } from "@modules/challenge";
-import { SubmissionIF } from "@shared/types";
+import { SubmissionModel, ISubmissionRepository, SubmissionDocument } from "@modules/challenge";
 import { BaseRepository } from "@core";
+import { SubmissionAttrs } from "@shared/types";
 
 export class SubmissionRepository
-  extends BaseRepository<SubmissionIF>
+  extends BaseRepository<SubmissionDocument>
   implements ISubmissionRepository
 {
   constructor() {
@@ -12,8 +12,8 @@ export class SubmissionRepository
   }
 
   async createSubmission(
-    data: SubmissionIF
-  ): Promise<SubmissionIF> {
+    data: SubmissionAttrs
+  ): Promise<SubmissionDocument> {
     const submission = new this.model(data);
     return await submission.save();
   }
@@ -21,7 +21,7 @@ export class SubmissionRepository
   async getSubmissionsByUserAndChallenge(
     userId: Types.ObjectId,
     challengeId: Types.ObjectId
-  ): Promise<SubmissionIF[]> {
+  ): Promise<SubmissionDocument[]> {
     return await this.model.find({
       userId: userId,
       challengeId: challengeId,
@@ -38,18 +38,18 @@ export class SubmissionRepository
 
   async getSubmissionById(
     id: Types.ObjectId
-  ): Promise<SubmissionIF | null> {
+  ): Promise<SubmissionDocument | null> {
     return await this.model.findById(id);
   }
 
-  async getSubmissions(filter: any): Promise<SubmissionIF[]> {
+  async getSubmissions(filter: any): Promise<SubmissionDocument[]> {
     return await this.model.find(filter);
   }
 
   async updateSubmission(
     id: Types.ObjectId,
-    data: Partial<SubmissionIF>
-  ): Promise<SubmissionIF | null> {
+    data: Partial<SubmissionAttrs>
+  ): Promise<SubmissionDocument | null> {
     return await this.model.findByIdAndUpdate(id, data, { new: true });
   }
 
@@ -60,10 +60,10 @@ export class SubmissionRepository
 
   async getAllSubmissionsByUser(
     userId: Types.ObjectId
-  ): Promise<SubmissionIF[]> {
+  ): Promise<SubmissionDocument[]> {
     const allSubmissions  = await this.model.find({ userId });
 
-    const latestSubmissionMap = new Map<string, SubmissionIF>();
+    const latestSubmissionMap = new Map<string, SubmissionAttrs>();
 
     allSubmissions.forEach((submission) => {
       const existingSubmission = latestSubmissionMap.get(
@@ -96,7 +96,7 @@ export class SubmissionRepository
 
   async getRecentSubmissions(
     userId: Types.ObjectId
-  ): Promise<SubmissionIF[] | null> {
+  ): Promise<SubmissionDocument[] | null> {
     return await this.model.find({ userId }).sort({ submittedAt: -1 }).limit(3);
   }
 
@@ -141,13 +141,13 @@ export class SubmissionRepository
 
   async getAllSubmissionsByChallenge(
     challengeId: Types.ObjectId
-  ): Promise<SubmissionIF[]> {
+  ): Promise<SubmissionDocument[]> {
     return await this.model.find({ challengeId });
   }
   async getSubmissionsByUserAndYear(userId: Types.ObjectId, year: number) {
     const start = new Date(`${year}-01-01`);
     const end = new Date(`${year}-12-31T23:59:59.999Z`);
-    return ChallengeProgress.find({
+    return await this.model.find({
       userId,
       submittedAt: { $gte: start, $lte: end },
     });

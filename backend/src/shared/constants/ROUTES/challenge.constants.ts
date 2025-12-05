@@ -3,7 +3,7 @@ import { COMMON_ROUTES } from "./commen.routes";
 export const CHALLENGE_ROUTES = {
   BASE: COMMON_ROUTES.BASE,
   CREATE: COMMON_ROUTES.BASE,
-  GET_ALL: COMMON_ROUTES.BASE,   
+  GET_ALL: "/all",
   BY_ID: "/:id",
   UPDATE: "/:id",
   DELETE: "/:id",

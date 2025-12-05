@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Calendar, Code, ListFilter,  Target } from "lucide-react";
+import { Calendar, Code, ListFilter, Target } from "lucide-react";
 import React from "react";
 
 type FilteredTypes = {
@@ -12,14 +12,17 @@ type ChallengeLevel = {
   name: string;
 };
 
+type TimeFilter = "day" | "week" | "month" | "year" | "all";
+type TypeFilter = "txp" | "score" | "fastest" | "memory" | "cpu" | "attempts";
+
 type Props = {
   showFilters: boolean;
-  timeFilter: string;
-  setTimeFilter: (value: "week" | "month" | "year") => void;
-  typeFilter: string;
-  setTypeFilter: (value: "txp" | "fastest" | "streak" | "level" | "rank") => void;
+  timeFilter: TimeFilter;
+  setTimeFilter: (value: TimeFilter) => void;
+  typeFilter: TypeFilter;
+  setTypeFilter: (value: TypeFilter) => void;
   filteredTypes: FilteredTypes[];
-  levelFilter: string;
+  levelFilter: "novice" | "adept" | "master" | "all";
   setLevelFilter: (value: "novice" | "adept" | "master" | "all") => void;
   challengeLevels: ChallengeLevel[];
   sortDirection: "asc" | "desc";
@@ -57,12 +60,13 @@ const FilterPanel: React.FC<Props> = ({
               <select
                 className="w-full bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={timeFilter}
-                onChange={(e) => setTimeFilter(e.target.value as "week" | "month" | "year")}
+                onChange={(e) => setTimeFilter(e.target.value as TimeFilter)}
               >
                 <option value="day">Today</option>
                 <option value="week">This Week</option>
                 <option value="month">This Month</option>
                 <option value="year">This Year</option>
+                <option value="all">All Time</option>
               </select>
             </div>
 
@@ -74,7 +78,7 @@ const FilterPanel: React.FC<Props> = ({
               <select
                 className="w-full bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value as "txp" | "fastest" | "streak" | "level" | "rank")}
+                onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
               >
                 {filteredTypes.map((type) => (
                   <option key={type.id} value={type.id}>
@@ -92,7 +96,11 @@ const FilterPanel: React.FC<Props> = ({
               <select
                 className="w-full bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={levelFilter}
-                onChange={(e) => setLevelFilter(e.target.value as "novice" | "adept" | "master" | "all")}
+                onChange={(e) =>
+                  setLevelFilter(
+                    e.target.value as "novice" | "adept" | "master" | "all"
+                  )
+                }
               >
                 {challengeLevels.map((level) => (
                   <option key={level.id} value={level.id}>
@@ -105,7 +113,7 @@ const FilterPanel: React.FC<Props> = ({
             <div>
               <label className="block text-gray-400 text-sm font-medium mb-2 flex items-center">
                 <ListFilter size={16} className="mr-1.5" />
-                Sort By
+                Sort Direction
               </label>
               <select
                 className="w-full bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -119,7 +127,6 @@ const FilterPanel: React.FC<Props> = ({
               </select>
             </div>
           </div>
-
         </motion.div>
       )}
     </AnimatePresence>

@@ -1,33 +1,37 @@
-import React, { useState, ChangeEvent, JSX } from "react"
-import { Lightbulb, Plus, Trash } from "lucide-react"
+import React, { useState, ChangeEvent, JSX } from "react";
+import { Lightbulb, Plus, Trash, Maximize2 } from "lucide-react";
+import InstructionEditor from "./InstructionEditor";
 
 type ChallengeType = {
-  id: string
-  name: string
-  icon: JSX.Element
-}
+  id: string;
+  name: string;
+  icon: JSX.Element;
+};
 
 type FormData = {
-  type: string
-  title: string
-  description: string
-  instructions: string
-  functionSignature: string
-  hints: string[]
-  initialCode?: string
-  solutionCode?: string
-}
+  type: string;
+  title: string;
+  description: string;
+  instructions: string;
+  mode: string;
+  functionName: string;
+  parameters: { name: string; type: string }[];
+  returnType: string;
+  hints: string[];
+  initialCode?: string;
+  solutionCode?: string;
+};
 
 type Errors = {
-  [key: string]: string | undefined
-}
+  [key: string]: string | undefined;
+};
 
 interface ChallengeFormDetailsProps {
-  challengeTypes: ChallengeType[]
-  formData: FormData
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>
-  errors: Errors
-  setErrors: React.Dispatch<React.SetStateAction<Errors>>
+  challengeTypes: ChallengeType[];
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  errors: Errors;
+  setErrors: React.Dispatch<React.SetStateAction<Errors>>;
 }
 
 const ChallengeFormDetails: React.FC<ChallengeFormDetailsProps> = ({
@@ -37,39 +41,67 @@ const ChallengeFormDetails: React.FC<ChallengeFormDetailsProps> = ({
   errors,
   setErrors,
 }) => {
-  const [currentHint, setCurrentHint] = useState("")
+  const [currentHint, setCurrentHint] = useState("");
+  const [showRichEditor, setShowRichEditor] = useState(false);
+  const typeOptions = [
+    "String",
+    "Number",
+    "Boolean",
+    "Array",
+    "Object",
+    "Void",
+  ];
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-    setErrors((prev) => ({ ...prev, [name]: undefined }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
+  };
 
   const setType = (typeId: string) => {
     setFormData((prev) => ({
       ...prev,
       type: typeId,
-    }))
-    setErrors((prev) => ({ ...prev, type: undefined })) 
-  }
+    }));
+    setErrors((prev) => ({ ...prev, type: undefined }));
+  };
 
   const handleHintAdd = () => {
-    if (currentHint.trim() === "") return
+    if (currentHint.trim() === "") return;
     setFormData((prev) => ({
       ...prev,
       hints: [...prev.hints, currentHint.trim()],
-    }))
-    setCurrentHint("")
-  }
+    }));
+    setCurrentHint("");
+  };
 
   const handleHintRemove = (index: number) => {
     setFormData((prev) => ({
       ...prev,
       hints: prev.hints.filter((_, i) => i !== index),
-    }))
-  }
+    }));
+  };
+
+  const handleInstructionsUpdate = (newInstructions: string) => {
+    setFormData((prev) => ({ ...prev, instructions: newInstructions }));
+    setErrors((prev) => ({ ...prev, instructions: undefined }));
+  };
+
+  const addParameter = () => {
+    setFormData({
+      ...formData,
+      parameters: [...formData.parameters, { name: "", type: "" }],
+    });
+  };
+
+  const handleParameterChange = (index, e) => {
+    const { name, value } = e.target;
+    const updated = [...formData.parameters];
+    updated[index][name] = value;
+    setFormData({ ...formData, parameters: updated });
+  };
 
   return (
     <div className="space-y-4">
@@ -123,64 +155,116 @@ const ChallengeFormDetails: React.FC<ChallengeFormDetailsProps> = ({
       </div>
 
       <div className="mb-4">
-        <label className="block text-gray-300 mb-1 font-medium">
-          Description <span className="text-red-500">*</span>
+        <label className="block text-gray-300 mb-1 font-medium flex items-center justify-between">
+          <span>
+            Instructions <span className="text-red-500">*</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowRichEditor(true)}
+            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center text-xs transition-colors"
+          >
+            <Maximize2 size={14} className="mr-1" />
+            Open Full Editor
+          </button>
         </label>
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleInputChange}
-          className={`w-full bg-gray-800 border ${
-            errors.description ? "border-red-500" : "border-gray-700"
-          } rounded-lg p-2.5 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
-          rows={3}
-          placeholder="Brief description of the challenge"
-        />
-        {errors.description && (
-          <p className="text-sm text-red-500 mt-1">{errors.description}</p>
-        )}
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-gray-300 mb-1 font-medium">
-          Instructions <span className="text-red-500">*</span>
-        </label>
-        <textarea
-          name="instructions"
-          value={formData.instructions}
-          onChange={handleInputChange}
+        <div
+          onClick={() => setShowRichEditor(true)}
           className={`w-full bg-gray-800 border ${
             errors.instructions ? "border-red-500" : "border-gray-700"
-          } rounded-lg p-2.5 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
-          rows={4}
-          placeholder="Detailed instructions for the challenge"
-        />
+          } rounded-lg p-2.5 text-white min-h-[100px] cursor-pointer hover:border-indigo-500 transition-colors ${
+            !formData.instructions ? "text-gray-500" : ""
+          }`}
+        >
+          {formData.instructions ? (
+            <div className="text-sm line-clamp-4">{formData.instructions}</div>
+          ) : (
+            <div className="flex items-center justify-center h-full text-gray-500">
+              Click to open full editor with rich text formatting
+            </div>
+          )}
+        </div>
         {errors.instructions && (
           <p className="text-sm text-red-500 mt-1">{errors.instructions}</p>
         )}
       </div>
 
       {formData.type === "code" && (
-        <div className="mb-4">
-          <label className="block text-gray-300 mb-1 font-medium">
-            Function Signature <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="functionSignature"
-            value={formData.functionSignature}
-            onChange={handleInputChange}
-            className={`w-full bg-gray-800 border ${
-              errors.functionSignature ? "border-red-500" : "border-gray-700"
-            } rounded-lg p-2.5 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
-            placeholder="Enter function signature"
-          />
-          {errors.functionSignature && (
-            <p className="text-sm text-red-500 mt-1">
-              {errors.functionSignature}
-            </p>
-          )}
-        </div>
+        <>
+          <div className="mb-4">
+            <label className="block text-gray-300 mb-1 font-medium">
+              Function Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="functionName"
+              value={formData.functionName}
+              onChange={handleInputChange}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white"
+              placeholder="Enter function name"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-300 mb-1 font-medium">
+              Return Type <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="returnType"
+              value={formData.returnType}
+              onChange={handleInputChange}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white"
+            >
+              <option value="">Select return type</option>
+              {typeOptions.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-300 mb-1 font-medium">
+              Parameters
+            </label>
+
+            {formData?.parameters?.map((param, index) => (
+              <div key={index} className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Parameter name"
+                  value={param.name}
+                  onChange={(e) => handleParameterChange(index, e)}
+                  className="w-1/2 bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white"
+                />
+
+                <select
+                  name="type"
+                  value={param.type}
+                  onChange={(e) => handleParameterChange(index, e)}
+                  className="w-1/2 bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white"
+                >
+                  <option value="">Type</option>
+                  {typeOptions.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={addParameter}
+              className="mt-2 bg-indigo-600 px-3 py-1 rounded text-white"
+            >
+              + Add Parameter
+            </button>
+          </div>
+        </>
       )}
 
       <div className="mb-4">
@@ -243,7 +327,7 @@ const ChallengeFormDetails: React.FC<ChallengeFormDetailsProps> = ({
             rows={4}
             placeholder="Enter sample cipher text"
           />
-          <label className="block text-gray-300 mb-1 font-medium">
+          <label className="block text-gray-300 mb-1 font-medium mt-3">
             Decrypted Message
           </label>
           <textarea
@@ -256,8 +340,16 @@ const ChallengeFormDetails: React.FC<ChallengeFormDetailsProps> = ({
           />
         </div>
       )}
-    </div>
-  )
-}
 
-export default ChallengeFormDetails
+      {showRichEditor && (
+        <InstructionEditor
+          value={formData.instructions}
+          onChange={handleInstructionsUpdate}
+          onClose={() => setShowRichEditor(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default ChallengeFormDetails;

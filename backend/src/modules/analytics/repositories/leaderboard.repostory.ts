@@ -4,8 +4,8 @@ import { ILeaderboardRepository } from "@modules/analytics";
 export class LeaderboardRepository implements ILeaderboardRepository {
   async getLeaderboardData(
     matchConditions: any,
-    sortField: any,
-    sortOrder: any,
+    sortField: string,
+    sortOrder: 1 | -1,
     page: number,
     limit: number
   ): Promise<any> {
@@ -16,7 +16,10 @@ export class LeaderboardRepository implements ILeaderboardRepository {
           _id: "$userId",
           avgTimeTaken: { $avg: "$timeTaken" },
           totalXp: { $sum: "$xpGained" },
-          count: { $sum: 1 },
+          totalScore: { $sum: "$score" },
+          submissionsCount: { $sum: 1 },
+          avgMemoryUsed: { $avg: "$execution.memoryUsed" },
+          avgCpuTime: { $avg: "$execution.cpuTime" },
         },
       },
       {
@@ -28,7 +31,6 @@ export class LeaderboardRepository implements ILeaderboardRepository {
         },
       },
       { $unwind: "$user" },
-
       {
         $lookup: {
           from: "avatars",
@@ -43,28 +45,31 @@ export class LeaderboardRepository implements ILeaderboardRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-
       {
         $project: {
           user: 1,
           avgTimeTaken: 1,
           totalXp: 1,
-          count: 1,
+          totalScore: 1,
+          submissionsCount: 1,
+          avgMemoryUsed: 1,
+          avgCpuTime: 1,
         },
       },
-      { $sort: { [sortField]: sortOrder } },
+      { $sort: { [sortField]: sortOrder, _id: 1 } },
       { $skip: (page - 1) * limit },
       { $limit: limit },
     ]);
 
     return leaderboard;
   }
+
   async coutAllLeaderboardData(matchConditions: any): Promise<any> {
     return await SubmissionModel.countDocuments(matchConditions);
   }
 
   async getStatistics(): Promise<any> {
-    const totalSubmissions = await SubmissionModel.countDocuments(); 
+    const totalSubmissions = await SubmissionModel.countDocuments();
     const totalUsers = await SubmissionModel.distinct("userId").then(
       (res) => res.length
     );
@@ -85,9 +90,7 @@ export class LeaderboardRepository implements ILeaderboardRepository {
           count: { $sum: 1 },
         },
       },
-      {
-        $sort: { count: -1 },
-      },
+      { $sort: { count: -1 } },
       { $limit: 3 },
       {
         $lookup: {
@@ -100,7 +103,7 @@ export class LeaderboardRepository implements ILeaderboardRepository {
       { $unwind: "$challenge" },
       {
         $project: {
-          name: "$challenge.name",
+          name: "$challenge.title",
           count: 1,
         },
       },
@@ -111,7 +114,7 @@ export class LeaderboardRepository implements ILeaderboardRepository {
       totalUsers,
       completionRate: successRate,
       successRate,
-      topCompletedChallenges: topChallenges.map((c) => ({
+      topCompletedChallenges: topChallenges.map((c: any) => ({
         name: c.name,
         completions: c.count,
       })),

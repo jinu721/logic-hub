@@ -1,22 +1,26 @@
-export function csharpWrapper(userCode: string, funcName: string) {
-  const content = `
+export const csharpWrapper = (userCode: string, funcName: string, testCases: any[]) => `
 using System;
-using System.Text.Json;
-public class Solution {
-${userCode}
-}
+
 public class Program {
-  public static void Main() {
-    var json = Console.In.ReadToEnd();
-    var doc = JsonDocument.Parse(string.IsNullOrWhiteSpace(json)? "{}" : json);
-    var args = doc.RootElement.GetProperty("args").EnumerateArray();
-    double a = args.MoveNext() ? args.Current.GetDouble() : 0;
-    args.MoveNext();
-    double b = args.Current.GetDouble();
-    var res = Solution.${funcName}(a,b);
-    Console.WriteLine(JsonSerializer.Serialize(new { result = res }));
-  }
+
+    // === USER CODE START ===
+${userCode}
+    // === USER CODE END ===
+
+    public static void Main() {
+
+        string[] inputs = new string[] {
+            ${testCases.map((t) => `"${t.input[0]}"`).join(", ")}
+        };
+
+        foreach (var input in inputs) {
+            try {
+                var result = ${funcName}(input);
+                Console.WriteLine(result);
+            } catch {
+                Console.WriteLine("error");
+            }
+        }
+    }
 }
 `.trim();
-  return { name: "Program.cs", content };
-}

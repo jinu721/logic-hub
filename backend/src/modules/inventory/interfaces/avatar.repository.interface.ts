@@ -2,9 +2,9 @@ import { UpdateQuery } from "mongoose";
 import { InventoryIF } from "@shared/types";
 
 export interface IAvatarRepository {
-  createAvatar(data: Partial<InventoryIF>): Promise<InventoryIF>;
-  getAllAvatars(query:any,skip:number,limit:number): Promise<InventoryIF[]>;
-  getAvatarById(id: string): Promise<InventoryIF | null>;
-  updateAvatar(userId: string, update: UpdateQuery<InventoryIF>): Promise<InventoryIF | null>
-  deleteAvatar(id: string): Promise<boolean>;
+  create(data: Partial<InventoryIF>): Promise<InventoryIF>;
+  getAll(query:any,skip:number,limit:number): Promise<InventoryIF[]>;
+  getById(id: string): Promise<InventoryIF | null>;
+  update(userId: string, update: UpdateQuery<InventoryIF>): Promise<InventoryIF | null>
+  delete(id: string): Promise<boolean>;
 }

@@ -58,7 +58,7 @@ const DomainWorkspace: React.FC<DomainWorkspaceProps> = ({
               <div className="relative">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className="flex items-center gap-3 px-4 py-2.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 rounded-lg border border-slate-700/50 hover:border-slate-600/70 focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 min-w-[140px]"
+                  className="flex items-center gap-3 px-4 py-2.5  text-slate-200 rounded-lg border border-slate-700/50 hover:border-slate-600/70 focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 min-w-[140px]"
                 >
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-blue-400"></div>

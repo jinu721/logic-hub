@@ -35,8 +35,8 @@ const UsersPage: React.FC = () => {
       setIsLoading(true);
       const response = await getUsers(searchTerm, page, limit);
       console.log("Users", response);
-      const data = response.users.users;
-      setTotalItems(response.users.totalItems);
+      const data = response.users;
+      setTotalItems(response.totalItems);
       setUsers(data);
     } catch (error) {
       console.error("Error fetching users:", error);

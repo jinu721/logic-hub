@@ -1,15 +1,43 @@
 export function phpWrapper(userCode: string, funcName: string) {
   const content = `<?php
 ${userCode}
-try {
-  $raw = trim(stream_get_contents(STDIN));
-  $data = $raw ? json_decode($raw, true) : ['args'=>[]];
-  $args = $data['args'] ?? [];
-  $res = call_user_func_array('${funcName}', $args);
-  echo json_encode(['result'=>$res]);
-} catch (Exception $e) {
-  echo json_encode(['error'=>$e->getMessage()]);
+
+function safe_call($fnName, $args) {
+    try {
+        return ["actual" => $fnName(...$args)];
+    } catch (Throwable $e) {
+        return ["error" => $e->getMessage()];
+    }
 }
+
+try {
+    $raw = stream_get_contents(STDIN);
+    $payload = $raw ? json_decode($raw, true) : [];
+
+    $fnName = $payload["funcName"];
+    if (!function_exists($fnName)) {
+        echo json_encode(["error" => "Function not found"]);
+        exit;
+    }
+
+    $results = [];
+    foreach ($payload["testcases"] as $tc) {
+        $args = is_array($tc["input"]) ? $tc["input"] : [];
+        $res = safe_call($fnName, $args);
+        $results[] = [
+            "input" => $tc["input"],
+            "expected" => $tc["expected"],
+            "actual" => $res["actual"] ?? null,
+            "error" => $res["error"] ?? null
+        ];
+    }
+
+    echo json_encode(["results" => $results]);
+} catch (Throwable $e) {
+    echo json_encode(["error" => $e->getMessage()]);
+}
+?>
 `.trim();
-  return { name: "main.php", content };
+
+  return { name: "script.php", content };
 }

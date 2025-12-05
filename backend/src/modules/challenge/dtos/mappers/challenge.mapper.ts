@@ -1,12 +1,11 @@
 import { PublicChallengeDTO } from "@modules/challenge/dtos";
-import { ChallengeDomainIF } from "@shared/types";
+import { ChallengeIF } from "@shared/types";
 
 
-export const toPublicChallengeDTO = (item: ChallengeDomainIF): PublicChallengeDTO => {
+export const toPublicChallengeDTO = (item: ChallengeIF): PublicChallengeDTO => {
   return {
     _id: item._id ? item._id.toString() : "",
     title: item.title,
-    description: item.description,
     instructions: item.instructions,
     type: item.type,
     level: item.level,
@@ -17,7 +16,9 @@ export const toPublicChallengeDTO = (item: ChallengeDomainIF): PublicChallengeDT
     requiredSkills: item.requiredSkills,
     isPremium: item.isPremium,
     isKeyRequired: item.isKeyRequired,
-    functionSignature: item.functionSignature,
+    functionName: item.functionName,
+    parameters: item.parameters || [],
+    returnType: item.returnType,
     initialCode: item.initialCode,
     solutionCode: item.solutionCode,
     status: item.status,
@@ -29,6 +30,6 @@ export const toPublicChallengeDTO = (item: ChallengeDomainIF): PublicChallengeDT
   };
 };
 
-export const toPublicChallengeDTOs = (items: ChallengeDomainIF[]): PublicChallengeDTO[] => {
+export const toPublicChallengeDTOs = (items: ChallengeIF[]): PublicChallengeDTO[] => {
   return items.map(toPublicChallengeDTO);
 };

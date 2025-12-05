@@ -33,10 +33,15 @@ export const runCodeWithJudge0 = async (languageId: number, sourceCode: string, 
     run: {
       stdout: data.stdout || "",
       stderr: data.stderr || "",
-      output: (data.stdout || "") + (data.stderr || ""),
-      code: data.status?.id || null,
+      resultStatus: data.status?.description || "",
+      statusId: data.status?.id || null,
+      time: data.time ? Number(data.time) : null,      
+      memory: data.memory ? Number(data.memory) : null,
+      cpuTime: data.cpu_time ? Number(data.cpu_time) : null,
+      compileOutput: data.compile_output || null,
+      output: (data.stdout || "") + (data.stderr || "")
     },
-    raw: data,
+    raw: data
   };
 };
 

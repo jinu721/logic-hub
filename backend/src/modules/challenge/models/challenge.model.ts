@@ -14,7 +14,6 @@ const testCaseSchema = new Schema<TestCaseIF>(
 
 const challengeDomainSchema = new Schema<ChallengeIF>({
   title: { type: String, required: true },
-  description: { type: String, required: true },
   instructions: { type: String, required: true },
   type: { type: String, enum: ["code", "cipher"], required: true },
   level: { type: String, enum: ["novice", "adept", "master"], required: true },
@@ -30,7 +29,14 @@ const challengeDomainSchema = new Schema<ChallengeIF>({
   requiredSkills: { type: [String], required: true },
   isPremium: { type: Boolean, required: true },
   isKeyRequired: { type: Boolean, required: true },
-  functionSignature: { type: String },
+  functionName: { type: String },
+  parameters: [
+    {
+      name: { type: String, required: true },
+      type: { type: String, required: true },
+    },
+  ],
+  returnType: { type: String },
   initialCode: { type: Schema.Types.Mixed },
   solutionCode: { type: Schema.Types.Mixed },
   status: {

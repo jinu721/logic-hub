@@ -13,12 +13,12 @@ import {
 import {
   IUserRepository
 } from "@modules/user";
-import { SubmissionIF } from "@shared/types";
+import { SubmissionAttrs } from "@shared/types";
 import { UserIF } from "@shared/types/user.types";
 import { Types } from "mongoose";
 
 export class SubmissionService
-  extends BaseService<SubmissionIF, PublicSubmissionDTO>
+  extends BaseService<SubmissionAttrs, PublicSubmissionDTO>
   implements ISubmissionService
 {
   constructor(
@@ -28,15 +28,15 @@ export class SubmissionService
     super();
   }
 
-  protected toDTO(entity: SubmissionIF): PublicSubmissionDTO {
+  protected toDTO(entity: SubmissionAttrs): PublicSubmissionDTO {
     return toPublicSubmissionDTO(entity);
   }
 
-  protected toDTOs(entities: SubmissionIF[]): PublicSubmissionDTO[] {
+  protected toDTOs(entities: SubmissionAttrs[]): PublicSubmissionDTO[] {
     return toPublicSubmissionDTOs(entities);
   }
 
-  async createSubmission(data: SubmissionIF) {
+  async createSubmission(data: SubmissionAttrs) {
     const submission = await this.submissionRepo.createSubmission(data);
     return this.mapOne(submission);
   }
