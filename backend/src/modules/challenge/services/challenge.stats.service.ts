@@ -5,13 +5,17 @@ import {
   IChallengeStatsService,
   IChallengeRepository,
   ISubmissionRepository,
-  ILevelRepository,
-  IUserRepository
-} from "@modules/challenge/interfaces";
-import { ChallengeIF } from "@shared/types";
+} from "@modules/challenge";
+import { IUserRepository } from "@modules/user";
+import { ILevelRepository } from "@modules/level";
+
+import { ChallengeDocument } from "@modules/challenge/models";
+import { PublicChallengeDTO, toPublicChallengeDTO, toPublicChallengeDTOs } from "@modules/challenge/dtos";
+import { LevelDocument, SubmissionAttrs, SubmissionEffectsData, SubmissionEffectsResult, UserAttrs } from "@shared/types";
+import { Types } from "mongoose";
 
 export class ChallengeStatsService
-  extends BaseService<ChallengeIF, any>
+  extends BaseService<ChallengeDocument, PublicChallengeDTO>
   implements IChallengeStatsService
 {
   constructor(
@@ -23,41 +27,43 @@ export class ChallengeStatsService
     super();
   }
 
-  protected toDTO(entity: any): any {
-    return entity;
+  protected toDTO(entity: ChallengeDocument): PublicChallengeDTO {
+    return toPublicChallengeDTO(entity);
   }
 
-  protected toDTOs(entities: any[]): any[] {
-    return entities;
+  protected toDTOs(entities: ChallengeDocument[]): PublicChallengeDTO[] {
+    return toPublicChallengeDTOs(entities);
   }
 
-  async applySubmissionEffects(data: any, userId: string) {
-    const { challengeId, passed, results, language } = data;
+  async applySubmissionEffects(
+    data: SubmissionEffectsData,
+    userId: string
+  ): Promise<SubmissionEffectsResult> {
+    const { challengeId, passed } = data;
 
-    const challenge = await this.challengeRepo.getChallengeById(challengeId);
+    const challenge = await this.challengeRepo.getChallengeById(toObjectId(challengeId as string));
     if (!challenge) throw new AppError(HttpStatus.NOT_FOUND, "Challenge not found");
 
     const user = await this.userRepo.getUserById(userId);
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
-    const existing = await this.submissionRepo.findOne({
-      challengeId: challenge._id,
-      userId: user._id,
-      passed: true
-    });
+    const existing = await this.submissionRepo.getSubmissionsByUserAndChallenge(
+      toObjectId(user._id as string),
+      toObjectId(challenge._id as string)
+    );
 
     const alreadyCompleted = !!existing;
 
     let xpGained = 0;
-    let newXP = user.stats.xpPoints || 0;
-    let newLevel = user.stats.level || 1;
+    let newXP = user.stats.xpPoints;
+    let newLevel = user.stats.level;
 
     if (passed && !alreadyCompleted) {
-      xpGained = challenge.xpRewards || 0;
+      xpGained = challenge.xpRewards;
       newXP += xpGained;
 
       while (true) {
-        const nextLevel = await this.levelRepo.getLevelByLevel(newLevel + 1);
+        const nextLevel: LevelDocument | null = await this.levelRepo.getLevelByLevel(newLevel + 1);
         if (!nextLevel || newXP < nextLevel.requiredXP) break;
 
         newXP -= nextLevel.requiredXP;
@@ -65,48 +71,33 @@ export class ChallengeStatsService
       }
 
       user.stats.xpPoints = newXP;
-      user.stats.totalXpPoints = (user.stats.totalXpPoints || 0) + xpGained;
+      user.stats.totalXpPoints += xpGained;
       user.stats.level = newLevel;
     }
 
-    await this.userRepo.save(user);
-
-    const progressData: any = {
-      challengeId: toObjectId(challengeId),
-      userId: toObjectId(userId),
-      passed,
-      xpGained,
-      level: challenge.level,
-      type: challenge.type,
-      tags: challenge.tags || [],
-      submittedAt: new Date(),
-      execution: {
-        language,
-        resultOutput: results
-      }
-    };
-
-    await this.submissionRepo.createSubmission(progressData);
+    await this.userRepo.saveUser(user);
 
     return {
       passed,
       xpGained,
-      newLevel: newLevel > user.stats.level ? newLevel : undefined
+      newLevel: newLevel > user.stats.level ? newLevel : undefined,
     };
   }
 
-  async getPopularChallenge() {
+  async getPopularChallenge(): Promise<Types.ObjectId | null> {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-    const popular = await this.submissionRepo.getMostCompletedChallengeOfWeek(oneWeekAgo);
-    return popular;
+    return this.submissionRepo.getMostCompletedChallengeOfWeek(oneWeekAgo);
   }
 
-  async getChallengeSuccessRate(challengeId: string) {
-    const list = await this.submissionRepo.getAllSubmissionsByChallenge(challengeId);
+  async getChallengeSuccessRate(challengeId: string): Promise<number> {
+    const list: SubmissionAttrs[] = await this.submissionRepo.getAllSubmissionsByChallenge(
+      toObjectId(challengeId)
+    );
+
     const total = list.length;
-    const completed = list.filter(x => x.status === "completed").length;
+    const completed = list.filter((x) => x.status === "completed").length;
     return total > 0 ? Math.round((completed / total) * 100) : 0;
   }
 }

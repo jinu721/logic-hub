@@ -1,7 +1,7 @@
-import { Schema, model } from "mongoose";
-import { SolutionIF } from "@shared/types";
+import { Document, Schema, model } from "mongoose";
+import { SolutionDocument } from "@shared/types";
 
-const solutionSchema = new Schema<SolutionIF>({
+const solutionSchema = new Schema<SolutionDocument>({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   challenge: { type: Schema.Types.ObjectId, ref: 'Challenge', required: true },
   title: { type: String, required: true },
@@ -23,4 +23,4 @@ const solutionSchema = new Schema<SolutionIF>({
   }
 }, { timestamps: true });
 
-export const SolutionModel = model<SolutionIF>('Solution', solutionSchema);
+export const SolutionModel = model<SolutionDocument>('Solution', solutionSchema);

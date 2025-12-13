@@ -1,107 +1,112 @@
-import { Request, Response } from "express";
 import { ISolutionController, ISolutionService } from "@modules/challenge";
 import { HttpStatus } from "@constants/http.status";
 import { sendSuccess, asyncHandler, AppError } from "@utils/application";
-
+import {
+  CreateSolutionRequestDto,
+  SolutionQueryDto,
+  CommentSolutionRequestDto,
+  UpdateSolutionDto
+} from "@modules/challenge/dtos";
+import { SolutionUserQueryDto } from "../dtos/requests/solution-user-query.dto";
+import { LikeSolutionDto } from "../dtos/requests/like-solution.dto";
+import { DeleteCommentDto } from "../dtos/requests/delete-comment.dto";
 
 export class SolutionController implements ISolutionController {
-  constructor(private readonly _solutionSvc: ISolutionService) {}
+  constructor(private readonly _solutionSvc: ISolutionService) { }
 
-  createSolution = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = (req as any).user?.userId;
-    if (!userId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-    }
+  createSolution = asyncHandler(async (req, res): Promise<void> => {
+    const userId = req.user?.userId;
+    if (!userId) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+
+    const dto = CreateSolutionRequestDto.from(req.body);
+    const validation = dto.validate();
+    if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
 
     const result = await this._solutionSvc.addSolution({
-      ...req.body,
+      ...dto,
       user: userId,
     });
 
-    sendSuccess(res, HttpStatus.CREATED, result, "Solution created successfully");
+    sendSuccess(res, HttpStatus.CREATED, result);
   });
 
-  getSolutionsByChallenge = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { search = "", page = "1", limit = "10", sortBy = "likes" } = req.query;
+  getSolutionsByChallenge = asyncHandler(async (req, res): Promise<void> => {
+    const dto = SolutionQueryDto.from(req.query);
+    const validation = dto.validate();
+    if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
 
     const result = await this._solutionSvc.getSolutionsByChallenge(
       req.params.challengeId,
-      search.toString(),
-      parseInt(page.toString()),
-      parseInt(limit.toString()),
-      sortBy.toString()
+      dto.search,
+      dto.page,
+      dto.limit,
+      dto.sortBy
     );
 
-    sendSuccess(res, HttpStatus.OK, result, "Solutions fetched successfully");
+    sendSuccess(res, HttpStatus.OK, result);
   });
 
-  getSolutionsByUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { userId } = req.params;
-    if (!userId) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "User ID is required");
-    }
-
-    const result = await this._solutionSvc.getSolutionsByUser(userId);
-    sendSuccess(res, HttpStatus.OK, result, "Solutions fetched successfully");
+  getSolutionsByUser = asyncHandler(async (req, res): Promise<void> => {
+    const dto = SolutionUserQueryDto.from({ userId: req.params.userId });
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors?.join(", "));
+    const result = await this._solutionSvc.getSolutionsByUser(dto.userId);
+    sendSuccess(res, HttpStatus.OK, result);
   });
 
-  likeSolution = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = (req as any).user?.userId;
-    if (!userId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-    }
+  likeSolution = asyncHandler(async (req, res): Promise<void> => {
+    const userId = req.user?.userId;
+    if (!userId) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
 
-    const result = await this._solutionSvc.likeSolution(req.params.solutionId, userId);
-    sendSuccess(res, HttpStatus.OK, result, "Solution liked successfully");
+    const dto = LikeSolutionDto.from({ solutionId: req.params.solutionId, userId });
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors?.join(", "));
+
+    const result = await this._solutionSvc.likeSolution(dto.solutionId, dto.userId);
+    sendSuccess(res, HttpStatus.OK, result);
   });
 
-  commentSolution = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = (req as any).user?.userId;
-    if (!userId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-    }
 
-    const { data } = req.body;
-    if (!data) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Comment data is required");
-    }
+  commentSolution = asyncHandler(async (req, res): Promise<void> => {
+    const userId = req.user?.userId;
+    if (!userId) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
 
-    const result = await this._solutionSvc.commentSolution(userId, data);
-    sendSuccess(res, HttpStatus.OK, result, "Comment added successfully");
+    const dto = CommentSolutionRequestDto.from(req.body);
+    const validation = dto.validate();
+    if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
+
+    const result = await this._solutionSvc.commentSolution(userId, dto);
+    sendSuccess(res, HttpStatus.OK, result);
   });
 
-  deleteComment = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { solutionId, commentId } = req.params;
-    if (!solutionId || !commentId) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Solution ID and Comment ID are required");
-    }
+  deleteComment = asyncHandler(async (req, res): Promise<void> => {
+    const dto = DeleteCommentDto.from({
+      solutionId: req.params.solutionId,
+      commentId: req.params.commentId,
+    });
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors?.join(", "));
 
-    const result = await this._solutionSvc.deleteComment(solutionId, commentId);
-    sendSuccess(res, HttpStatus.OK, result, "Comment deleted successfully");
+    const result = await this._solutionSvc.deleteComment(dto.solutionId, dto.commentId);
+    sendSuccess(res, HttpStatus.OK, result);
   });
 
-  updateSolution = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { solutionId } = req.params;
-    const data = req.body;
 
-    if (!solutionId) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Solution ID is required");
-    }
-    if (!data) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Update data is required");
-    }
+  updateSolution = asyncHandler(async (req, res): Promise<void> => {
+    const dto = UpdateSolutionDto.from({
+      solutionId: req.params.solutionId,
+      payload: req.body,
+    });
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors?.join(", "));
 
-    const result = await this._solutionSvc.updateSolution(solutionId, data);
-    sendSuccess(res, HttpStatus.OK, result, "Solution updated successfully");
+    const result = await this._solutionSvc.updateSolution(dto.solutionId, dto.payload);
+    sendSuccess(res, HttpStatus.OK, result);
   });
 
-  deleteSolution  = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { solutionId } = req.params;
-    if (!solutionId) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Solution ID is required");
-    }
 
-    await this._solutionSvc.deleteSolution(solutionId);
-    sendSuccess(res, HttpStatus.NO_CONTENT, null, "Solution deleted successfully");
+  deleteSolution = asyncHandler(async (req, res): Promise<void> => {
+    await this._solutionSvc.deleteSolution(req.params.solutionId);
+    sendSuccess(res, HttpStatus.NO_CONTENT, null);
   });
 }

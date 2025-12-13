@@ -1,6 +1,21 @@
+import {
+  LeaderboardDbSortKey,
+  LeaderboardFilters,
+  LeaderboardStatisticsDomain,
+  LeaderboardUserDomain,
+  SortDirection,
+} from "@shared/types";
 
 export interface ILeaderboardRepository {
-  getLeaderboardData(matchConditions:any,sortField:any,sortOrder:any,page:number,limit:number): Promise<any>
-  coutAllLeaderboardData(matchConditions:any): Promise<any>
-  getStatistics(): Promise<any>
+  getLeaderboardData(
+    matchConditions: LeaderboardFilters,
+    sortField: LeaderboardDbSortKey,
+    sortOrder: SortDirection,
+    page: number,
+    limit: number
+  ): Promise<LeaderboardUserDomain[]>;
+
+  coutAllLeaderboardData(matchConditions: LeaderboardFilters): Promise<number>;
+
+  getStatistics(): Promise<LeaderboardStatisticsDomain>;
 }

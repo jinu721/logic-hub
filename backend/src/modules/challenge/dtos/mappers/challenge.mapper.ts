@@ -1,8 +1,8 @@
 import { PublicChallengeDTO } from "@modules/challenge/dtos";
-import { ChallengeIF } from "@shared/types";
+import { ChallengeDocument } from "@modules/challenge/models";
 
 
-export const toPublicChallengeDTO = (item: ChallengeIF): PublicChallengeDTO => {
+export const toPublicChallengeDTO = (item: ChallengeDocument): PublicChallengeDTO => {
   return {
     _id: item._id ? item._id.toString() : "",
     title: item.title,
@@ -30,6 +30,6 @@ export const toPublicChallengeDTO = (item: ChallengeIF): PublicChallengeDTO => {
   };
 };
 
-export const toPublicChallengeDTOs = (items: ChallengeIF[]): PublicChallengeDTO[] => {
+export const toPublicChallengeDTOs = (items: ChallengeDocument[]): PublicChallengeDTO[] => {
   return items.map(toPublicChallengeDTO);
 };

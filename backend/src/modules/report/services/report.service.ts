@@ -9,47 +9,42 @@ import {
   GroupedReportDTO
 } from "@modules/report/dtos";
 
-import { IReportService, IReportRepository } from "@modules/report";
-import { ReportIF, ReportStatus } from "@shared/types";
+import { IReportService, IReportRepository, ReportDocument } from "@modules/report";
+import { CreateReportInput, GetAllReportInput, ReportStatus } from "@shared/types";
 
 
 export class ReportService
-  extends BaseService<ReportIF, PublicReportDTO>
-  implements IReportService
-{
+  extends BaseService<ReportDocument, PublicReportDTO>
+  implements IReportService {
   constructor(private readonly reportRepo: IReportRepository) {
     super()
   }
 
-  protected toDTO(entity: ReportIF): PublicReportDTO {
+  protected toDTO(entity: ReportDocument): PublicReportDTO {
     return toPublicReportDTO(entity)
   }
 
-  protected toDTOs(entities: ReportIF[]): PublicReportDTO[] {
+  protected toDTOs(entities: ReportDocument[]): PublicReportDTO[] {
     return toPublicReportDTOs(entities)
   }
 
-  async createReport(data: ReportIF): Promise<PublicReportDTO> {
+  async createReport(data: CreateReportInput): Promise<PublicReportDTO> {
     const report = await this.reportRepo.createReport(data)
     return this.mapOne(report)
   }
 
-  async getAllReports(
-    filter: any,
-    page: number,
-    limit: number
-  ): Promise<{ reports: GroupedReportDTO[]; totalItems: number }>
-  {
-    const query: any = {}
+  async getAllReports(data: GetAllReportInput): Promise<{ reports: GroupedReportDTO[]; totalItems: number }> {
+    const query: GetAllReportInput = {}
 
-    if (filter.reportedType && filter.reportedType !== "all") {
-      query.reportedType = filter.reportedType
+    if (data.reportedType && data.reportedType !== "All") {
+      query.reportedType = data.reportedType
     }
-    if (filter.status) {
-      query.status = filter.status
+    if (data.status) {
+      query.status = data.status
     }
 
-    const skip = (page - 1) * limit
+    const skip = ((data.page ?? 1) - 1) * (data.limit ?? 10)
+    const limit = data.limit ?? 10
 
     const groupedReports = await this.reportRepo.getAllReports(query, skip, limit)
     const totalItems = await this.reportRepo.countAllReports(query)
@@ -57,11 +52,23 @@ export class ReportService
     const reports = groupedReports.map(group => ({
       reportedId: group._id.toString(),
       reportedType: group.reportedType,
-      totalReports: group.totalReports || group.reports.length,
-      userInfo: group.userInfo || undefined,
-      groupInfo: group.groupInfo || undefined,
-      reports: toPublicReportDTOs(group.reports)
+      totalReports: group.totalReports,
+      userInfo: group.userInfo
+        ? {
+          _id: group.userInfo._id.toString(),
+          username: group.userInfo.username,
+          email: group.userInfo.email,
+        }
+        : undefined,
+      groupInfo: group.groupInfo
+        ? {
+          _id: group.groupInfo._id.toString(),
+          name: group.groupInfo.name,
+        }
+        : undefined,
+      reports: group.reports
     }))
+
 
     return { reports, totalItems }
   }

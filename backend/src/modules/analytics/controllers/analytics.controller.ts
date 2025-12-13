@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import { IAnalyticsController, IAnalyticsService } from "@modules/analytics";
 import { HttpStatus } from "@constants";
-import { sendSuccess, asyncHandler } from "@utils/application";
+import { sendSuccess, asyncHandler, AppError } from "@utils/application";
+import { LeaderboardQueryDto } from "@modules/analytics/dtos"
 
 export class AnalyticsController implements IAnalyticsController {
-  constructor(private readonly _analyticsSvc: IAnalyticsService) {}
+  constructor(private readonly _analyticsSvc: IAnalyticsService) { }
 
   getUserAnalytics = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const data = await this._analyticsSvc.fetchUserAnalytics();
@@ -16,21 +17,20 @@ export class AnalyticsController implements IAnalyticsController {
     sendSuccess(res, HttpStatus.OK, { success: true, data }, "Challenge stats fetched successfully");
   });
 
-  getLeaderboardData = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const based = req.query.based?.toString() || "txp";      
-    const category = req.query.category?.toString() || "";  
-    const period = req.query.period?.toString() || "week";  
-    const order = req.query.order?.toString() || "desc";    
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
+  getLeaderboardData = asyncHandler(async (req, res) => {
+    const dto = LeaderboardQueryDto.from(req.query);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
+    }
 
     const data = await this._analyticsSvc.getLeaderboardData(
-      based,
-      category,
-      period,
-      order,
-      page,
-      limit
+      dto.based,
+      dto.category,
+      dto.period,
+      dto.order,
+      dto.page,
+      dto.limit
     );
 
     sendSuccess(res, HttpStatus.OK, { success: true, data }, "Leaderboard trends fetched successfully");

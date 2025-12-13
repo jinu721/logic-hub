@@ -1,7 +1,9 @@
-import { model, Schema } from "mongoose";
-import { ReportIF } from "@shared/types";
+import { Document, model, Schema } from "mongoose";
+import { ReportAttrs } from "@shared/types";
 
-const reportSchema = new Schema<ReportIF>({
+export interface ReportDocument extends ReportAttrs, Document {}
+
+const reportSchema = new Schema<ReportDocument>({
     reporter: {
       type: Schema.Types.ObjectId,
       ref: 'User',
@@ -34,4 +36,4 @@ const reportSchema = new Schema<ReportIF>({
     }
   });
   
-  export const ReportModel = model<ReportIF>('Report', reportSchema);
+  export const ReportModel = model<ReportDocument>('Report', reportSchema);

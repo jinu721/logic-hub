@@ -1,21 +1,21 @@
 import { Request, Response } from "express";
 import { ILevelService, ILevelController } from "@modules/level";
+import { CreateLevelDto, DeleteLevelDto, GetAllLevelsDto, GetLevelDto, UpdateLevelDto, UpdateUserLevelDto } from "@modules/level/dtos";
 import { HttpStatus } from "@constants/http.status";
 import { sendSuccess, asyncHandler, AppError } from "@utils/application";
 
 
 export class LevelController implements ILevelController {
-  constructor(private readonly _levelSvc: ILevelService) {}
+  constructor(private readonly _levelSvc: ILevelService) { }
 
   updateUserLevel = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.params.userId;
-    const xp = req.body.xpPoints;
-
-    if (!userId || xp === undefined) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "UserId and xpPoints are required");
+    const dto = UpdateUserLevelDto.from({ userId: req.params.userId, xpPoints: req.body.xpPoints });
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const userLevel = await this._levelSvc.updateUserLevel(userId, xp);
+    const userLevel = await this._levelSvc.updateUserLevel(dto.userId, dto.xpPoints);
     if (!userLevel) {
       throw new AppError(HttpStatus.NOT_FOUND, "User level could not be updated");
     }
@@ -24,30 +24,36 @@ export class LevelController implements ILevelController {
   });
 
   createLevel = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const levelData = req.body;
-    if (!levelData) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Level data is required");
+    const dto = CreateLevelDto.from(req.body);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const level = await this._levelSvc.createLevel(levelData);
+    const level = await this._levelSvc.createLevel(dto as any);
     sendSuccess(res, HttpStatus.CREATED, level, "Level created successfully");
   });
 
   getAllLevels = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const page = req.query.page ? Number(req.query.page) : 1;
-    const limit = req.query.limit ? Number(req.query.limit) : 10;
+    const dto = GetAllLevelsDto.from(req.query);
+    const validation = dto.validate(); 
+    if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
+
+    const page = dto.page ? Number(dto.page) : 1;
+    const limit = dto.limit ? Number(dto.limit) : 10;
 
     const levels = await this._levelSvc.getAllLevels(page, limit);
     sendSuccess(res, HttpStatus.OK, levels, "Levels fetched successfully");
   });
 
   getLevelById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Level ID is required");
+    const dto = GetLevelDto.from(req.params);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const level = await this._levelSvc.getLevelById(id);
+    const level = await this._levelSvc.getLevelById(dto.id);
     if (!level) {
       throw new AppError(HttpStatus.NOT_FOUND, "Level not found");
     }
@@ -56,14 +62,13 @@ export class LevelController implements ILevelController {
   });
 
   updateLevel = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    const levelData = req.body;
-
-    if (!id || !levelData) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Level ID and data are required");
+    const dto = UpdateLevelDto.from({ ...req.body, id: req.params.id });
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const level = await this._levelSvc.updateLevel(id, levelData);
+    const level = await this._levelSvc.updateLevel(dto.id, dto);
     if (!level) {
       throw new AppError(HttpStatus.NOT_FOUND, "Level not found");
     }
@@ -72,12 +77,13 @@ export class LevelController implements ILevelController {
   });
 
   deleteLevel = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Level ID is required");
+    const dto = DeleteLevelDto.from(req.params);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const level = await this._levelSvc.deleteLevel(id);
+    const level = await this._levelSvc.deleteLevel(dto.id);
     if (!level) {
       throw new AppError(HttpStatus.NOT_FOUND, "Level not found");
     }

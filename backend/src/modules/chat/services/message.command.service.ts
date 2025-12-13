@@ -1,14 +1,13 @@
 import { BaseService } from "@core"
 import { IMessageCommandService, IMessageRepository } from "@modules/chat"
 import { PublicMessageDTO, toPublicMessageDTO } from "@modules/chat/dtos"
-import { MessageIF } from "@shared/types"
+import { MessageIF, CreateMessageInput, JwtPayloadBase } from "@shared/types"
 import { verifyAccessToken } from "@utils/token"
 import { Types } from "mongoose"
 
 export class MessageCommandService
   extends BaseService<MessageIF, PublicMessageDTO>
-  implements IMessageCommandService
-{
+  implements IMessageCommandService {
   constructor(private readonly messageRepo: IMessageRepository) {
     super()
   }
@@ -22,15 +21,15 @@ export class MessageCommandService
   }
 
   async createMessage(
-    data: MessageIF & { replyTo?: string },
+    data: CreateMessageInput,
     accessToken: string | null
   ): Promise<PublicMessageDTO> {
     const SYSTEM_USER_ID = new Types.ObjectId("000000000000000000000000")
 
-    let sender
+    let sender: Types.ObjectId
 
     if (accessToken) {
-      const user = verifyAccessToken(accessToken) as any
+      const user = verifyAccessToken(accessToken) as JwtPayloadBase | null
       if (!user) throw new Error("Unauthorized")
       sender = new Types.ObjectId(user.userId)
     } else {

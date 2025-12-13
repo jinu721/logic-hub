@@ -1,8 +1,8 @@
-import { MarketItemIF } from "@shared/types";
+import { MarketItemDocument } from "@shared/types";
 import { toPublicInventoryDTO } from "@modules/inventory";
 import { PublicMarketItemDTO } from "@modules/market/dtos";
 
-export const toPublicMarketItemDTO = (item: MarketItemIF): PublicMarketItemDTO => {
+export const toPublicMarketItemDTO = (item: MarketItemDocument): PublicMarketItemDTO => {
   return {
     _id: item._id ? item._id.toString() : "",
     name: item.name,
@@ -18,6 +18,6 @@ export const toPublicMarketItemDTO = (item: MarketItemIF): PublicMarketItemDTO =
   };
 };
 
-export const toPublicMarketItemDTOs = (items: MarketItemIF[]): PublicMarketItemDTO[] => {
+export const toPublicMarketItemDTOs = (items: MarketItemDocument[]): PublicMarketItemDTO[] => {
   return items.map(toPublicMarketItemDTO);
 };

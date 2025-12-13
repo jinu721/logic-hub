@@ -8,7 +8,7 @@ export interface IGroupMemberService {
   sendJoinRequest(groupId: string, userId: string): Promise<{
     updatedConversation: PublicConversationDTO | null;
     userId: string;
-    conversationId: any;
+    conversationId: string;
     newGroupData: PublicGroupDTO;
   }>
   acceptJoinRequest(conversationId: string, groupId: string, userId: string): Promise<PublicConversationDTO | null>

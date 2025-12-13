@@ -1,11 +1,11 @@
 import { IAnalyticsRepository } from "@modules/analytics";
-import { UserAnalytics, ChallengeStats, LeaderboardTrends } from "@shared/types";
-import { UserModel } from "@modules/user";
+import { UserAnalyticsDomain, ChallengeStatsDomain, LeaderboardTrendsDomain } from "@shared/types";
+import { UserModel } from "@modules/user";  
 import { SubmissionModel } from "@modules/challenge";
 
 
 export class AnalyticsRepository implements IAnalyticsRepository {
-  async getUserAnalytics(): Promise<UserAnalytics> {
+  async getUserAnalytics(): Promise<UserAnalyticsDomain> {
     const totalUsers = await UserModel.countDocuments();
     const activeUsersToday = await UserModel.countDocuments({
       lastSeen: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) },
@@ -17,7 +17,7 @@ export class AnalyticsRepository implements IAnalyticsRepository {
     return { totalUsers, activeUsersToday, newUsersLast7Days };
   }
 
-  async getChallengeStats(): Promise<ChallengeStats> {
+  async getChallengeStats(): Promise<ChallengeStatsDomain> {
     const mostPlayedRooms = await SubmissionModel.aggregate([
       {
         $group: {
@@ -130,7 +130,7 @@ export class AnalyticsRepository implements IAnalyticsRepository {
     };
   }
 
-  async getLeaderboardTrends(): Promise<LeaderboardTrends> {
+  async getLeaderboardTrends(): Promise<LeaderboardTrendsDomain> {
     const topUsers = await UserModel.find()
       .sort({ "stats.xpPoints": -1 })
       .limit(10)

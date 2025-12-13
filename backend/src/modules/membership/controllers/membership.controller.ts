@@ -1,25 +1,32 @@
 import { Request, Response } from "express";
 import { IMembershipService, IMembershipController } from "@modules/membership";
+import { CreateMembershipDto, DeleteMembershipDto, GetAllMembershipsDto, GetMembershipDto, UpdateMembershipDto } from "@modules/membership/dtos";
 import { HttpStatus } from "@constants/http.status";
 import { sendSuccess, asyncHandler, AppError } from "@utils/application";
 
 
 export class MembershipController implements IMembershipController {
-  constructor(private readonly _membershipSvc: IMembershipService) {}
+  constructor(private readonly _membershipSvc: IMembershipService) { }
 
   createMembership = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    if (!req.body) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Membership data is required");
+    const dto = CreateMembershipDto.from(req.body);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._membershipSvc.createPlan(req.body);
+    const result = await this._membershipSvc.createPlan(dto as any);
     sendSuccess(res, HttpStatus.CREATED, result, "Membership created successfully");
   });
 
   getAllMemberships = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const search = req.query.search as string;
-    const page = req.query.page ? Number(req.query.page) : 1;
-    const limit = req.query.limit ? Number(req.query.limit) : 10;
+    const dto = GetAllMembershipsDto.from(req.query);
+    const validation = dto.validate();
+    if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
+
+    const search = dto.search || "";
+    const page = dto.page ? Number(dto.page) : 1;
+    const limit = dto.limit ? Number(dto.limit) : 10;
 
     const result = await this._membershipSvc.getAllPlans(search, page, limit);
     sendSuccess(res, HttpStatus.OK, result, "Memberships fetched successfully");
@@ -31,12 +38,13 @@ export class MembershipController implements IMembershipController {
   });
 
   getMembershipById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Membership ID is required");
+    const dto = GetMembershipDto.from(req.params);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._membershipSvc.getPlanById(id);
+    const result = await this._membershipSvc.getPlanById(dto.id);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Membership not found");
     }
@@ -45,12 +53,13 @@ export class MembershipController implements IMembershipController {
   });
 
   updateMembership = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    if (!id || !req.body) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Membership ID and data are required");
+    const dto = UpdateMembershipDto.from({ id: req.params.id, ...req.body });
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._membershipSvc.updatePlan(id, req.body);
+    const result = await this._membershipSvc.updatePlan(dto.id, dto as any);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Membership not found");
     }
@@ -59,12 +68,13 @@ export class MembershipController implements IMembershipController {
   });
 
   deleteMembership = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Membership ID is required");
+    const dto = DeleteMembershipDto.from(req.params);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._membershipSvc.deletePlan(id);
+    const result = await this._membershipSvc.deletePlan(dto.id);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Membership not found");
     }

@@ -1,24 +1,24 @@
-import { ReportModel, IReportRepository } from "@modules/report";
+import { ReportModel, IReportRepository, ReportDocument } from "@modules/report";
 import { BaseRepository } from "@core";
-import { ReportIF, ReportStatus } from "@shared/types";
+import { CreateReportInput, GetAllReportInput, GroupedReportDomain, ReportStatus } from "@shared/types";
 import { toLean, toLeanMany } from "@utils/database/query.utils";
 
 
 export class ReportRepository
-  extends BaseRepository<ReportIF>
+  extends BaseRepository<ReportDocument>
   implements IReportRepository
 {
   constructor() {
     super(ReportModel);
   }
 
-  async createReport(data: ReportIF): Promise<ReportIF> {
+  async createReport(data: CreateReportInput): Promise<ReportDocument> {
     const report = new this.model(data);
     return report.save();
   }
 
 
-  async getAllReports(query: any, skip: number, limit: number): Promise<any[]> {
+  async getAllReports(query: GetAllReportInput, skip: number, limit: number): Promise<GroupedReportDomain[]> {
     const reports = await this.model.aggregate([
       { $match: query },
 
@@ -81,19 +81,19 @@ export class ReportRepository
     return reports;
   }
 
-  async countAllReports(query: any): Promise<number> {
+  async countAllReports(query: GetAllReportInput): Promise<number> {
     return this.model.countDocuments(query);
   }
 
-  async getReportById(id: string): Promise<ReportIF | null> {
-    return toLean<ReportIF>(this.model.findById(id));
+  async getReportById(id: string): Promise<ReportDocument | null> {
+    return toLean<ReportDocument>(this.model.findById(id));
   }
 
   async updateReportStatus(
     id: string,
     status: ReportStatus
-  ): Promise<ReportIF | null> {
-    return toLean<ReportIF>(
+  ): Promise<ReportDocument | null> {
+    return toLean<ReportDocument>(
       this.model.findByIdAndUpdate(id, { status }, { new: true })
     );
   }

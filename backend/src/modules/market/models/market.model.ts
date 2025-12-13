@@ -1,7 +1,7 @@
 import { model, Schema, Types } from "mongoose";
-import { MarketItemIF } from "@shared/types";
+import { MarketItemDocument } from "@shared/types";
 
-const marketItemSchema = new Schema<MarketItemIF>({
+const marketItemSchema = new Schema<MarketItemDocument>({
   name: {
     type: String,
     required: true,
@@ -46,4 +46,4 @@ const marketItemSchema = new Schema<MarketItemIF>({
   },
 });
 
-export const MarketModel =  model<MarketItemIF>('MarketItem', marketItemSchema);
+export const MarketModel =  model<MarketItemDocument>('MarketItem', marketItemSchema);

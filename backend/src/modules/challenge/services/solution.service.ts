@@ -8,12 +8,13 @@ import {
 } from "@modules/challenge/dtos";
 import {
   ISolutionService,
-  ISolutionRepository
-} from "@modules/challenge/interfaces";
-import { SolutionIF } from "@shared/types/solutions.types";
+  ISolutionRepository,
+  SolutionDocument
+} from "@modules/challenge";
+import { CreateSolutionInput, SolutionQuery, SolutionSortOption } from "@shared/types";
 
 export class SolutionService
-  extends BaseService<SolutionIF, PublicSolutionDTO>
+  extends BaseService<SolutionDocument, PublicSolutionDTO>
   implements ISolutionService
 {
   constructor(
@@ -22,15 +23,15 @@ export class SolutionService
     super();
   }
 
-  protected toDTO(solution: SolutionIF): PublicSolutionDTO {
+  protected toDTO(solution: SolutionDocument): PublicSolutionDTO {
     return toPublicSolutionDTO(solution);
   }
 
-  protected toDTOs(solutions: SolutionIF[]): PublicSolutionDTO[] {
+  protected toDTOs(solutions: SolutionDocument[]): PublicSolutionDTO[] {
     return toPublicSolutionDTOs(solutions);
   }
 
-  async addSolution(data: Partial<SolutionIF>) {
+  async addSolution(data: CreateSolutionInput) {
     const created = await this.solutionRepo.createSolution(data);
     return this.mapOne(created);
   }
@@ -42,16 +43,16 @@ export class SolutionService
     limit: number,
     sortBy: string
   ) {
-    const query: any = { challenge: challengeId };
+    const query: SolutionQuery  = { challenge: challengeId };
 
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } }
+        { content: { $regex: search, $options: "i" } }
       ];
     }
 
-    let sortOption: any = {};
+    let sortOption: SolutionSortOption = {};
     if (sortBy === "likes") sortOption = { likes: -1 };
     else if (sortBy === "newest") sortOption = { createdAt: -1 };
     else if (sortBy === "comments") sortOption = { commentsCount: -1 };
@@ -92,7 +93,7 @@ export class SolutionService
     return this.mapOne(deleted);
   }
 
-  async updateSolution(solutionId: string, data: Partial<SolutionIF>) {
+  async updateSolution(solutionId: string, data: Partial<SolutionDocument>) {
     const updated = await this.solutionRepo.updateSolution(solutionId, data);
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "Solution not found");
     return this.mapOne(updated);

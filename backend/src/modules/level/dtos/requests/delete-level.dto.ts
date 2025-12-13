@@ -1,0 +1,11 @@
+import { BaseDto } from "@shared/dtos/base.dto";
+
+export class DeleteLevelDto extends BaseDto {
+    id!: string;
+
+    validate() {
+        const errors: string[] = [];
+        if (!this.id) errors.push("Level ID is required");
+        return { valid: errors.length === 0, errors };
+    }
+}

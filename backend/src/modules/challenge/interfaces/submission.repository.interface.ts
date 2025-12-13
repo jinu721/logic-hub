@@ -1,12 +1,12 @@
 import { Types } from "mongoose";
-import { SubmissionAttrs } from "@shared/types"; 
+import { CreateSubmissionInput } from "@shared/types"; 
 import { SubmissionDocument } from "@modules/challenge";
 
 export interface ISubmissionRepository {
-  createSubmission(data: SubmissionAttrs): Promise<SubmissionDocument>;
+  createSubmission(data: CreateSubmissionInput): Promise<SubmissionDocument>;
   getSubmissionsByUserAndChallenge(userId: Types.ObjectId, challengeId: Types.ObjectId): Promise<SubmissionDocument[]>;
   getSubmissionById(id: Types.ObjectId): Promise<SubmissionDocument | null>;
-  updateSubmission(id: Types.ObjectId, data: Partial<SubmissionAttrs>): Promise<SubmissionDocument | null>;
+  updateSubmission(id: Types.ObjectId, data: Partial<SubmissionDocument>): Promise<SubmissionDocument | null>;
   getLatestSubmissionByUserAndChallenge(userId: Types.ObjectId, challengeId: Types.ObjectId): Promise<SubmissionDocument | null>;
   getAllSubmissionsByUserAndChallenge(userId: Types.ObjectId, challengeId: Types.ObjectId): Promise<SubmissionDocument[]>;
   getRecentSubmissions(userId: Types.ObjectId): Promise<SubmissionDocument[] | null>;

@@ -7,31 +7,33 @@ import {
   toPublicChallengeDTOs,
 } from "@modules/challenge/dtos";
 import {
+  ChallengeDocument
+} from "@modules/challenge/models";
+import {
   IChallengeCommandService,
   IChallengeRepository,
 } from "@modules/challenge/interfaces";
-import { ChallengeIF } from "@shared/types";
+import { ChallengeAttrs, CreateChallengeInput, ParsedValue, TestCaseIF } from "@shared/types";
 import { Types } from "mongoose";
 
 export class ChallengeCommandService
-  extends BaseService<ChallengeIF, PublicChallengeDTO>
-  implements IChallengeCommandService
-{
+  extends BaseService<ChallengeAttrs, PublicChallengeDTO>
+  implements IChallengeCommandService {
   constructor(private readonly challengeRepo: IChallengeRepository) {
     super();
   }
 
-  protected toDTO(challenge: ChallengeIF): PublicChallengeDTO {
+  protected toDTO(challenge: ChallengeDocument): PublicChallengeDTO {
     return toPublicChallengeDTO(challenge);
   }
 
-  protected toDTOs(challenges: ChallengeIF[]): PublicChallengeDTO[] {
+  protected toDTOs(challenges: ChallengeDocument[]): PublicChallengeDTO[] {
     return toPublicChallengeDTOs(challenges);
   }
 
-  private parseValue(value: any) {
+  private parseValue(value: unknown): ParsedValue {
     if (Array.isArray(value) || (typeof value === "object" && value !== null)) {
-      return value;
+      return value as unknown[] | Record<string, unknown>;
     }
     if (typeof value === "string") {
       try {
@@ -40,18 +42,18 @@ export class ChallengeCommandService
         return value;
       }
     }
-    return value;
+    return value as string | number | boolean | null;
   }
 
-  private normalizeTestCases(testCases: any[]) {
+  private normalizeTestCases(testCases: TestCaseIF[]): TestCaseIF[] {
     return testCases.map((tc) => ({
       ...tc,
-      input: this.parseValue(tc.input),
+      input: this.parseValue(tc.input) as unknown[],
       output: this.parseValue(tc.output),
     }));
   }
 
-  async createChallenge(data: Omit<ChallengeIF, "_id">) {
+  async createChallenge(data: CreateChallengeInput) {
     if (data.testCases) {
       data.testCases = this.normalizeTestCases(data.testCases);
     }
@@ -61,7 +63,7 @@ export class ChallengeCommandService
 
   async updateChallenge(
     id: Types.ObjectId | string,
-    data: Partial<ChallengeIF>
+    data: Partial<ChallengeAttrs>
   ) {
     if (data.testCases) {
       data.testCases = this.normalizeTestCases(data.testCases);

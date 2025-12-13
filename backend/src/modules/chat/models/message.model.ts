@@ -1,9 +1,8 @@
-import { Schema, model } from 'mongoose';
-import { MessageIF } from '@shared/types';
+import { Schema, model, Document } from 'mongoose';
+import { MessageDocument } from '@shared/types';
 
 
-
-const MessageSchema = new Schema<MessageIF>(
+const MessageSchema = new Schema<MessageDocument>(
   {
     conversationId: {
       type: Schema.Types.ObjectId,
@@ -67,4 +66,4 @@ const MessageSchema = new Schema<MessageIF>(
   { timestamps: true }
 );
 
-export const MessageModel = model<MessageIF>('Message', MessageSchema);
+export const MessageModel = model<MessageDocument>('Message', MessageSchema);

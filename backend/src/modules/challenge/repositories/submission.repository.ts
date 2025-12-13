@@ -1,18 +1,17 @@
 import { Types } from "mongoose";
 import { SubmissionModel, ISubmissionRepository, SubmissionDocument } from "@modules/challenge";
 import { BaseRepository } from "@core";
-import { SubmissionAttrs } from "@shared/types";
+import { CreateSubmissionInput, SubmissionAttrs, SubmissionFilter } from "@shared/types";
 
 export class SubmissionRepository
   extends BaseRepository<SubmissionDocument>
-  implements ISubmissionRepository
-{
+  implements ISubmissionRepository {
   constructor() {
     super(SubmissionModel);
   }
 
   async createSubmission(
-    data: SubmissionAttrs
+    data: CreateSubmissionInput
   ): Promise<SubmissionDocument> {
     const submission = new this.model(data);
     return await submission.save();
@@ -42,7 +41,7 @@ export class SubmissionRepository
     return await this.model.findById(id);
   }
 
-  async getSubmissions(filter: any): Promise<SubmissionDocument[]> {
+  async getSubmissions(filter: SubmissionFilter): Promise<SubmissionDocument[]> {
     return await this.model.find(filter);
   }
 
@@ -61,9 +60,9 @@ export class SubmissionRepository
   async getAllSubmissionsByUser(
     userId: Types.ObjectId
   ): Promise<SubmissionDocument[]> {
-    const allSubmissions  = await this.model.find({ userId });
+    const allSubmissions = await this.model.find({ userId });
 
-    const latestSubmissionMap = new Map<string, SubmissionAttrs>();
+    const latestSubmissionMap = new Map<string, SubmissionDocument>();
 
     allSubmissions.forEach((submission) => {
       const existingSubmission = latestSubmissionMap.get(
@@ -129,7 +128,7 @@ export class SubmissionRepository
     return aggResult[0]._id;
   }
 
-  async getAllSubmissions(): Promise<SubmissionIF[]> {
+  async getAllSubmissions(): Promise<SubmissionDocument[]> {
     return await this.model
       .find()
       .populate({

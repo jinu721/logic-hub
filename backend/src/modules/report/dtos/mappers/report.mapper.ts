@@ -1,12 +1,12 @@
-import { ReportIF } from "@shared/types";
 import { PublicReportDTO } from "@modules/report/dtos";
+import { ReportDocument } from "@modules/report";
 
-export const toPublicReportDTO = (report: ReportIF): PublicReportDTO => {
+export const toPublicReportDTO = (report: ReportDocument): PublicReportDTO => {
   return {
-    _id: report._id ? report._id.toString() : "",
-    reporter: report.reporter as any,
+    _id: String(report._id),
+    reporter: report.reporter,
     reportedType: report.reportedType,
-    reportedId: report.reportedId as any,
+    reportedId: String(report.reportedId),
     reason: report.reason,
     description: report.description,
     status: report.status,
@@ -14,6 +14,6 @@ export const toPublicReportDTO = (report: ReportIF): PublicReportDTO => {
   };
 };
 
-export const toPublicReportDTOs = (reports: ReportIF[]): PublicReportDTO[] => {
+export const toPublicReportDTOs = (reports: ReportDocument[]): PublicReportDTO[] => {
   return reports.map(toPublicReportDTO);
 };

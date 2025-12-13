@@ -6,8 +6,8 @@ export interface IAuthController {
   login(req: Request, res: Response, next: NextFunction): Promise<void>;
   verifyLogin(req: Request, res: Response, next: NextFunction): Promise<void>;
   changePassword(req: Request, res: Response, next: NextFunction): Promise<void>;
-  googleAuth(req: Request, res: Response, next: NextFunction): Promise<void>;
-  githubAuth(req: Request, res: Response, next: NextFunction): Promise<void>;
+  googleAuthCallback(req: Request, res: Response, next: NextFunction): Promise<void>;
+  githubAuthCallback(req: Request, res: Response, next: NextFunction): Promise<void>;
   forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void>;
   resetPassword(req: Request, res: Response, next: NextFunction): Promise<void>;
   getMe(req: Request, res: Response, next: NextFunction): Promise<void>;

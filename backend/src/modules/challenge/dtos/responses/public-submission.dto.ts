@@ -1,3 +1,5 @@
+import { TestCaseExecutionResult } from "@shared/types";
+
 export interface PublicSubmissionDTO {
   _id: string;
   userId: string;
@@ -13,7 +15,7 @@ export interface PublicSubmissionDTO {
   execution?: {
     language?: string;
     codeSubmitted?: string;
-    resultOutput?: any;
+    resultOutput?: TestCaseExecutionResult[] | { error: string; rawOutput?: string } | null;
     testCasesPassed?: number;
     totalTestCases?: number;
   };

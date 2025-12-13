@@ -1,22 +1,22 @@
 import jwt from "jsonwebtoken"
 
 import { BaseService } from "@core"
-import { AppError, generateOTP, toObjectId } from "@utils/application"
+import { AppError, generateOTP, generateUsername, toObjectId } from "@utils/application"
 import { HttpStatus } from "@constants"
-import { IAuthService, IUserRepository, IPendingUserRepository, PublicUserDTO, CreateUserDTO, VerifyOtpDTO, toPublicUserDTO, toPublicUserDTOs } from "@modules/user"
+import { IAuthService, IUserRepository, IPendingUserRepository, PublicUserDTO, CreateUserDTO, VerifyOtpDTO, toPublicUserDTO, toPublicUserDTOs, UserDocument } from "@modules/user"
 import { ITokenProvider } from "@providers/token"
 import { IEmailProvider } from "@providers/email"
 import { IHashProvider } from "@providers/hashing"
 import { ITokenService } from "@modules/token"
-import { UserIF } from "@shared/types"
 import { env } from "@config/env"
 import { setAccessToken, setRefreshToken, clearAuthCookies, verifyLinkToken } from "@utils/token"
 import { RedisHelper } from "@utils/database"
+import { HttpContext } from "@shared/types/core.types"
+import { SocialLoginInput } from "@shared/types"
+import { Response } from "express"
 
 
-type HttpContext = { ip?: string | null | undefined; userAgent?: string | undefined; res?: any };
-
-export class AuthService extends BaseService<UserIF, PublicUserDTO> implements IAuthService {
+export class AuthService extends BaseService<UserDocument, PublicUserDTO> implements IAuthService {
   constructor(
     private readonly userRepo: IUserRepository,
     private readonly pendingRepo: IPendingUserRepository,
@@ -28,8 +28,8 @@ export class AuthService extends BaseService<UserIF, PublicUserDTO> implements I
     super();
   }
 
-  protected toDTO(user: UserIF): PublicUserDTO { return toPublicUserDTO(user); }
-  protected toDTOs(users: UserIF[]): PublicUserDTO[] { return toPublicUserDTOs(users); }
+  protected toDTO(user: UserDocument): PublicUserDTO { return toPublicUserDTO(user); }
+  protected toDTOs(users: UserDocument[]): PublicUserDTO[] { return toPublicUserDTOs(users); }
 
   async register(dto: CreateUserDTO) {
     const exists =
@@ -159,13 +159,34 @@ export class AuthService extends BaseService<UserIF, PublicUserDTO> implements I
     return { accessToken: newAccessToken };
   }
 
-  async socialAuth(oauthUser: any, ctx: HttpContext) {
-    const userId = String(oauthUser._id);
-    const pub = {
-      userId,
-      email: oauthUser.email,
-      username: oauthUser.username,
-    } as unknown as PublicUserDTO;
+async socialLogin(data: SocialLoginInput) {
+  const user = await this.userRepo.getByEmailOrUsername(data.email);
+
+  if (user) {
+    if (user.loginType !== data.loginType) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Login type mismatch");
+    }
+    return user;
+  }
+
+  const username = await generateUsername(data.name);
+
+  const newUser = await this.userRepo.createUser({
+    username,
+    email: data.email,
+    loginType: data.loginType,
+    isVerified: true,
+    ...(data.loginType === "google" && { googleId: data.profileId }),
+    ...(data.loginType === "github" && { githubId: data.profileId }),
+  });
+
+  return newUser;
+}
+
+
+  async socialAuthCallback(oauthUser: UserDocument, ctx: HttpContext) {
+    const userId = String(oauthUser._id || oauthUser.id);
+    const pub: PublicUserDTO = this.mapOne(oauthUser);
 
     const accessToken = this.tokenProv.generateAccessToken(pub);
     const refreshToken = this.tokenProv.generateRefreshToken(pub);
@@ -222,7 +243,7 @@ export class AuthService extends BaseService<UserIF, PublicUserDTO> implements I
   async getMe(userId: string) {
     const user = await this.userRepo.getUserById(userId);
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
-    return { role: (user as any).role, isBanned: (user as any).isBanned };
+    return { role: user.role, isBanned: user.isBanned };
   }
 
   async logout(userId: string, bearerToken: string, ctx: HttpContext) {
@@ -243,7 +264,7 @@ export class AuthService extends BaseService<UserIF, PublicUserDTO> implements I
     return { message: "Logged out successfully" };
   }
 
-  async clearCookies(res: any) {
+  async clearCookies(res: Response) {
     clearAuthCookies(res);
     return { message: "Cookies cleared successfully" };
   }

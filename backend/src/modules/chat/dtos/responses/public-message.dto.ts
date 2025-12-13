@@ -7,7 +7,7 @@ export interface PublicMessageDTO {
   content?: string;
   type: 'text' | 'image' | 'video' | 'audio' | 'document' | 'voice' | 'poll' | 'system' | 'sticker';
   mentionedUsers?: string[];
-  seenBy?: any[];
+  seenBy?: string[];
   media?: {
     url: string;
     type: 'image' | 'video' | 'audio' | 'document' | 'voice' | 'sticker';

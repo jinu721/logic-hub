@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
+import { AuthRequest } from "@shared/types";
 import { INotificationController, INotificationService } from "@modules/notification";
+import { CreateNotificationDto, DeleteNotificationDto, GetNotificationDto, UpdateNotificationDto } from "@modules/notification/dtos";
 import { HttpStatus } from "@constants/http.status";
 import { sendSuccess, asyncHandler, AppError } from "@utils/application";
 
@@ -7,14 +9,16 @@ import { sendSuccess, asyncHandler, AppError } from "@utils/application";
 export class NotificationController implements INotificationController {
   constructor(
     private readonly _notifySvc: INotificationService,
-  ) {}
+  ) { }
 
   createNotification = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    if (!req.body) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Notification data is required");
+    const dto = CreateNotificationDto.from(req.body);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._notifySvc.createNotification(req.body);
+    const result = await this._notifySvc.createNotification(dto as any);
     sendSuccess(res, HttpStatus.CREATED, result, "Notification created successfully");
   });
 
@@ -24,12 +28,13 @@ export class NotificationController implements INotificationController {
   });
 
   getNotificationById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Notification ID is required");
+    const dto = GetNotificationDto.from(req.params);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._notifySvc.getNotificationById(id);
+    const result = await this._notifySvc.getNotificationById(dto.id);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Notification not found");
     }
@@ -38,15 +43,13 @@ export class NotificationController implements INotificationController {
   });
 
   updateNotification = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Notification ID is required");
-    }
-    if (!req.body) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Update data is required");
+    const dto = UpdateNotificationDto.from({ id: req.params.id, ...req.body });
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._notifySvc.updateNotification(id, req.body);
+    const result = await this._notifySvc.updateNotification(dto.id, dto as any);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Notification not found");
     }
@@ -55,12 +58,13 @@ export class NotificationController implements INotificationController {
   });
 
   deleteNotification = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Notification ID is required");
+    const dto = DeleteNotificationDto.from(req.params);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._notifySvc.deleteNotification(id);
+    const result = await this._notifySvc.deleteNotification(dto.id);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Notification not found");
     }
@@ -69,7 +73,7 @@ export class NotificationController implements INotificationController {
   });
 
   getNotificationByUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = (req as any).user?.userId;
+    const userId = (req as AuthRequest).user?.userId;
     if (!userId) {
       throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
     }
@@ -79,7 +83,7 @@ export class NotificationController implements INotificationController {
   });
 
   markAllAsRead = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = (req as any).user?.userId;
+    const userId = (req as AuthRequest).user?.userId;
     if (!userId) {
       throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
     }
@@ -89,7 +93,7 @@ export class NotificationController implements INotificationController {
   });
 
   deleteAllNotifications = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = (req as any).user?.userId;
+    const userId = (req as AuthRequest).user?.userId;
     if (!userId) {
       throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
     }

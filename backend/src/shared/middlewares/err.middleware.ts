@@ -1,27 +1,33 @@
 import { Request, Response, NextFunction } from "express";
 import logger from "../utils/application/logger";
-import { AppError } from "../utils/application/app.error"; 
+import { AppError, isErrorDetailsObject } from "../utils/application/app.error";
+import { env } from "@config/env";
 
 export function errorHandler(
-  err: AppError,
+  err: unknown,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+  const isAppError = err instanceof AppError;
+
+  const statusCode = isAppError ? err.statusCode : 500;
+  const message = isAppError ? err.message : "Internal Server Error";
+
+  const rawDetails = isAppError ? err.details : null;
+  const safeDetails = isErrorDetailsObject(rawDetails) ? rawDetails : undefined;
 
   logger.error(`${req.method} ${req.url} - ${statusCode} - ${message}`, {
-    stack: err.stack,
-    details: err.details || null,
+    stack: isAppError ? err.stack : undefined,
+    details: safeDetails ?? null,
   });
 
-  res.status(statusCode).json({
+  return res.status(statusCode).json({
     success: false,
     message,
-    ...(process.env.NODE_ENV === "development" && {
-      stack: err.stack,
-      details: err.details,
+    ...(env.NODE_ENV === "development" && {
+      stack: isAppError ? err.stack : undefined,
+      details: safeDetails,
     }),
   });
 }

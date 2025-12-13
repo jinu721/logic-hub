@@ -4,7 +4,7 @@ export interface PublicConversationDTO {
   _id: string;
   type: 'group' | 'one-to-one';
   participants: PublicUserDTO[];
-  latestMessage?: any;
+  latestMessage?: PublicMessageDTO | null;
   isDeleted?: boolean;
   typingUsers: PublicUserDTO[];
   unreadCounts: Map<string, number>;

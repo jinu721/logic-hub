@@ -1,6 +1,6 @@
-import { Types,Document } from "mongoose";
+import { Types} from "mongoose";
 
-export interface ConversationIF extends Document {
+export interface ConversationAttrs {
   type: string;
   participants: Types.ObjectId[];
   groupId?: Types.ObjectId | null;
@@ -12,3 +12,5 @@ export interface ConversationIF extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface ConversationDocument extends ConversationAttrs, Document {}

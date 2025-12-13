@@ -1,21 +1,22 @@
 
 import redisClient from "@config/redis.config";
-import { container } from "@di";
+import { Container } from "@di";
+import { Server } from "socket.io";
 
 
-interface SendNotificationParams {
-  io: any;
-  container: any;
+interface SendNotificationParams<T> {
+  io: Server;
+  container: Container;
   type: string;
   title: string;
   message: string;
-  data: any;
+  data: T;
   socketEvent: string;
 }
   
-export const sendNotificationToAllUsers = async ({ io, container, type, title, message, data, socketEvent }: SendNotificationParams) => {
+export const sendNotificationToAllUsers = async <T>({ io, container, type, title, message, data, socketEvent }: SendNotificationParams<T>) => {
     try {
-      const users = await container.userSvc.findUsers();
+      const users = await container.userQuerySvc.findUsers();
       console.log(`type : ${type} , title : ${title} , message : ${message} , data : ${data}`);
       for (const user of users) {
         const socketId = await redisClient.get(`socket:${user._id.toString()}`);

@@ -1,14 +1,15 @@
 import { SubmissionModel } from "@modules/challenge";
 import { ILeaderboardRepository } from "@modules/analytics";
+import { LeaderboardDbSortKey, LeaderboardFilters, LeaderboardStatisticsDomain, LeaderboardUserDomain, SortDirection, TopCompletedChallenge } from "@shared/types";
 
 export class LeaderboardRepository implements ILeaderboardRepository {
   async getLeaderboardData(
-    matchConditions: any,
-    sortField: string,
-    sortOrder: 1 | -1,
+    matchConditions: LeaderboardFilters,
+    sortField: LeaderboardDbSortKey,
+    sortOrder: SortDirection,
     page: number,
     limit: number
-  ): Promise<any> {
+  ): Promise<LeaderboardUserDomain[]> {
     const leaderboard = await SubmissionModel.aggregate([
       { $match: matchConditions },
       {
@@ -64,11 +65,11 @@ export class LeaderboardRepository implements ILeaderboardRepository {
     return leaderboard;
   }
 
-  async coutAllLeaderboardData(matchConditions: any): Promise<any> {
+  async coutAllLeaderboardData(matchConditions: LeaderboardFilters): Promise<number> {
     return await SubmissionModel.countDocuments(matchConditions);
   }
 
-  async getStatistics(): Promise<any> {
+  async getStatistics(): Promise<LeaderboardStatisticsDomain> {
     const totalSubmissions = await SubmissionModel.countDocuments();
     const totalUsers = await SubmissionModel.distinct("userId").then(
       (res) => res.length
@@ -114,7 +115,7 @@ export class LeaderboardRepository implements ILeaderboardRepository {
       totalUsers,
       completionRate: successRate,
       successRate,
-      topCompletedChallenges: topChallenges.map((c: any) => ({
+      topCompletedChallenges: topChallenges.map((c: { name: string; count: number }): TopCompletedChallenge => ({
         name: c.name,
         completions: c.count,
       })),

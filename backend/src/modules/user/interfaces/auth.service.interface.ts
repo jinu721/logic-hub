@@ -1,17 +1,16 @@
 import { PublicUserDTO } from "@modules/user/dtos";
+import { UserDocument } from "../models";
+import { CreateUserInput, HttpContext, SocialLoginInput, AuthContext } from "@shared/types";
+import { Response } from "express";
 
 export interface IAuthService {
-  register(dto: {
-    username: string;
-    email: string;
-    password: string;
-  }): Promise<{ email: string }>;
+  register(dto: CreateUserInput): Promise<{ email: string }>;
 
   resendOtp(email: string): Promise<{ email: string }>;
 
   verifyOTP(
     dto: { email: string; otp: string },
-    ctx: { ip?: string | null; userAgent?: string; res?: any }
+    ctx: HttpContext
   ): Promise<{
     accessToken: string;
     refreshToken: string;
@@ -20,7 +19,7 @@ export interface IAuthService {
 
   login(
     dto: { identifier: string; password: string },
-    ctx: { ip?: string | null; userAgent?: string; res?: any }
+    ctx: HttpContext
   ): Promise<{
     isVerified: boolean;
     security: boolean;
@@ -31,7 +30,7 @@ export interface IAuthService {
 
   verifyLogin(
     token: string,
-    ctx: { ip?: string | null; userAgent?: string; res?: any }
+    ctx: HttpContext
   ): Promise<{
     accessToken: string;
     refreshToken: string;
@@ -40,12 +39,16 @@ export interface IAuthService {
 
   refreshAccessToken(
     refreshTokenCookie: string | undefined,
-    ctx: { ip?: string | null; userAgent?: string; res?: any }
+    ctx: HttpContext
   ): Promise<{ accessToken: string }>;
 
-  socialAuth(
-    oauthUser: any,
-    ctx: { ip?: string | null; userAgent?: string; res?: any }
+  socialLogin(
+    data: SocialLoginInput
+  ): Promise<UserDocument>;
+
+  socialAuthCallback(
+    oauthUser: UserDocument,
+    ctx: HttpContext
   ): Promise<string>;
 
   forgotPassword(email: string): Promise<{ message: string }>;
@@ -64,11 +67,11 @@ export interface IAuthService {
   logout(
     userId: string,
     bearerToken: string,
-    ctx: { res?: any }
+    ctx: AuthContext
   ): Promise<{ message: string }>;
 
   getMe(userId: string): Promise<{ role: string; isBanned: boolean }>;
 
 
-  clearCookies(res: any): Promise<{ message: string }>;
+  clearCookies(res: Response): Promise<{ message: string }>;
 }

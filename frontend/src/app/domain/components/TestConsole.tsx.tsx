@@ -57,7 +57,7 @@ const TestConsole: React.FC<Props> = ({
 
   const testData = useMemo(() => {
     if (hasRunTests) {
-      return previewResults.map((result) => ({
+      return previewResults?.map((result) => ({
         input: result.input || [],
         expected: result.expected,
         actual: result.actual,
@@ -170,7 +170,7 @@ const TestConsole: React.FC<Props> = ({
               <div className="h-full flex flex-col">
                 <div className="flex-shrink-0 bg-[#0e1117] border-b border-[#1c1f26]">
                   <div className="flex items-center px-4 py-2 space-x-2 overflow-x-auto">
-                    {testData.map((test, index) => {
+                    {testData?.map((test, index) => {
                       const passed = test.passed;
                       return (
                         <button
@@ -203,7 +203,7 @@ const TestConsole: React.FC<Props> = ({
                         <div className="text-sm text-gray-400 mb-2 font-semibold">
                           INPUT
                         </div>
-                        {currentTestCase.input.map((inp: any, idx: number) => (
+                        {currentTestCase.input?.map((inp: any, idx: number) => (
                           <div
                             key={idx}
                             className="bg-[#1c1f26] border border-[#2a2f3a] rounded-md p-3 mb-2"
@@ -289,9 +289,9 @@ const TestConsole: React.FC<Props> = ({
             ) : (
               <div className="p-4 h-full">
                 <div className="bg-[#0e1117] rounded-lg p-4 h-full min-h-32 font-mono text-sm">
-                  {consoleOutput.length > 0 ? (
+                  {consoleOutput?.length > 0 ? (
                     <div className="space-y-1">
-                      {consoleOutput.map((output, index) => (
+                      {consoleOutput?.map((output, index) => (
                         <div
                           key={`console-${index}`}
                           className="flex items-start"

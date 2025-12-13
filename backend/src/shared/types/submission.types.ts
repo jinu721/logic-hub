@@ -1,5 +1,14 @@
 import {  Types } from "mongoose";
 
+
+export interface TestCaseExecutionResult {
+  input?: unknown;
+  expected?: unknown;
+  actual?: unknown;
+  error?: string | null;
+  passed?: boolean;
+}
+
 export interface SubmissionAttrs {
   userId: Types.ObjectId;
   challengeId: Types.ObjectId;
@@ -20,13 +29,29 @@ export interface SubmissionAttrs {
   execution?: {
     language?: string;
     codeSubmitted?: string;
-    resultOutput?: any;
+    resultOutput?: TestCaseExecutionResult[] | { error: string; rawOutput?: string } | null;
     testCasesPassed?: number;
     totalTestCases?: number;
 
     runTime?: number;
     memoryUsed?: number;
     cpuTime?: number;
-    compileError?: any;
+    compileError?: string | null;
   };
 }
+
+export interface SubmissionDocument extends SubmissionAttrs, Document {}
+
+export interface CreateSubmissionInput {
+  challengeId: string;
+  userId: string;
+  userCode: string;
+  language: string;
+}
+
+export interface SubmissionWithChallenge {
+  challengeId: Types.ObjectId;
+  status: "completed" | "failed-timeout" | "failed-output" | "pending";
+}
+
+

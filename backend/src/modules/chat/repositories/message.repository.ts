@@ -1,19 +1,18 @@
 import { Types } from "mongoose";
-import { MessageModel, IMessageRepository } from "@modules/chat";
-import { MessageIF } from "@shared/types";
+import { MessageModel, IMessageRepository, MessageDocument } from "@modules/chat";
+import {  MessageQueryFilter } from "@shared/types";
 import { BaseRepository } from "@core";
 
 
 export class MessageRepository
-  extends BaseRepository<MessageIF>
-  implements IMessageRepository
-{
+  extends BaseRepository<MessageDocument>
+  implements IMessageRepository {
   constructor() {
     super(MessageModel);
   }
   async createMessage(
-    data: MessageIF & { replyTo?: string }
-  ): Promise<MessageIF> {
+    data: MessageDocument & { replyTo?: string }
+  ): Promise<MessageDocument> {
     const message = await this.model.create(data);
 
     return await message.populate([
@@ -79,7 +78,7 @@ export class MessageRepository
         },
       ]);
   }
-  async getMessages(limit: number, query: any): Promise<MessageIF[]> {
+  async getMessages(limit: number, query: MessageQueryFilter): Promise<MessageIF[]> {
     return await this.model
       .find(query)
       .sort({ createdAt: 1 })
@@ -130,15 +129,15 @@ export class MessageRepository
 
     const query = message
       ? this.model.findOneAndUpdate(
-          { _id: messageId, "reactions.userId": userId },
-          { $set: { "reactions.$.emoji": emoji } },
-          { new: true }
-        )
+        { _id: messageId, "reactions.userId": userId },
+        { $set: { "reactions.$.emoji": emoji } },
+        { new: true }
+      )
       : this.model.findByIdAndUpdate(
-          messageId,
-          { $push: { reactions: { userId, emoji } } },
-          { new: true }
-        );
+        messageId,
+        { $push: { reactions: { userId, emoji } } },
+        { new: true }
+      );
 
     return await query.populate([
       {
@@ -235,7 +234,7 @@ export class MessageRepository
     ]);
   }
 
-  async save(message: any) {
+  async save(message: MessageIF) {
     return message.save();
   }
 

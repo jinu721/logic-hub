@@ -1,6 +1,6 @@
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
-export interface GroupIF extends Document {
+export interface GroupAttrs {
   name: string;
   description?: string;
   image?: string;
@@ -23,4 +23,13 @@ export interface GroupIF extends Document {
   isDeleted:boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface GroupDocument extends GroupAttrs, Document {}
+
+export interface GroupAllInput {
+    name?: string 
+    isActive?: boolean;
+    members?: string 
+    createdBy?: string;
 }

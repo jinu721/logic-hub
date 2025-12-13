@@ -23,13 +23,12 @@ import {
   IUserRepository,
 } from "@modules/user";
 
-import { ConversationIF } from "@shared/types";
+import { ConversationIF, ConversationSearchFilter } from "@shared/types";
 
 
 export class ConversationQueryService
   extends BaseService<ConversationIF, PublicConversationDTO>
-  implements IConversationQueryService
-{
+  implements IConversationQueryService {
   constructor(
     private readonly conversationRepo: IConversationRepository,
     private readonly groupRepo: IGroupRepository,
@@ -113,15 +112,15 @@ export class ConversationQueryService
     };
   }
 
-  async findConversations(userId: string, search: any) {
+  async findConversations(userId: string, search: ConversationSearchFilter) {
     if (!userId) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
 
     const convs = await this.conversationRepo.findConversationsByUser(userId);
     if (!convs || convs.length === 0) return [];
 
-    
+
     const result = await Promise.all(
-      convs.map(async (conv: any) => {
+      convs.map(async (conv: ConversationIF) => {
         let group: PublicGroupDTO | undefined;
         let otherUser: PublicUserDTO | undefined;
 
@@ -130,7 +129,7 @@ export class ConversationQueryService
           if (found) group = toPublicGroupDTO(found);
         } else if (conv.type === "one-to-one" && Array.isArray(conv.participants)) {
           const other = conv.participants.find(
-            (u: any) => u._id?.toString() !== userId.toString()
+            (u: { _id?: { toString: () => string } }) => u._id?.toString() !== userId.toString()
           );
           if (other) {
             const user = await this.userRepo.getUserById(other._id.toString());

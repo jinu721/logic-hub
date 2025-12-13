@@ -1,3 +1,5 @@
+import { ChallengeExecutionResult, SubmitChallengeResult } from "@shared/types";
+
 export interface IChallengeExecutionService {
   runChallengeCode(
     challengeId: string,
@@ -5,7 +7,14 @@ export interface IChallengeExecutionService {
     sourceCode: string,
     input: string,
     userId: string
-  ): Promise<any>;
+  ): Promise<ChallengeExecutionResult>;
 
-  submitChallenge(data: any, userId: string): Promise<any>;
+  submitChallenge(
+    data: {
+      challengeId: string;
+      userCode: string;
+      language: string;
+    },
+    userId: string
+  ): Promise<SubmitChallengeResult>;
 }

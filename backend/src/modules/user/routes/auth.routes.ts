@@ -2,8 +2,9 @@ import { Router } from "express";
 import passport from "passport";
 import { authMiddleware } from "@middlewares";
 import { AUTH_ROUTES } from "@constants";
+import { Container } from "@di/types";
 
-export function authRoutes(container: any) {
+export function authRoutes(container: Container) {
   const router = Router();
   const authController = container.authCtrl;
 
@@ -27,7 +28,7 @@ export function authRoutes(container: any) {
   router.get(
     AUTH_ROUTES.GOOGLE_CALLBACK,
     passport.authenticate("google", { failureRedirect: AUTH_ROUTES.REGISTER, session: false }),
-    authController.googleAuth.bind(authController)
+    authController.googleAuthCallback.bind(authController)
   );
 
   router.get(
@@ -37,7 +38,7 @@ export function authRoutes(container: any) {
   router.get(
     AUTH_ROUTES.GITHUB_CALLBACK,
     passport.authenticate("github", { failureRedirect: AUTH_ROUTES.REGISTER, session: false }),
-    authController.githubAuth.bind(authController)
+    authController.githubAuthCallback.bind(authController)
   );
 
   return router;

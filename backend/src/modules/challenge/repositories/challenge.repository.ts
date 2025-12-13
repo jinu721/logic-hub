@@ -1,10 +1,10 @@
 import { Types } from "mongoose";
-import { ChallengeModel, IChallengeRepository } from "@modules/challenge";
-import { ChallengeIF } from "@shared/types";
+import { ChallengeDocument, ChallengeModel, IChallengeRepository } from "@modules/challenge";
 import { BaseRepository } from "@core";
+import { ChallengeDBQuery, CreateChallengeInput } from "@shared/types";
 
 export class ChallengeRepository
-  extends BaseRepository<ChallengeIF>
+  extends BaseRepository<ChallengeDocument>
   implements IChallengeRepository
 {
   constructor() {
@@ -12,24 +12,24 @@ export class ChallengeRepository
   }
 
   async createChallenge(
-    challengeData: Omit<ChallengeIF, "_id">
-  ): Promise<ChallengeIF> {
+    challengeData: CreateChallengeInput
+  ): Promise<ChallengeDocument> {
     return await this.model.create(challengeData);
   }
 
-  async getChallengeById(id: Types.ObjectId): Promise<ChallengeIF | null> {
+  async getChallengeById(id: Types.ObjectId): Promise<ChallengeDocument | null> {
     return await this.model.findById(id);
   }
 
-  async getChallenges(filter: any,skip:number,limit: number): Promise<ChallengeIF[]> {
-    return await this.model.find(filter).skip(skip).limit(limit).sort({ _id: -1 });
+  async getChallenges(query: ChallengeDBQuery,skip:number,limit: number): Promise<ChallengeDocument[]> {
+    return await this.model.find(query).skip(skip).limit(limit).sort({ _id: -1 });
   }
 
 
   async updateChallenge(
     id: Types.ObjectId,
-    updateData: Partial<ChallengeIF>
-  ): Promise<ChallengeIF | null> {
+    updateData: Partial<ChallengeDocument>
+  ): Promise<ChallengeDocument | null> {
     return await this.model.findByIdAndUpdate(id, updateData, { new: true });
   }
 
@@ -38,7 +38,7 @@ export class ChallengeRepository
     return result !== null;
   }
 
-  async getAllChallenges(search:string, skip:number, limit:number): Promise<ChallengeIF[]> {
+  async getAllChallenges(search:string, skip:number, limit:number): Promise<ChallengeDocument[]> {
     return await this.model.find({title:{$regex:search,$options:"i"}}).skip(skip).limit(limit).sort({_id:-1});
   }
 

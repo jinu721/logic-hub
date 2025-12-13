@@ -1,4 +1,6 @@
-export const rustWrapper = (userCode: string, funcName: string, testCases: any[]) => `
+import { TestCaseIF } from "@shared/types";
+
+export const rustWrapper = (userCode: string, funcName: string, testCases: TestCaseIF[]) => `
 // === USER CODE START ===
 ${userCode}
 // === USER CODE END ===

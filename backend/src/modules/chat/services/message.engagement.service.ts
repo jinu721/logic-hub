@@ -18,8 +18,7 @@ import { Types } from "mongoose";
 
 export class MessageEngagementService
   extends BaseService<MessageIF, PublicMessageDTO>
-  implements IMessageEngagementService
-{
+  implements IMessageEngagementService {
   constructor(private readonly messageRepo: IMessageRepository) {
     super();
   }
@@ -66,7 +65,7 @@ export class MessageEngagementService
     }
 
     const idx = message.reactions.findIndex(
-      (r: any) => r.userId?.toString() === userId
+      (r: { userId?: { toString: () => string } }) => r.userId?.toString() === userId
     );
 
     if (idx !== -1) {

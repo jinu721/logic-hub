@@ -1,3 +1,4 @@
+
 import { Types, UpdateQuery } from "mongoose";
 import { INotificationRepository, NotificationModel } from "@modules/notification";
 import { NotificationIF } from "@shared/types";
@@ -28,9 +29,9 @@ export class NotificationRepository
     return toLean<NotificationIF>(this.model.findById(id));
   }
 
-  async getNotificationByUser(id: Types.ObjectId): Promise<NotificationIF[]> {
+  async getNotificationByUser(userId: Types.ObjectId): Promise<NotificationIF[]> {
     return toLeanMany<NotificationIF>(
-      this.model.find({ userId: id }).sort({ createdAt: -1 })
+      this.model.find({ userId }).sort({ createdAt: -1 })
     );
   }
 

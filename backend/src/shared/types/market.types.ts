@@ -1,17 +1,16 @@
-import { Document, Types } from "mongoose";
+import { Types, Document } from "mongoose";
 
-export interface MarketItemIF extends Document  {
-    name: string;
-    description?: string;
-    costXP: number;
-    itemId: Types.ObjectId;
-    category: 'avatar' | 'banner' | 'badge' ;
-    available?: boolean;
-    limitedTime?: boolean;
-    isExclusive?: boolean;
-    expiresAt?: Date;
-    createdAt?: Date;
-  }
+export interface MarketItemAttrs {
+  name: string;
+  description?: string;
+  costXP: number;
+  itemId: Types.ObjectId;
+  category: 'avatar' | 'banner' | 'badge';
+  available?: boolean;
+  limitedTime?: boolean;
+  isExclusive?: boolean;
+  expiresAt?: Date;
+  createdAt?: Date;
+}
 
-
-  
+export interface MarketItemDocument extends MarketItemAttrs, Document { }

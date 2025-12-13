@@ -1,9 +1,10 @@
-import { ReportIF, ReportStatus } from "@shared/types";
+import { CreateReportInput, GetAllReportInput, GroupedReportDomain, ReportStatus } from "@shared/types";
+import { ReportDocument } from "@modules/report";
 
 export interface IReportRepository {
-  createReport(data: ReportIF): Promise<ReportIF>;
-  getAllReports(query: any, skip: number, limit: number): Promise<any[]>;
-  countAllReports(query: any): Promise<number>;
-  getReportById(id: string): Promise<ReportIF | null>;
-  updateReportStatus(id: string, status: ReportStatus): Promise<ReportIF | null>;
+  createReport(data: CreateReportInput): Promise<ReportDocument>;
+  getAllReports(query: GetAllReportInput, skip: number, limit: number): Promise<GroupedReportDomain[]>;
+  countAllReports(query: GetAllReportInput): Promise<number>;
+  getReportById(id: string): Promise<ReportDocument | null>;
+  updateReportStatus(id: string, status: ReportStatus): Promise<ReportDocument | null>;
 }

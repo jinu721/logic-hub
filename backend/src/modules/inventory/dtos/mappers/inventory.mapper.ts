@@ -1,8 +1,8 @@
-import { InventoryIF } from "@shared/types"
+import { InventoryDocument } from "@shared/types"
 import { generateSignedImageUrl } from "@utils/application"
 import { IPublicInventoryDTO } from "@modules/inventory/dtos";
 
-export const toPublicInventoryDTO = (item: InventoryIF): IPublicInventoryDTO | undefined => {
+export const toPublicInventoryDTO = (item: InventoryDocument): IPublicInventoryDTO | undefined => {
   if(!item) return;
   return {
     _id: item._id ? item._id.toString() : "",
@@ -14,6 +14,6 @@ export const toPublicInventoryDTO = (item: InventoryIF): IPublicInventoryDTO | u
   };
 };
 
-export const toPublicInventoryDTOs = (items: InventoryIF[]): IPublicInventoryDTO[] => {
+export const toPublicInventoryDTOs = (items: InventoryDocument[]): IPublicInventoryDTO[] => {
   return items.map((item) => toPublicInventoryDTO(item) as any);
 };

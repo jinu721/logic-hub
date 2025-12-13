@@ -3,6 +3,7 @@ import { ExtendedSocket } from "../../shared/types/socket.types";
 import { sendNotificationToAllUsers } from "../../shared/utils/application/send.notification";
 import redisClient from "../../config/redis.config";
 import { Container } from "@di";
+import { ChallengeAttrs, MarketItemAttrs } from "@shared/types";
 
 export class NotificationHandler {
   constructor(private io: Server, private container: Container) {}
@@ -15,10 +16,11 @@ export class NotificationHandler {
 
   private async handleAdminAddDomain(
     socket: ExtendedSocket,
-    domainData: any
+    domainData: ChallengeAttrs
   ): Promise<void> {
     await sendNotificationToAllUsers({
       io: this.io,
+      container: this.container,
       type: "domain",
       title: "New Domain Opened",
       message: "Finish the domain and win exciting rewards!",
@@ -29,10 +31,11 @@ export class NotificationHandler {
 
   private async handleAdminAddMarketItem(
     socket: ExtendedSocket,
-    marketData: any
+    marketData: MarketItemAttrs
   ): Promise<void> {
     await sendNotificationToAllUsers({
       io: this.io,
+      container: this.container,
       type: "market",
       title: "New Market Item Available",
       message: "Check out the new items in the market!",
@@ -58,7 +61,7 @@ export class NotificationHandler {
           type: "gift",
           isRead: false
         });
-        await this.container.notificationService.create({
+        await this.container.notificationSvc.createNotification({
           userId: userId,
           title: "You've received a gift!",
           itemData:item,

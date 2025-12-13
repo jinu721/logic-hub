@@ -11,7 +11,7 @@ import {
   toPublicChallengeDTO,
   toPublicChallengeDTOs,
 } from "@modules/challenge/dtos";
-import { ChallengeIF } from "@shared/types";
+import { ChallengeDocument } from "@modules/challenge/models";
 
 import {
   runCodeWithJudge0,
@@ -19,11 +19,11 @@ import {
   judge0Languages,
   deepEqual,
 } from "@execution";
+import { ChallengeExecutionResult, ChallengeExecutionResultItem, ChallengeSubmitPayload, ParsedRunnerOutput, RunnerResult, SubmitChallengeResult, TestCaseIF } from "@shared/types";
 
 export class ChallengeExecutionService
-  extends BaseService<ChallengeIF, PublicChallengeDTO>
-  implements IChallengeExecutionService
-{
+  extends BaseService<ChallengeDocument, PublicChallengeDTO>
+  implements IChallengeExecutionService {
   constructor(
     private readonly challengeRepo: IChallengeRepository,
     private readonly submissionRepo: ISubmissionRepository
@@ -31,15 +31,15 @@ export class ChallengeExecutionService
     super();
   }
 
-  protected toDTO(challenge: ChallengeIF): PublicChallengeDTO {
+  protected toDTO(challenge: ChallengeDocument): PublicChallengeDTO {
     return toPublicChallengeDTO(challenge);
   }
 
-  protected toDTOs(challenges: ChallengeIF[]): PublicChallengeDTO[] {
+  protected toDTOs(challenges: ChallengeDocument[]): PublicChallengeDTO[] {
     return toPublicChallengeDTOs(challenges);
   }
 
-  private parseOutput(stdout: string) {
+  private parseOutput(stdout: string): ParsedRunnerOutput {
     try {
       return JSON.parse(stdout || "{}");
     } catch {
@@ -47,19 +47,22 @@ export class ChallengeExecutionService
     }
   }
 
-  private buildResults(parsed: any, testCases: any[]) {
+  private buildResults(
+    parsed: ParsedRunnerOutput,
+    testCases: TestCaseIF[]
+  ): { results: ChallengeExecutionResultItem[]; allPassed: boolean } {
     const list = Array.isArray(parsed.results) ? parsed.results : [];
 
-    const mapped = (
+    const mapped: ChallengeExecutionResultItem[] = (
       list.length
         ? list
-        : testCases.map((t: any) => ({
-            input: t.input,
-            expected: t.output,
-            actual: null,
-            error: parsed.error || "No runner results",
-          }))
-    ).map((r: any) => {
+        : testCases.map((t: TestCaseIF) => ({
+          input: t.input,
+          expected: t.output,
+          actual: null,
+          error: parsed.error || "No runner results",
+        }))
+    ).map((r: RunnerResult): ChallengeExecutionResultItem => {
       const actual = r.actual ?? null;
       const expected = r.expected ?? null;
       const error = r.error ?? null;
@@ -69,9 +72,10 @@ export class ChallengeExecutionService
 
     return {
       results: mapped,
-      allPassed: mapped.every((r: any) => r.passed),
+      allPassed: mapped.every((r) => r.passed),
     };
   }
+
 
   async runChallengeCode(
     challengeId: string,
@@ -79,7 +83,7 @@ export class ChallengeExecutionService
     userCode: string,
     _input: string,
     userId: string
-  ) {
+  ): Promise<ChallengeExecutionResult> {
     const challenge = await this.challengeRepo.getChallengeById(
       toObjectId(challengeId)
     );
@@ -91,14 +95,14 @@ export class ChallengeExecutionService
       throw new AppError(HttpStatus.BAD_REQUEST, "Function signature missing");
 
     const testCases = (challenge.testCases || []).slice(0, 3);
-    const funcName = challenge.functionName
+    const funcName = challenge.functionName;
 
     const wrapperFiles = generateExecutableFiles(language, userCode, funcName);
     const sourceCode = wrapperFiles[0].content;
 
     const stdinPayload = JSON.stringify({
       funcName,
-      testcases: testCases.map((t: any) => ({
+      testcases: testCases.map((t: TestCaseIF) => ({
         input: t.input ?? [],
         expected: t.output,
       })),
@@ -123,7 +127,10 @@ export class ChallengeExecutionService
     };
   }
 
-  async submitChallenge(data: any, userId: string) {
+  async submitChallenge(
+    data: ChallengeSubmitPayload,
+    userId: string
+  ): Promise<SubmitChallengeResult> {
     const { challengeId, userCode, language } = data;
 
     const challenge = await this.challengeRepo.getChallengeById(
@@ -134,14 +141,14 @@ export class ChallengeExecutionService
     if (!challenge.functionName)
       throw new AppError(HttpStatus.BAD_REQUEST, "Function signature missing");
 
-    const funcName = challenge.functionName
+    const funcName = challenge.functionName;
     const wrapperFiles = generateExecutableFiles(language, userCode, funcName);
     const sourceCode = wrapperFiles[0].content;
 
     const testCases = challenge.testCases || [];
     const stdinPayload = JSON.stringify({
       funcName,
-      testcases: testCases.map((t: any) => ({
+      testcases: testCases.map((t: TestCaseIF) => ({
         input: t.input ?? [],
         expected: t.output,
       })),
@@ -162,8 +169,7 @@ export class ChallengeExecutionService
     const compileError = exec.run?.compileOutput ?? null;
     const judgeStatus = exec.run?.resultStatus ?? "pending";
 
-    const passRatio =
-      results.filter((r: any) => r.passed).length / results.length;
+    const passRatio = results.filter((r) => r.passed).length / results.length;
     const levelWeight =
       challenge.level === "master" ? 3 : challenge.level === "adept" ? 2 : 1;
 
@@ -172,41 +178,35 @@ export class ChallengeExecutionService
       Math.round((passRatio * levelWeight * 2000) / (runTime + 1))
     );
 
-    try {
-      await this.submissionRepo.createSubmission({
-        userId: toObjectId(userId),
-        challengeId,
-        xpGained: challenge.xpRewards,
-        passed: allPassed,
-        score,
-        timeTaken: runTime,
-
-        type: challenge.type,
-        level: challenge.level,
-        tags: challenge.tags || [],
-        challengeVersion: challenge.version || 1,
-
-        status: allPassed
-          ? "completed"
-          : judgeStatus.includes("Time")
+    await this.submissionRepo.createSubmission({
+      userId: userId,
+      challengeId: challengeId,
+      xpGained: challenge.xpRewards,
+      passed: allPassed,
+      score,
+      timeTaken: runTime,
+      type: challenge.type,
+      level: challenge.level,
+      tags: challenge.tags || [],
+      challengeVersion: challenge.version || 1,
+      status: allPassed
+        ? "completed"
+        : judgeStatus.includes("Time")
           ? "failed-timeout"
           : "failed-output",
-        submittedAt: new Date(),
-
-
-        execution: {
-          language,
-          codeSubmitted: userCode,
-          resultOutput: parsed,
-          testCasesPassed: results.filter((r: any) => r.passed).length,
-          totalTestCases: results.length,
-          runTime,
-          memoryUsed,
-          cpuTime,
-          compileError,
-        },
-      });
-    } catch {}
+      submittedAt: new Date(),
+      execution: {
+        language,
+        codeSubmitted: userCode,
+        resultOutput: parsed,
+        testCasesPassed: results.filter((r) => r.passed).length,
+        totalTestCases: results.length,
+        runTime,
+        memoryUsed,
+        cpuTime,
+        compileError,
+      },
+    });
 
     return {
       challengeId,

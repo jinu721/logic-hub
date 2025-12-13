@@ -1,82 +1,86 @@
 import passport from 'passport';
-import {Strategy as GoogleStrategy,Profile as GoogleProfile, VerifyCallback} from 'passport-google-oauth20';
-import {Strategy as GithubStrategy,Profile as GithubProfile} from 'passport-github2';
-import { UserModel } from '@modules/user';
-import { generateUsername } from '../shared/utils/application/generate.username';
+import { Strategy as GoogleStrategy, Profile as GoogleProfile, VerifyCallback } from 'passport-google-oauth20';
+import { Strategy as GithubStrategy, Profile as GithubProfile } from 'passport-github2';
+import { Request } from 'express';
 import { env } from './env';
+import { Container } from '@di';
+import { LoginType } from '@shared/types';
 
 
+export const setupPassport = (container: Container) => {
 
-passport.use(
-    new GoogleStrategy({
-        clientID:env.GOOGLE_CLIENT_ID as string,
-        clientSecret:env.GOOGLE_CLIENT_SECRET as string,
-        callbackURL:env.GOOGLE_CALLBACK_URL as string
-    }, async (accessToken:string,refreshToken:string | undefined,profile:GoogleProfile,done:VerifyCallback)=>{
-        try{
+    const authService = container.authSrv;
 
-            const email = profile?.emails?.[0]?.value;
-            if (!email) return done(new Error("Google did not provide an email."));
 
-            let user = await UserModel.findOne({email});
+    passport.use(
+        new GoogleStrategy(
+            {
+                clientID: env.GOOGLE_CLIENT_ID!,
+                clientSecret: env.GOOGLE_CLIENT_SECRET!,
+                callbackURL: env.GOOGLE_CALLBACK_URL!,
+                passReqToCallback: true
+            },
+            async (
+                req: Request,
+                _accessToken: string,
+                _refreshToken: string,
+                profile: GoogleProfile,
+                done: VerifyCallback
+            ) => {
+                try {
+                    const email = profile.emails?.[0]?.value;
+                    if (!email) return done(new Error("Google did not provide an email."));
 
-            if(user){
-                if(!user.googleId){
-                    user.googleId = profile.id;
-                    await user.save();
+                    const user = await authService.socialLogin({
+                        email,
+                        name: profile.displayName || profile.username || "unknown",
+                        profileId: profile.id,
+                        loginType: LoginType.GOOGLE
+                    });
+
+                    return done(null, user);
+                } catch (e) {
+                    return done(e as Error);
                 }
-            }else{
-                user = await UserModel.create({
-                    username:await generateUsername(profile.displayName as string || profile.username as string),
-                    email,
-                    loginType:"google",
-                    googleId:profile.id,
-                    isVerified:true,
-                })
             }
-            done(null,user);
-        }catch(err){
-            console.log(err);
-            done(err);
-        }
-    })
-)
-
-passport.use(
-    new GithubStrategy({
-        clientID: env.GITHUB_CLIENT_ID as string,
-        clientSecret: env.GITHUB_CLIENT_SECRET as string,
-        callbackURL: env.GITHUB_CALLBACK_URL as string,
-        scope:['user:email']
-    }, async (accessToken: string, refreshToken: string | undefined, profile: GithubProfile, done: VerifyCallback) => {
-        try {
-
-            let email = profile.emails?.[0]?.value;
-            if (!email) {
-                return done(new Error("GitHub did not provide an email."));
-            }
+        )
+    );
 
 
-            let user = await UserModel.findOne({ email });
+    passport.use(
+        new GithubStrategy(
+            {
+                clientID: env.GITHUB_CLIENT_ID!,
+                clientSecret: env.GITHUB_CLIENT_SECRET!,
+                callbackURL: env.GITHUB_CALLBACK_URL!,
+                scope: ["user:email"],
+                passReqToCallback: true
+            },
+            async (
+                req: Request,
+                _accessToken: string,
+                _refreshToken: string,
+                profile: GithubProfile,
+                done: VerifyCallback
+            ) => {
+                try {
+                    const email = profile.emails?.[0]?.value;
+                    if (!email) return done(new Error("GitHub did not provide an email."));
 
-            if(user){
-                if(!user.githubId){
-                    user.githubId = profile.id;
-                    await user.save();
+                    const user = await authService.socialLogin({
+                        email,
+                        name: profile.displayName || profile.username || "unknown",
+                        profileId: profile.id,
+                        loginType: LoginType.GITHUB
+                    });
+
+                    return done(null, user);
+                } catch (e) {
+                    return done(e as Error);
                 }
-            }else{
-                user = await UserModel.create({
-                    username: await generateUsername(profile.displayName as string || profile.username as string),
-                    email,
-                    loginType: "github",
-                    githubId: profile.id,
-                    isVerified: true
-                });
             }
-            done(null, user);
-        } catch (err) {
-            console.error("Error storing GitHub user:", err);
-            done(err);
-        }
-    })
-);
+        )
+    );
+
+}
+

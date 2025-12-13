@@ -1,51 +1,65 @@
-import { SolutionModel, ISolutionRepository } from "@modules/challenge";
-import { SolutionIF } from "@shared/types";
-import { BaseRepository } from "@core";
+import { BaseRepository } from "@shared/core";
+import {
+  SolutionQuery, 
+  SolutionSortOption, 
+  SolutionWithUser,
+  SolutionWithFullComments,
+  SolutionWithChallenge,
+  CreateSolutionInput
+} from "@shared/types";
 
-export class SolutionRepository
-  extends BaseRepository<SolutionIF>
-  implements ISolutionRepository
-{
+import { SolutionDocument } from "@modules/challenge";
+
+import { ISolutionRepository, SolutionModel } from "@modules/challenge";
+
+export class SolutionRepository extends BaseRepository<SolutionDocument>
+  implements ISolutionRepository {
   constructor() {
     super(SolutionModel);
   }
-  async createSolution(data: Partial<SolutionIF>) {
+
+  async createSolution(data: CreateSolutionInput): Promise<SolutionWithUser> {
     const doc = await this.model.create(data);
-    return await doc.populate("user");
+    return (await doc.populate("user")) as SolutionWithUser;
   }
 
-async findSolutionsByChallenge(query: any, sort: any, page: number, limit: number) {
-  return this.model
-    .find(query)
-    .sort(sort)
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .populate("user")
-    .populate("comments.user");
-}
+  async findSolutionsByChallenge(
+    query: SolutionQuery,
+    sort: SolutionSortOption,
+    page: number,
+    limit: number
+  ): Promise<SolutionWithFullComments[]> {
+    return this.model
+      .find(query)
+      .sort(sort)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("user")
+      .populate("comments.user") as unknown as SolutionWithFullComments[];
+  }
 
-  async findSolutionsByUser(userId: string) {
-    return await this.model
+  async findSolutionsByUser(userId: string): Promise<SolutionWithChallenge[]> {
+    return this.model
       .find({ user: userId })
       .populate("challenge")
-      .populate("user");
+      .populate("user") as unknown as SolutionWithChallenge[];
   }
 
-  async likeSolution(solutionId: string, userId: string) {
-    return await this.model.findByIdAndUpdate(
+  async likeSolution(solutionId: string, userId: string): Promise<SolutionDocument | null> {
+    return this.model.findByIdAndUpdate(
       solutionId,
       { $addToSet: { likes: userId } },
       { new: true }
     );
   }
 
-  async checkUserLikedSolution(solutionId: string, userId: string) {
+  async checkUserLikedSolution(solutionId: string, userId: string): Promise<boolean> {
     const result = await this.model.findOne({ _id: solutionId, likes: userId });
-    return result ? true : false;
+    return !!result;
   }
 
-  async unlikeSolution(solutionId: string, userId: string) {
-    return await this.model.findByIdAndUpdate(
+  async unlikeSolution(solutionId: string, userId: string): Promise<SolutionDocument | null> {
+    return this.model.findByIdAndUpdate(
       solutionId,
       { $pull: { likes: userId } },
       { new: true }
@@ -55,39 +69,42 @@ async findSolutionsByChallenge(query: any, sort: any, page: number, limit: numbe
   async commentSolution(
     solutionId: string,
     comment: { user: string; content: string }
-  ) {
-    return await this.model.findByIdAndUpdate(
-      solutionId,
-      {
-        $push: {
-          comments: {
-            user: comment.user,
-            content: comment.content,
+  ): Promise<SolutionWithUser | null> {
+    return this.model
+      .findByIdAndUpdate(
+        solutionId,
+        {
+          $push: {
+            comments: {
+              user: comment.user,
+              content: comment.content,
+            },
           },
         },
-      },
-      { new: true }
-    ).populate("user");
+        { new: true }
+      )
+      .populate("user") as unknown as SolutionWithUser;
   }
 
-  async deleteComment(solutionId: string, commentId: string) {
-    return await this.model.findByIdAndUpdate(
+  async deleteComment(solutionId: string, commentId: string): Promise<SolutionDocument | null> {
+    return this.model.findByIdAndUpdate(
       solutionId,
-      {
-        $pull: {
-          comments: { _id: commentId },
-        },
-      },
+      { $pull: { comments: { _id: commentId } } },
       { new: true }
     );
   }
 
-  async updateSolution(solutionId: string, data: Partial<SolutionIF>) {
-    return await this.model.findByIdAndUpdate(solutionId, data, { new: true }).populate("user");
+  async updateSolution(
+    solutionId: string,
+    data: Partial<SolutionDocument>
+  ): Promise<SolutionWithUser | null> {
+    return this.model
+      .findByIdAndUpdate(solutionId, data, { new: true })
+      .populate("user") as unknown as SolutionWithUser;
   }
 
-  async deleteSolution(solutionId: string) {
+  async deleteSolution(solutionId: string): Promise<boolean> {
     const success = await this.model.findByIdAndDelete(solutionId);
-    return success ? true : false;
+    return !!success;
   }
 }

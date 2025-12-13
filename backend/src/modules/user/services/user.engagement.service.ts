@@ -8,13 +8,12 @@ import {
   toPublicUserDTO,
   toPublicUserDTOs,
 } from "@modules/user";
-import { UserIF } from "@shared/types";
+import { UserDocument } from "@shared/types";
 import { IMarketService } from "@modules/market";
 
 export class UserEngagementService
-  extends BaseService<UserIF, PublicUserDTO>
-  implements IUserEngagementService
-{
+  extends BaseService<UserDocument, PublicUserDTO>
+  implements IUserEngagementService {
   constructor(
     private readonly _userRepo: IUserRepository,
     private _marketSvc: IMarketService,
@@ -22,11 +21,11 @@ export class UserEngagementService
     super();
   }
 
-  protected toDTO(user: UserIF): PublicUserDTO {
+  protected toDTO(user: UserDocument): PublicUserDTO {
     return toPublicUserDTO(user);
   }
 
-  protected toDTOs(users: UserIF[]): PublicUserDTO[] {
+  protected toDTOs(users: UserDocument[]): PublicUserDTO[] {
     return toPublicUserDTOs(users);
   }
 
@@ -98,9 +97,9 @@ export class UserEngagementService
 
     await this._userRepo.updateUser(toObjectId(userId), {
       membership: {
-        ...(user.membership?.toJSON() as any),
+        ...(user.membership?.toJSON() ?? {}),
         isActive: false,
-      } as any,
+      },
     });
 
     return true;

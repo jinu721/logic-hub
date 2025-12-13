@@ -1,7 +1,5 @@
 import { Document, Schema, model } from "mongoose";
-import { SubmissionAttrs } from "@shared/types";
-
-export interface SubmissionDocument extends SubmissionAttrs, Document {}
+import { SubmissionDocument } from "@shared/types";
 
 
 const SubmissionSchema = new Schema<SubmissionDocument>({

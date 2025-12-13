@@ -1,41 +1,49 @@
 import { Request, Response } from "express";
 import { HttpStatus } from "@constants/http.status";
 import { IMarketController, IMarketService } from "@modules/market";
+import { CreateMarketItemDto, DeleteMarketItemDto, GetAllMarketItemsDto, GetMarketItemDto, UpdateMarketItemDto } from "@modules/market/dtos";
 import { sendSuccess, asyncHandler, AppError } from "@utils/application";
 
 
 export class MarketController implements IMarketController {
-  constructor(private readonly _marketSvc: IMarketService) {}
+  constructor(private readonly _marketSvc: IMarketService) { }
 
   createItem = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    if (!req.body) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Item data is required");
+    const dto = CreateMarketItemDto.from(req.body);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._marketSvc.createItem(req.body);
+    const result = await this._marketSvc.createItem(dto as any);
     sendSuccess(res, HttpStatus.CREATED, result, "Item created successfully");
   });
 
   getAllItems = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const dto = GetAllMarketItemsDto.from(req.query);
+    const validation = dto.validate();
+    if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
+
     const filter = {
-      category: req.query.category,
-      searchQuery: req.query.searchQuery,
-      sortOption: req.query.sortOption,
+      category: dto.category as any,
+      searchQuery: dto.searchQuery,
+      sortOption: dto.sortOption,
     };
-    const page = req.query.page ? Number(req.query.page) : 1;
-    const limit = req.query.limit ? Number(req.query.limit) : 10;
+    const page = dto.page ? Number(dto.page) : 1;
+    const limit = dto.limit ? Number(dto.limit) : 10;
 
     const result = await this._marketSvc.getAllItems(filter, page, limit);
     sendSuccess(res, HttpStatus.OK, result, "Items fetched successfully");
   });
 
   getItemById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Item ID is required");
+    const dto = GetMarketItemDto.from(req.params);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._marketSvc.getItemById(id);
+    const result = await this._marketSvc.getItemById(dto.id);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
     }
@@ -44,12 +52,13 @@ export class MarketController implements IMarketController {
   });
 
   updateItem = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    if (!id || !req.body) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Item ID and data are required");
+    const dto = UpdateMarketItemDto.from({ id: req.params.id, ...req.body });
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._marketSvc.updateItem(id, req.body);
+    const result = await this._marketSvc.updateItem(dto.id, dto as any);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
     }
@@ -58,12 +67,13 @@ export class MarketController implements IMarketController {
   });
 
   deleteItem = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Item ID is required");
+    const dto = DeleteMarketItemDto.from(req.params);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._marketSvc.deleteItem(id);
+    const result = await this._marketSvc.deleteItem(dto.id);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
     }

@@ -1,13 +1,13 @@
-import { Document, Types } from "mongoose";
+import { Types } from "mongoose";
 
-export interface TokenIF extends Document {
+export interface TokenAttrs {
   userId: Types.ObjectId;
   refreshToken: string;
   accessToken: string;
   device?: string;
   ip?: string;
   createdAt?: Date;
-  updatedAr?: Date;
+  updatedAt?: Date;
 }
 
 export type TokenPayloadIF = {

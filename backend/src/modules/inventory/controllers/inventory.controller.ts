@@ -1,27 +1,24 @@
 import { HttpStatus } from "@constants";
 import { sendSuccess, asyncHandler, AppError } from "@utils/application";
 import {
-  CreateInventoryDTO,
   IInventoryController,
-  UpdateInventoryDTO,
+  IInventoryService,
 } from "@modules/inventory";
+import {
+  CreateInventoryDto,
+  UpdateInventoryDto,
+  GetAllInventoryDto,
+  GetInventoryDto,
+  DeleteInventoryDto
+} from "@modules/inventory/dtos";
 
 export class InventoryController implements IInventoryController {
-  constructor(private svc: any) {}
+  constructor(private svc: IInventoryService) { }
 
   create = asyncHandler(async (req, res) => {
-    const dto: CreateInventoryDTO = {
-      name: req.body.name,
-      description: req.body.description,
-      isActive: req.body.isActive,
-      rarity: req.body.rarity,
-    };
-    if (!dto.name || !dto.description || !dto.isActive || !dto.rarity) {
-      throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        "Name,Description,isActive,rarity required"
-      );
-    }
+    const dto = CreateInventoryDto.from(req.body);
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors.join(","));
 
     let imageFile = "";
     if (req.file) {
@@ -40,34 +37,48 @@ export class InventoryController implements IInventoryController {
   });
 
   getAll = asyncHandler(async (req, res) => {
-    const search = req.query.search as string;
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
+    const dto = GetAllInventoryDto.from(req.query);
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors.join(","));
+
+    const search = dto.search || "";
+    const page = dto.page ? Number(dto.page) : 1;
+    const limit = dto.limit ? Number(dto.limit) : 10;
 
     const data = await this.svc.getAll(search, page, limit);
     sendSuccess(res, HttpStatus.OK, { data }, "Fetched");
   });
 
   getById = asyncHandler(async (req, res) => {
-    const data = await this.svc.getById(req.params.id);
+    const dto = GetInventoryDto.from(req.params);
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors.join(","));
+
+    const data = await this.svc.getById(dto.id);
     if (!data) throw new AppError(HttpStatus.NOT_FOUND, "Not Found");
     sendSuccess(res, HttpStatus.OK, { data }, "Fetched");
   });
 
   update = asyncHandler(async (req, res) => {
-    const dto: UpdateInventoryDTO = {
-      name: req.body.name,
-      description: req.body.description,
-      isActive: req.body.isActive,
-      rarity: req.body.rarity,
-    };
-    const data = await this.svc.update(req.params.id, dto);
+    const dto = UpdateInventoryDto.from(req.body);
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors.join(","));
+
+    const idDto = GetInventoryDto.from(req.params);
+    const validId = idDto.validate();
+    if (!validId.valid) throw new AppError(HttpStatus.BAD_REQUEST, validId.errors.join(","));
+
+    const data = await this.svc.update(idDto.id, dto);
     if (!data) throw new AppError(HttpStatus.NOT_FOUND, "Not Found");
     sendSuccess(res, HttpStatus.OK, { data }, "Updated");
   });
 
   delete = asyncHandler(async (req, res) => {
-    const deleted = await this.svc.delete(req.params.id);
+    const dto = DeleteInventoryDto.from(req.params);
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors.join(","));
+
+    const deleted = await this.svc.delete(dto.id);
     if (!deleted) throw new AppError(HttpStatus.NOT_FOUND, "Not Found");
     sendSuccess(res, HttpStatus.OK, {}, "Deleted");
   });

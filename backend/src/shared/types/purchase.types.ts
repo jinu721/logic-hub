@@ -1,6 +1,6 @@
-import { Types,Document } from "mongoose";
+import { Types } from "mongoose";
 
-export interface PurchaseIF extends Document {
+export interface PurchaseAttrs {
   userId: Types.ObjectId;
   planId: Types.ObjectId;
   razorpayOrderId: string;
@@ -9,5 +9,5 @@ export interface PurchaseIF extends Document {
   amount: number;
   status: 'Success' | 'Failed';
   startedAt: Date;
-  expiresAt: Date;
+  expiresAt: Date;  
 }

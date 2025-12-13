@@ -1,6 +1,6 @@
 import { Document, Types } from "mongoose";
 
-export interface MessageIF extends Document {
+export interface MessageAttrs {
   conversationId: Types.ObjectId;
   sender: Types.ObjectId;
   content?: string;
@@ -21,3 +21,8 @@ export interface MessageIF extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+
+export interface MessageDocument extends MessageAttrs, Document {}
+
+

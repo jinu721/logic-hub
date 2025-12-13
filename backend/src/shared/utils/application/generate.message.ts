@@ -1,72 +1,99 @@
 import { Container } from "@di";
+import { Types } from "mongoose";
+import { MessageIF } from "@shared/types"; 
+
+export type SystemMessageType =
+  | "add_members"
+  | "remove_member"
+  | "make_admin"
+  | "remove_admin"
+  | "edit_group_info"
+  | "leave_group"
+  | "delete_group"
+  | "join_group"
+  | "approve_group";
+
+interface GroupUpdateData {
+  name?: string;
+  description?: string;
+  image?: string;
+}
 
 export const generateSystemMessage = async (
   container: Container,
-  type: string,
+  type: SystemMessageType,
   conversationId: string,
   userId: string,
   members: string[],
-  newGroupData: any,
-  removeMember: string
-) => {
-  let content = "";
+  newGroupData?: GroupUpdateData,
+  removeMemberId?: string
+): Promise<MessageIF | null> => {
   const actingUser = await container.userQuerySvc.findUserById(userId);
-  console.log("ActingUser:- ", type);
-  if (!actingUser) {
-    console.error("actingUser is null");
-    return;
-  }
+  if (!actingUser) return null;
 
-  let removedMember;
-  if (removeMember) {
-    removedMember = await container.userQuerySvc.findUserById(removeMember);
+  let removedMemberName = "";
+  if (removeMemberId) {
+    const removedUser = await container.userQuerySvc.findUserById(removeMemberId);
+    removedMemberName = removedUser?.username ?? "";
   }
 
   const memberUsers = await Promise.all(
-    members?.map((id) => container.userQuerySvc.findUserById(id))
+    members.map((id) => container.userQuerySvc.findUserById(id))
   );
+  const memberNames = memberUsers.map((u) => u.username).join(", ");
+
+  let content: string;
 
   switch (type) {
     case "add_members":
-      const addedNames = memberUsers.map((user) => user.username).join(", ");
-      content = `${actingUser.username} added ${addedNames} to the group`;
+      content = `${actingUser.username} added ${memberNames} to the group`;
       break;
+
     case "remove_member":
-      content = `${actingUser.username} remove ${removedMember?.username} from the group`;
+      content = `${actingUser.username} removed ${removedMemberName} from the group`;
       break;
+
     case "make_admin":
       content = `${actingUser.username} became an admin`;
       break;
+
     case "remove_admin":
       content = `${actingUser.username} is no longer an admin`;
       break;
+
     case "edit_group_info":
-      content = `${actingUser.username} changed group name to '${newGroupData.name}'`;
+      content = `${actingUser.username} changed group name to '${newGroupData?.name}'`;
       break;
+
     case "leave_group":
       content = `${actingUser.username} left the group`;
       break;
+
     case "delete_group":
       content = `${actingUser.username} deleted the group`;
       break;
+
     case "join_group":
-      content = `${actingUser.username} joined to the group`;
-      break;
     case "approve_group":
-      content = `${actingUser.username} joined to the group`;
+      content = `${actingUser.username} joined the group`;
       break;
 
     default:
       return null;
   }
 
-  const systemMessageData = {
-    sender: "system",
-    conversationId,
+  const systemMessage: MessageAttrs = {
+    sender: new Types.ObjectId(), 
+    conversationId: new Types.ObjectId(conversationId),
     type: "system",
     content,
-  } as any;
+    mentionedUsers: [],
+    seenBy: [],
+    isEdited: false,
+    isDeleted: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
-
-  return await container.messageCommandSvc.createMessage(systemMessageData, null);
+  return await container.messageCommandSvc.createMessage(systemMessage, null);
 };

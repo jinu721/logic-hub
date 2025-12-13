@@ -9,11 +9,11 @@ import {
   toPublicUserDTOs
 } from "@modules/user";
 import { ISubmissionRepository } from "@modules/challenge";
-import { UserIF } from "@shared/types";
+import { UserDocument } from "@modules/user/models";
 
 
 export class UserQueryService
-  extends BaseService<UserIF, PublicUserDTO>
+  extends BaseService<UserDocument, PublicUserDTO>
   implements IUserQueryService
 {
   constructor(
@@ -23,15 +23,15 @@ export class UserQueryService
     super();
   }
 
-  protected toDTO(user: UserIF): PublicUserDTO {
+  protected toDTO(user: UserDocument): PublicUserDTO {
     return toPublicUserDTO(user);
   }
 
-  protected toDTOs(users: UserIF[]): PublicUserDTO[] {
+  protected toDTOs(users: UserDocument[]): PublicUserDTO[] {
     return toPublicUserDTOs(users);
   }
 
-  private async buildUserData(user: UserIF, currentUserId: string) {
+  private async buildUserData(user: UserDocument, currentUserId: string) {
     const rank = await this._userRepo.findUserRank(user._id as string);
     const completedDomains = await this._submissionRepo.findCompletedDomainsByUser(
       toObjectId(user._id as string)
@@ -48,6 +48,12 @@ export class UserQueryService
   async findByEmailOrUsername(value: string) {
     const exists = await this._userRepo.getByEmailOrUsername(value);
     return !exists;
+  }
+
+  async getUserByEmail(email: string) {
+    const user = await this._userRepo.getUserByEmail(email);
+    if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
+    return this.buildUserData(user, email);
   }
 
   async findUserById(id: string) {

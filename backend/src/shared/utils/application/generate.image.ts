@@ -1,8 +1,9 @@
 import cloudinary from "@config/cloudinary.config";
+import { CloudinaryURLParams } from "@shared/types";
 
 export const generateSignedImageUrl = (
   publicId: string,
-  options: Record<string, any> = {}
+  options: CloudinaryURLParams = {}
 ) => {
   return cloudinary.v2.url(publicId, {
     type: "authenticated",

@@ -1,4 +1,5 @@
 import { createLogger, format, transports } from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
 
 const { combine, timestamp, errors, printf, colorize } = format;
 
@@ -10,9 +11,7 @@ const blockFormat = printf(({ timestamp, level, message, stack, ...meta }) => {
     `💬 Message: ${message}`,
   ];
 
-  if (stack) {
-    logLines.push(`🧾 Stack  :\n${stack}`);
-  }
+  if (stack) logLines.push(`🧾 Stack  :\n${stack}`);
 
   if (meta.error) {
     const err = meta.error;
@@ -35,13 +34,20 @@ const logger = createLogger({
       format: combine(colorize(), timestamp(), errors({ stack: true }), blockFormat),
     }),
 
-    new transports.File({
-      filename: "logs/error.log",
+    new DailyRotateFile({
+      filename: "logs/error-%DATE%.log",
       level: "error",
+      datePattern: "YYYY-MM-DD",
+      maxFiles: "7d",   
+      zippedArchive: true,
       format: combine(timestamp(), errors({ stack: true }), blockFormat),
     }),
-    new transports.File({
-      filename: "logs/combined.log",
+
+    new DailyRotateFile({
+      filename: "logs/combined-%DATE%.log",
+      datePattern: "YYYY-MM-DD",
+      maxFiles: "14d",  
+      zippedArchive: true,
       format: combine(timestamp(), errors({ stack: true }), blockFormat),
     }),
   ],

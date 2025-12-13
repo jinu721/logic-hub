@@ -1,11 +1,21 @@
-import { PublicUserDTO} from "@modules/user/dtos";
 import { PublicReportDTO } from "@modules/report/dtos";
+import { GroupedReportItemDomain, ReportedType } from "@shared/types";
 
 export interface GroupedReportDTO {
   reportedId: string;
-  reportedType: "User" | "Group" | "Room";
+  reportedType: ReportedType;
   totalReports: number;
-  userInfo?: PublicUserDTO;
-  groupInfo?: any; 
-  reports: PublicReportDTO[];
+
+  userInfo?: {
+    _id: string;
+    username: string;
+    email: string;
+  };
+
+  groupInfo?: {
+    _id: string;
+    name: string;
+  };
+
+  reports: GroupedReportItemDomain[];
 }

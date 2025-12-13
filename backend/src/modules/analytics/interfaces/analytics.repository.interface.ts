@@ -1,7 +1,7 @@
-import { UserAnalytics, ChallengeStats, LeaderboardTrends } from "@shared/types";
+import { UserAnalyticsDomain, ChallengeStatsDomain, LeaderboardTrendsDomain } from "@shared/types";
 
 export interface IAnalyticsRepository {
-  getUserAnalytics(): Promise<UserAnalytics>;
-  getChallengeStats(): Promise<ChallengeStats>;
-  getLeaderboardTrends(): Promise<LeaderboardTrends>;
+  getUserAnalytics(): Promise<UserAnalyticsDomain>;
+  getChallengeStats(): Promise<ChallengeStatsDomain>;
+  getLeaderboardTrends(): Promise<LeaderboardTrendsDomain>;
 }

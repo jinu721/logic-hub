@@ -1,16 +1,45 @@
-export interface LeaderboardUser {
-  id: number;
-  rank: number;
-  username: string;
-  totalXP: number;
-  level: number;
-  solvedCount: number;
-  submissions: number;
-  domains: number;
-  stats: any;
-  hasUnlimitedAccess: boolean;
-  avatar?: any;
+import { Types } from "mongoose";
+import { SortOrder } from "./core.types";
+
+export interface LeaderboardUserDomain {
+  _id: Types.ObjectId; 
+  user: {
+    _id: Types.ObjectId;
+    username: string;
+    stats: { xpPoints: number };
+    avatar?: {
+      _id: Types.ObjectId;
+      imageUrl: string; 
+    } | null;
+  };
+
+  avgTimeTaken: number;
+  avgMemoryUsed: number;
+  avgCpuTime: number;
+  totalXp: number;
+  totalScore: number;
+  submissionsCount: number;
 }
+
+export interface LeaderboardTrendsDomain {
+  users: LeaderboardUserDomain[];
+  meta: LeaderboardMeta;
+  statistics: LeaderboardStatisticsDomain;
+}
+
+export interface TopCompletedChallengeDomain {
+  name: string;
+  completions: number;
+}
+
+export interface LeaderboardStatisticsDomain {
+  totalSubmissions: number;
+  totalUsers: number;
+  successRate: number;
+  completionRate: number;
+  topCompletedChallenges: TopCompletedChallengeDomain[];
+}
+
 
 export interface LevelDistribution {
   name: string;
@@ -64,4 +93,45 @@ export interface TopPerformersSummary {
   topEarner?: TopEarner;
   domainCompleter?: DomainCompleter;
   longestStreakAgg?: LongestStreakUser;
+}
+
+
+
+export interface LeaderboardFilters {
+  passed?: boolean;
+  submittedAt?: { $gte: Date };
+  level?: string;
+}
+
+export type LeaderboardSortField =
+  | "txp"
+  | "score"
+  | "fastest"
+  | "memory"
+  | "cpu"
+  | "attempts";
+
+
+export interface TopCompletedChallenge {
+  name: string;
+  completions: number;
+}
+
+export type LeaderboardDbSortKey = "totalXp" | "totalScore" | "avgTimeTaken" | "avgMemoryUsed" | "avgCpuTime" | "submissionsCount";
+
+
+
+export type LeaderboardPeriod = "day" | "week" | "month" | "year" | "all";
+
+
+export interface LeaderboardMeta {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  sortBy: LeaderboardSortField;
+  sortField: LeaderboardDbSortKey;
+  order: SortOrder;
+  period: LeaderboardPeriod;
+  category: string;
 }

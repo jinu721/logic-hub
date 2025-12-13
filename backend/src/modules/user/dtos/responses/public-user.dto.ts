@@ -1,4 +1,4 @@
-import { IPublicInventoryDTO } from "./inventory.dto";
+import { IPublicInventoryDTO } from "@modules/inventory/dtos";
 
 export interface PublicUserDTO {
   userId: string;
@@ -8,6 +8,8 @@ export interface PublicUserDTO {
   avatar: IPublicInventoryDTO | null | undefined;
   banner: IPublicInventoryDTO | null | undefined;
   role: string;
+  googleId: string | null;
+  githubId: string | null;
   loginType: string;
   stats: {
     xpPoints: number;

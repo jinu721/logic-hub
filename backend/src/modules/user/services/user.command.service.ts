@@ -3,11 +3,11 @@ import { AppError, toObjectId } from "@utils/application"
 import { HttpStatus } from "@constants"
 import { IUserCommandService, IUserRepository, PublicUserDTO, toPublicUserDTO, toPublicUserDTOs, UpdateUserDTO } from "@modules/user"
 import { IHashProvider } from "@providers/hashing"
-import { UserIF } from "@shared/types"
+import { UserDocument } from "@shared/types"
 
 
 export class UserCommandService
-  extends BaseService<UserIF, PublicUserDTO>
+  extends BaseService<UserDocument, PublicUserDTO>
   implements IUserCommandService
 {
   constructor(
@@ -17,15 +17,15 @@ export class UserCommandService
     super();
   }
 
-  protected toDTO(user: UserIF): PublicUserDTO {
+  protected toDTO(user: UserDocument): PublicUserDTO {
     return toPublicUserDTO(user);
   }
 
-  protected toDTOs(users: UserIF[]): PublicUserDTO[] {
+  protected toDTOs(users: UserDocument[]): PublicUserDTO[] {
     return toPublicUserDTOs(users);
   }
 
-  async findUserByIdAndUpdate(id: string, data: Partial<UserIF>) {
+  async findUserByIdAndUpdate(id: string, data: Partial<UserDocument>) {
     const updated = await this.userRepo.updateUser(toObjectId(id), data);
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
     return this.mapOne(updated);

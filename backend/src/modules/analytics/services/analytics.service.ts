@@ -3,32 +3,34 @@ import {
   IAnalyticsRepository,
   ILeaderboardRepository,
 } from "@modules/analytics";
-import { UserAnalytics, ChallengeStats } from "@shared/types";
+import { LeaderboardSortField, LeaderboardPeriod, SortOrder, LeaderboardDbSortKey } from "@shared/types";
+import { ChallengeStatsDTO, LeaderboardTrendsDTO, LeaderboardUserDTO, UserAnalyticsDTO } from "@modules/analytics/dtos";
 import { toPublicUserDTO } from "@modules/user";
 
 export class AnalyticsService implements IAnalyticsService {
   constructor(
     private analyticsRepo: IAnalyticsRepository,
     private leaderboardRepository: ILeaderboardRepository
-  ) {}
+  ) { }
 
-  async fetchUserAnalytics(): Promise<UserAnalytics> {
+  async fetchUserAnalytics(): Promise<UserAnalyticsDTO> {
     return this.analyticsRepo.getUserAnalytics();
   }
 
-  async fetchChallengeStats(): Promise<ChallengeStats> {
+  async fetchChallengeStats(): Promise<ChallengeStatsDTO> {
     return this.analyticsRepo.getChallengeStats();
   }
 
   async getLeaderboardData(
-    based: string,
+    based: LeaderboardSortField,
     category: string,
-    period: string,
-    order: string,
+    period: LeaderboardPeriod,
+    order: SortOrder,
     page: number,
     limit: number
-  ): Promise<any> {
-    const sortFieldMap: Record<string, string> = {
+  ): Promise<LeaderboardTrendsDTO> {
+
+    const sortFieldMap: Record<LeaderboardSortField, LeaderboardDbSortKey> = {
       txp: "totalXp",
       score: "totalScore",
       fastest: "avgTimeTaken",
@@ -37,24 +39,21 @@ export class AnalyticsService implements IAnalyticsService {
       attempts: "submissionsCount",
     };
 
-    const sortField = sortFieldMap[based] || "totalXp";
+    const sortField = sortFieldMap[based];
     const sortOrder = order === "asc" ? 1 : -1;
 
     let fromDate: Date | null = null;
     if (period !== "all") {
-      const now = new Date();
-      fromDate = new Date(now);
-
-      if (period === "day") fromDate.setDate(now.getDate() - 1);
-      else if (period === "week") fromDate.setDate(now.getDate() - 7);
-      else if (period === "month") fromDate.setMonth(now.getMonth() - 1);
-      else if (period === "year") fromDate.setFullYear(now.getFullYear() - 1);
+      fromDate = new Date();
+      if (period === "day") fromDate.setDate(fromDate.getDate() - 1);
+      if (period === "week") fromDate.setDate(fromDate.getDate() - 7);
+      if (period === "month") fromDate.setMonth(fromDate.getMonth() - 1);
+      if (period === "year") fromDate.setFullYear(fromDate.getFullYear() - 1);
     }
 
-    const matchConditions: any = { passed: true };
+    const matchConditions: Record<string, unknown> = { passed: true };
     if (fromDate) matchConditions.submittedAt = { $gte: fromDate };
-    if (category && category !== "all") matchConditions.level = category;
-
+    if (category !== "all") matchConditions.level = category;
 
     const rawData = await this.leaderboardRepository.getLeaderboardData(
       matchConditions,
@@ -64,14 +63,12 @@ export class AnalyticsService implements IAnalyticsService {
       limit
     );
 
-    const totalItems = await this.leaderboardRepository.coutAllLeaderboardData(
-      matchConditions
-    );
+    const totalItems =
+      await this.leaderboardRepository.coutAllLeaderboardData(matchConditions);
 
     const statistics = await this.leaderboardRepository.getStatistics();
 
-
-    const users = rawData.map((item: any, index: number) => ({
+    const users: LeaderboardUserDTO[] = rawData.map((item, index) => ({
       rank: (page - 1) * limit + index + 1,
       user: toPublicUserDTO(item.user),
       avgTimeTaken: item.avgTimeTaken ?? 0,
@@ -100,4 +97,5 @@ export class AnalyticsService implements IAnalyticsService {
       statistics,
     };
   }
+
 }

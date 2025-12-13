@@ -1,13 +1,10 @@
-export function deepEqual(a: any, b: any): boolean {
+export function deepEqual<T>(a: T, b: T): boolean {
   if (a === b) return true;
 
   if (a == null || b == null) return a === b;
 
-  const aNum = Number(a);
-  const bNum = Number(b);
-  const bothNumbers = !Number.isNaN(aNum) && !Number.isNaN(bNum) && (typeof a === "number" || typeof b === "number" || (typeof a === "string" && typeof b === "string"));
-  if (bothNumbers) {
-    return Math.abs(aNum - bNum) < 1e-9;
+  if (areNumbers(a, b)) {
+    return Math.abs(Number(a) - Number(b)) < 1e-9;
   }
 
   if (Array.isArray(a) && Array.isArray(b)) {
@@ -23,8 +20,9 @@ export function deepEqual(a: any, b: any): boolean {
     const bKeys = Object.keys(b).sort();
     if (aKeys.length !== bKeys.length) return false;
     for (let i = 0; i < aKeys.length; i++) {
-      if (aKeys[i] !== bKeys[i]) return false;
-      if (!deepEqual(a[aKeys[i]], b[bKeys[i]])) return false;
+      const key = aKeys[i];
+      if (key !== bKeys[i]) return false;
+      if (!deepEqual(a[key], b[key])) return false;
     }
     return true;
   }
@@ -36,6 +34,12 @@ export function deepEqual(a: any, b: any): boolean {
   }
 }
 
-function isPlainObject(x: any): x is Record<string, any> {
-  return Object.prototype.toString.call(x) === "[object Object]";
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Object.prototype.toString.call(value) === "[object Object]";
+}
+
+function areNumbers(a: unknown, b: unknown): boolean {
+  const aNum = typeof a === "string" || typeof a === "number" ? Number(a) : NaN;
+  const bNum = typeof b === "string" || typeof b === "number" ? Number(b) : NaN;
+  return !Number.isNaN(aNum) && !Number.isNaN(bNum);
 }

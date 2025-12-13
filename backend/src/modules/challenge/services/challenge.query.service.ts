@@ -11,12 +11,12 @@ import {
   IChallengeRepository,
   ISubmissionRepository
 } from "@modules/challenge/interfaces";
-import { ChallengeIF } from "@shared/types";
+import { ChallengeDocument } from "@modules/challenge/models";
+import { ChallengeDBQuery, ChallengeQueryFilter } from "@shared/types";
 
 export class ChallengeQueryService
-  extends BaseService<ChallengeIF, PublicChallengeDTO>
-  implements IChallengeQueryService
-{
+  extends BaseService<ChallengeDocument, PublicChallengeDTO>
+  implements IChallengeQueryService {
   constructor(
     private readonly _challengeRepo: IChallengeRepository,
     private readonly _submissionRepo: ISubmissionRepository
@@ -24,21 +24,21 @@ export class ChallengeQueryService
     super();
   }
 
-  protected toDTO(challenge: ChallengeIF): PublicChallengeDTO {
+  protected toDTO(challenge: ChallengeDocument): PublicChallengeDTO {
     return toPublicChallengeDTO(challenge);
   }
 
-  protected toDTOs(challenges: ChallengeIF[]): PublicChallengeDTO[] {
+  protected toDTOs(challenges: ChallengeDocument[]): PublicChallengeDTO[] {
     return toPublicChallengeDTOs(challenges);
   }
 
-  async findChallengeById(id: string) {
-    const challenge = await this._challengeRepo.getChallengeById(id);
-    return challenge;
+  async findChallengeById(id: string): Promise<PublicChallengeDTO | null> {
+    const challenge = await this._challengeRepo.getChallengeById(toObjectId(id));
+    return this.mapOne(challenge);
   }
 
-  async getChallengeById(id: string, userId?: string) {
-    const challenge = await this._challengeRepo.getChallengeById(id);
+  async getChallengeById(id: string, userId?: string): Promise<PublicChallengeDTO & { userId?: string }> {
+    const challenge = await this._challengeRepo.getChallengeById(toObjectId(id));
     if (!challenge) throw new AppError(HttpStatus.NOT_FOUND, "Challenge not found");
 
     return {
@@ -47,14 +47,15 @@ export class ChallengeQueryService
     };
   }
 
-  async getChallenges(filter: any, userId: string) {
+  async getChallenges(filter: ChallengeQueryFilter, userId: string) {
     if (!userId) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
 
     const limit = filter.limit || 10;
     const page = filter.page || 1;
     const skip = (page - 1) * limit || 0;
 
-    const query: any = {};
+    const query: ChallengeDBQuery = {};
+
 
     if (filter.type) query.type = filter.type;
     if (filter.isPremium) query.isPremium = filter.isPremium;
@@ -83,7 +84,7 @@ export class ChallengeQueryService
   }
 
   async getUserHomeChallenges(
-    filter: any,
+    filter: ChallengeQueryFilter,
     userId: string
   ): Promise<{
     challenges: PublicChallengeDTO[];
@@ -94,21 +95,22 @@ export class ChallengeQueryService
     console.log("Filter received in service:", filter);
 
 
-    let query:any = {};
+    const query: ChallengeDBQuery = {};
 
-    if(filter.type){
+
+    if (filter.type) {
       query.type = filter.type;
     }
-    if(filter.isPremium){
+    if (filter.isPremium) {
       query.isPremium = filter.isPremium;
     }
-    if(filter.level){
+    if (filter.level) {
       query.level = filter.level;
     }
-    if(filter.tags){
+    if (filter.tags) {
       query.tags = { $in: filter.tags };
     }
-    if(filter.searchQuery){
+    if (filter.searchQuery) {
       query.title = { $regex: filter.searchQuery, $options: "i" };
     }
 
@@ -151,16 +153,16 @@ export class ChallengeQueryService
       { total: number; completed: number }
     >();
 
-    if(submissionList && submissionList.length !== 0){      
-        for (const p of submissionList) {
-          const id = p.challengeId._id.toString();
-          if (!challengeSubmissionMap.has(id)) {
-            challengeSubmissionMap.set(id, { total: 0, completed: 0 });
-          }
-          const stats = challengeSubmissionMap.get(id)!;
-          stats.total += 1;
-          if (p.status === "completed") stats.completed += 1;
+    if (submissionList && submissionList.length !== 0) {
+      for (const p of submissionList) {
+        const id = p.challengeId._id.toString();
+        if (!challengeSubmissionMap.has(id)) {
+          challengeSubmissionMap.set(id, { total: 0, completed: 0 });
         }
+        const stats = challengeSubmissionMap.get(id)!;
+        stats.total += 1;
+        if (p.status === "completed") stats.completed += 1;
+      }
     }
 
     const challengesData = challenges.map((challenge) => {

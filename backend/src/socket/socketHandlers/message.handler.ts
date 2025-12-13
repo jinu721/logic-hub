@@ -4,10 +4,11 @@ import {
   MessageData,
   PollVoteData,
   TypingData,
-} from "../../shared/types/socket.types";
+} from "@shared/types";
 import redisClient from "../../config/redis.config";
-import { PublicUserDTO } from "../../mappers/user.dto";
+import { PublicUserDTO } from "@modules/user/dtos";
 import { Container } from "@di";
+import { PublicMessageDTO } from "@modules/chat";
 
 export class MessageHandler {
   constructor(private io: Server, private container: Container) {}
@@ -30,8 +31,8 @@ export class MessageHandler {
     { data, accessToken }: { data: MessageData; accessToken: string }
   ): Promise<void> {
     try {
-      const msg: any = await this.container.messageCommandSvc.createMessage(
-        data as any,
+      const msg: PublicMessageDTO = await this.container.messageCommandSvc.createMessage(
+        data,
         accessToken
       );
       await this.container.conversationCommandSvc.updateLastMessage(

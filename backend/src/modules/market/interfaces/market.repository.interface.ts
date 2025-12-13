@@ -1,11 +1,12 @@
 import { UpdateQuery } from "mongoose";
-import { MarketItemIF } from "@shared/types";
+import { MarketItemDocument } from "@shared/types";
+import { MarketItemFilter, MongoSortOptions } from "@shared/types";
 
 export interface IMarketRepository {
-  createItem(data: Partial<MarketItemIF>): Promise<MarketItemIF>;
-  getAllItems(query: any,sort:any,skip:number,limit:number): Promise<MarketItemIF[]>;
-  countMarketItems(query: any): Promise<number>;
-  getItemById(id: string): Promise<MarketItemIF | null>;
-  updateItem(id: string, update: UpdateQuery<MarketItemIF>): Promise<MarketItemIF | null>;
+  createItem(data: Partial<MarketItemDocument>): Promise<MarketItemDocument>;
+  getAllItems(query: MarketItemFilter, sort: MongoSortOptions, skip: number, limit: number): Promise<MarketItemDocument[]>;
+  countMarketItems(query: MarketItemFilter): Promise<number>;
+  getItemById(id: string): Promise<MarketItemDocument | null>;
+  updateItem(id: string, update: UpdateQuery<MarketItemDocument>): Promise<MarketItemDocument | null>;
   deleteItem(id: string): Promise<boolean>;
 }

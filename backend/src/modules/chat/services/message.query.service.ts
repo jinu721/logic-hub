@@ -1,12 +1,11 @@
 import { BaseService } from "@core"
-import { IMessageQueryService,IMessageRepository } from "@modules/chat"
+import { IMessageQueryService, IMessageRepository } from "@modules/chat"
 import { PublicMessageDTO, toPublicMessageDTOs, toPublicMessageDTO } from "@modules/chat/dtos"
-import { MessageIF } from "@shared/types"
+import { MessageIF, MessageQueryFilter } from "@shared/types"
 
 export class MessageQueryService
   extends BaseService<MessageIF, PublicMessageDTO>
-  implements IMessageQueryService
-{
+  implements IMessageQueryService {
   constructor(private readonly messageRepo: IMessageRepository) {
     super()
   }
@@ -19,7 +18,7 @@ export class MessageQueryService
     return toPublicMessageDTOs(entities)
   }
 
-  async getMessages(limit: number, query: any): Promise<PublicMessageDTO[]> {
+  async getMessages(limit: number, query: MessageQueryFilter): Promise<PublicMessageDTO[]> {
     const messages = await this.messageRepo.getMessages(limit, query)
     return this.mapMany(messages)
   }

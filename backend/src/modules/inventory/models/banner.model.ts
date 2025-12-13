@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
-import { InventoryIF } from "@shared/types";
+import { InventoryDocument } from "@shared/types";
 
-const BannerSchema: Schema<InventoryIF> = new Schema(
+const BannerSchema: Schema<InventoryDocument> = new Schema(
   {
     name: { type: String, required: true },
     description: { type: String, default: "" },
@@ -16,4 +16,4 @@ const BannerSchema: Schema<InventoryIF> = new Schema(
   { timestamps: true }
 );
 
-export const BannerModel = mongoose.model<InventoryIF>("Banner", BannerSchema);
+export const BannerModel = mongoose.model<InventoryDocument>("Banner", BannerSchema);

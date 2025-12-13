@@ -13,12 +13,11 @@ import {
   IUserRepository
 } from "@modules/user";
 
-import { MarketItemIF } from "@shared/types";
+import { MarketItemDocument, MarketItemFilter, MongoSortOptions } from "@shared/types";
 
 export class MarketService
-  extends BaseService<MarketItemIF, PublicMarketItemDTO>
-  implements IMarketService
-{
+  extends BaseService<MarketItemDocument, PublicMarketItemDTO>
+  implements IMarketService {
   constructor(
     private readonly marketRepo: IMarketRepository,
     private readonly userRepo: IUserRepository
@@ -26,22 +25,22 @@ export class MarketService
     super();
   }
 
-  protected toDTO(item: MarketItemIF): PublicMarketItemDTO {
+  protected toDTO(item: MarketItemDocument): PublicMarketItemDTO {
     return toPublicMarketItemDTO(item);
   }
 
-  protected toDTOs(items: MarketItemIF[]): PublicMarketItemDTO[] {
+  protected toDTOs(items: MarketItemDocument[]): PublicMarketItemDTO[] {
     return toPublicMarketItemDTOs(items);
   }
 
-  async createItem(data: Partial<MarketItemIF>) {
+  async createItem(data: Partial<MarketItemDocument>) {
     const created = await this.marketRepo.createItem(data);
     return this.mapOne(created);
   }
 
-  async getAllItems(filter: any = {}, page: number = 1, limit: number = 10) {
-    const query: any = {};
-    const sort: any = {};
+  async getAllItems(filter: MarketItemFilter = {}, page: number = 1, limit: number = 10) {
+    const query: MarketItemFilter = {};
+    const sort: MongoSortOptions = {};
 
     if (filter.category) query.category = filter.category;
     if (filter.searchQuery) query.name = { $regex: filter.searchQuery, $options: "i" };
@@ -65,7 +64,7 @@ export class MarketService
     return this.mapOne(item);
   }
 
-  async updateItem(id: string, data: Partial<MarketItemIF>) {
+  async updateItem(id: string, data: Partial<MarketItemDocument>) {
     const updated = await this.marketRepo.updateItem(id, data);
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
     return this.mapOne(updated);

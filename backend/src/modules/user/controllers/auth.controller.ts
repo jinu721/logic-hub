@@ -1,25 +1,21 @@
 import { Request, Response } from "express"
 import { HttpStatus } from "@constants"
-import { IAuthController } from "@modules/user"
+import { IAuthController, UserDocument } from "@modules/user"
 import { IAuthService } from "@modules/user"
 import { asyncHandler, sendSuccess, AppError } from "@utils/application"
-import { CreateUserDTO, LoginDTO, VerifyOtpDTO } from "@modules/user"
 
+
+import { RegisterRequestDto, LoginRequestDto, VerifyOtpRequestDto, ResetPasswordRequestDto, ChangePasswordRequestDto, LogoutRequestDto, VerifyLoginDto, RefreshTokenDto, ForgotPasswordDto } from "@modules/user/dtos";
 
 export class AuthController implements IAuthController {
-  constructor(private readonly authSvc: IAuthService) {}
+  constructor(private readonly authSvc: IAuthService) { }
 
   register = asyncHandler(async (req: Request, res: Response) => {
-    const dto: CreateUserDTO = {
-      username: req.body.username,
-      email: req.body.email,
-      password: req.body.password,
-    };
-    if (!dto.username || !dto.email || !dto.password) {
-      throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        "Username, Email and Password are required"
-      );
+    const dto = RegisterRequestDto.from(req.body);
+
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(400, validation.errors?.join(", "));
     }
     const result = await this.authSvc.register(dto);
     return sendSuccess(
@@ -31,12 +27,11 @@ export class AuthController implements IAuthController {
   });
 
   verifyOTP = asyncHandler(async (req: Request, res: Response) => {
-    const dto: VerifyOtpDTO = {
-      email: req.body.email,
-      otp: req.body.otp,
-    };
-    if (!dto.email || !dto.otp) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Email and OTP are required");
+    const dto = VerifyOtpRequestDto.from(req.body);
+    const validation = dto.validate();
+
+    if (!validation.valid) {
+      throw new AppError(400, validation.errors?.join(", "));
     }
     const ctx = {
       ip: req.ip || req.connection.remoteAddress,
@@ -53,16 +48,12 @@ export class AuthController implements IAuthController {
   });
 
   login = asyncHandler(async (req: Request, res: Response) => {
-    const dto: LoginDTO = {
-      identifier: req.body.emailOrUsername || req.body.email,
-      password: req.body.password,
-    };
-    if (!dto.identifier || !dto.password) {
-      throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        "Identifier and password are required"
-      );
+    const dto = LoginRequestDto.from(req.body as Partial<LoginRequestDto>);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", ") || "Validation failed");
     }
+
     const ctx = {
       ip: req.ip || req.connection.remoteAddress,
       userAgent: req.headers["user-agent"] || "unknown",
@@ -78,16 +69,18 @@ export class AuthController implements IAuthController {
   });
 
   verifyLogin = asyncHandler(async (req: Request, res: Response) => {
-    const token = req.query.token as string | undefined;
-    if (!token) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Token is required");
+    const dto = VerifyLoginDto.from({ token: req.query.token as string });
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
+
     const ctx = {
       ip: req.ip || req.connection.remoteAddress,
       userAgent: req.headers["user-agent"] || "unknown",
       res,
     };
-    const result = await this.authSvc.verifyLogin(token, ctx);
+    const result = await this.authSvc.verifyLogin(dto.token, ctx);
     return sendSuccess(
       res,
       HttpStatus.OK,
@@ -97,12 +90,15 @@ export class AuthController implements IAuthController {
   });
 
   refreshToken = asyncHandler(async (req: Request, res: Response) => {
-    const refreshTokenFromCookie = req.cookies?.refreshToken as
-      | string
-      | undefined;
+    const dto = RefreshTokenDto.from({ refreshToken: req.cookies?.refreshToken });
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, validation.errors?.join(", "));
+    }
+
     const ctx = { res };
     const result = await this.authSvc.refreshAccessToken(
-      refreshTokenFromCookie,
+      dto.refreshToken,
       ctx
     );
     return sendSuccess(
@@ -113,7 +109,7 @@ export class AuthController implements IAuthController {
     );
   });
 
-  googleAuth = asyncHandler(async (req: Request, res: Response) => {
+  googleAuthCallback = asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) {
       throw new AppError(HttpStatus.UNAUTHORIZED, "Authentication failed!");
     }
@@ -122,11 +118,11 @@ export class AuthController implements IAuthController {
       userAgent: req.headers["user-agent"] || "unknown",
       res,
     };
-    const url = await this.authSvc.socialAuth(req.user as any, ctx); 
+    const url = await this.authSvc.socialAuthCallback(req.user as unknown as UserDocument, ctx);
     return res.redirect(url);
   });
 
-  githubAuth = asyncHandler(async (req: Request, res: Response) => {
+  githubAuthCallback = asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) {
       throw new AppError(HttpStatus.UNAUTHORIZED, "Authentication failed!");
     }
@@ -135,65 +131,79 @@ export class AuthController implements IAuthController {
       userAgent: req.headers["user-agent"] || "unknown",
       res,
     };
-    const url = await this.authSvc.socialAuth(req.user as any, ctx);
+    const url = await this.authSvc.socialAuthCallback(req.user as unknown as UserDocument, ctx);
     return res.redirect(url);
   });
 
   forgotPassword = asyncHandler(async (req: Request, res: Response) => {
-    const { email } = req.body as { email?: string };
-    if (!email) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Email is required");
+    const dto = ForgotPasswordDto.from(req.body);
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
-    const result = await this.authSvc.forgotPassword(email);
+
+    const result = await this.authSvc.forgotPassword(dto.email);
     return sendSuccess(res, HttpStatus.OK, result);
   });
 
   resetPassword = asyncHandler(async (req: Request, res: Response) => {
-    const token = req.query.token as string | undefined;
-    const { password } = req.body as { password?: string };
-    if (!token || !password) {
-      throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        "Password and token are required"
-      );
+    const dto = ResetPasswordRequestDto.from({
+      token: req.query.token as string,
+      password: req.body.password as string,
+    });
+
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(400, validation.errors?.join(", "));
     }
+
     const result = await this.authSvc.resetPasswordWithLinkToken(
-      token,
-      password
+      dto.token,
+      dto.password
     );
     return sendSuccess(res, HttpStatus.OK, result);
   });
 
   changePassword = asyncHandler(async (req: Request, res: Response) => {
-    const userId = (req as any).user?.userId as string | undefined;
-    const { oldPassword, newPassword } = req.body as {
-      oldPassword?: string;
-      newPassword?: string;
-    };
+    const userId = req.user?.userId;
     if (!userId) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+    const dto = ChangePasswordRequestDto.from(req.body);
+
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(400, validation.errors?.join(", "));
+    }
     const result = await this.authSvc.changePassword(
       userId,
-      oldPassword!,
-      newPassword!
+      dto.oldPassword,
+      dto.newPassword
     );
     return sendSuccess(res, HttpStatus.OK, result);
   });
 
   getMe = asyncHandler(async (req: Request, res: Response) => {
-    const userId = (req as any).user?.userId as string | undefined;
+    const userId = req.user?.userId;
     if (!userId) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
     const me = await this.authSvc.getMe(userId);
     return sendSuccess(res, HttpStatus.OK, me);
   });
 
   logout = asyncHandler(async (req: Request, res: Response) => {
-    const userId = (req as any).user?.userId as string | undefined;
+    const userId = req.user?.userId;
     const bearer = req.headers["authorization"];
-    if (!userId || !bearer)
-      throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-    const token = bearer.split(" ")[1];
+
+    const dto = LogoutRequestDto.from({
+      userId,
+      token: bearer?.split(" ")[1]
+    });
+
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(401, validation.errors?.join(", "));
+    }
+
     const ctx = { res };
-    const result = await this.authSvc.logout(userId, token, ctx);
+    const result = await this.authSvc.logout(dto.userId, dto.token, ctx);
     return sendSuccess(res, HttpStatus.OK, result);
   });
 

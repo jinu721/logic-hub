@@ -1,10 +1,12 @@
-import { Document } from "mongoose";
+import { InventoryAttrs } from "./inventory.types";
 
-export interface NotificationIF extends Document {
+export type NotificationItemData = InventoryAttrs | string | { [key: string]: unknown };
+
+export interface NotificationAttrs {
   userId: string;
   title: string;
   message: string;
-  itemData?: any;
+  itemData?: NotificationItemData;
   type: "domain" | "market" | "gift" | "system";
   isRead: boolean;
   createdAt: Date;

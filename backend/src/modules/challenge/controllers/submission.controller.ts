@@ -1,49 +1,67 @@
 import { Request, Response } from "express";
 import { ISubmissionController, ISubmissionService } from "@modules/challenge";
 import { HttpStatus } from "@constants/http.status";
-import { sendSuccess, asyncHandler, AppError } from "@utils/application";
+import { sendSuccess, asyncHandler, AppError, toObjectId } from "@utils/application";
+import {
+  CreateSubmissionRequestDto,
+  GetHeatmapRequestDto,
+  UpdateSubmissionDto,
+  DeleteSubmissionDto,
+  SubmissionsUserChallengeDto,
+  SubmissionIdDto,
+  SubmissionsByUserDto,
+  SubmissionsByChallengeDto
+} from "@modules/challenge/dtos";
 
 
 export class SubmissionController implements ISubmissionController {
-  constructor(private readonly _submissionSvc: ISubmissionService) {}
+  constructor(private readonly _submissionSvc: ISubmissionService) { }
 
-  createSubmission = asyncHandler(async (req: Request, res: Response) => {
-    const submissionData = req.body;
-    if (!submissionData) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Submission data is required");
-    }
+  createSubmission = asyncHandler(async (req, res): Promise<void> => {
+    const userId = req.user?.userId;
+    if (!userId) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
 
-    const createdSubmission = await this._submissionSvc.createSubmission(submissionData);
+    const dto = CreateSubmissionRequestDto.from(req.body);
+    const validation = dto.validate();
+    if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
+
+    const createdSubmission = await this._submissionSvc.createSubmission({
+      ...dto,
+      userId
+    });
+
     sendSuccess(res, HttpStatus.CREATED, createdSubmission, "Submission created successfully");
   });
+  getSubmissionsByUserAndChallenge = asyncHandler(async (req, res): Promise<void> => {
+    const dto = SubmissionsUserChallengeDto.from({
+      userId: req.params.userId,
+      challengeId: req.params.challengeId
+    });
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors?.join(", "));
 
-  getSubmissionsByUserAndChallenge = asyncHandler(async (req: Request, res: Response) => {
-    const { userId, challengeId } = req.params;
-    if (!userId || !challengeId) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "User ID and Challenge ID are required");
-    }
-
-    const submissions = await this._submissionSvc.getSubmissionsByUserAndChallenge({ userId, challengeId });
-    sendSuccess(res, HttpStatus.OK, submissions, "Submissions fetched successfully");
+    const submissions = await this._submissionSvc.getSubmissionsByUserAndChallenge(dto);
+    sendSuccess(res, HttpStatus.OK, submissions);
   });
 
-  getSubmissionById = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Submission ID is required");
-    }
 
-    const submission = await this._submissionSvc.getSubmissionById(id);
-    sendSuccess(res, HttpStatus.OK, submission, "Submission fetched successfully");
+  getSubmissionById = asyncHandler(async (req, res): Promise<void> => {
+    const dto = SubmissionIdDto.from({ id: req.params.id });
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors?.join(", "));
+
+    const submission = await this._submissionSvc.getSubmissionById(dto.id);
+    sendSuccess(res, HttpStatus.OK, submission);
   });
 
-  getAllSubmissions = asyncHandler(async (req: Request, res: Response) => {
+
+  getAllSubmissions = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const submissions = await this._submissionSvc.getAllSubmissions();
     sendSuccess(res, HttpStatus.OK, submissions, "All submissions fetched successfully");
   });
 
-  getRecentSubmissions = asyncHandler(async (req: Request, res: Response) => {
-    const userId = (req as any).user?.username;
+  getRecentSubmissions = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?.username;
     if (!userId) {
       throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
     }
@@ -53,64 +71,68 @@ export class SubmissionController implements ISubmissionController {
     sendSuccess(res, HttpStatus.OK, submissions, "Recent submissions fetched successfully");
   });
 
-  updateSubmission = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const submissionData = req.body;
-    if (!id || !submissionData) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Submission ID and data are required");
-    }
+  updateSubmission = asyncHandler(async (req, res): Promise<void> => {
+    const dto = UpdateSubmissionDto.from({
+      id: req.params.id,
+      payload: req.body
+    });
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors?.join(", "));
 
-    const updatedSubmission = await this._submissionSvc.updateSubmission(id, submissionData);
-    sendSuccess(res, HttpStatus.OK, updatedSubmission, "Submission updated successfully");
+    const updated = await this._submissionSvc.updateSubmission(dto.id, dto.payload);
+    sendSuccess(res, HttpStatus.OK, updated);
   });
 
-  deleteSubmission = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Submission ID is required");
-    }
 
-    const result = await this._submissionSvc.deleteSubmissionById(id);
-    sendSuccess(res, HttpStatus.OK, result, "Submission deleted successfully");
+  deleteSubmission = asyncHandler(async (req, res): Promise<void> => {
+    const dto = DeleteSubmissionDto.from({ id: req.params.id });
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors?.join(", "));
+
+    const result = await this._submissionSvc.deleteSubmissionById(dto.id);
+    sendSuccess(res, HttpStatus.OK, result);
   });
 
-  getAllSubmissionsByUser = asyncHandler(async (req: Request, res: Response) => {
-    const currentUserId = (req as any).user?.userId;
-    if (!currentUserId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-    }
 
-    const userId = req.params.userId || currentUserId;
-    if (!userId) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "User ID is required");
-    }
+  getAllSubmissionsByUser = asyncHandler(async (req, res): Promise<void> => {
+    const dto = SubmissionsByUserDto.from({ userId: req.params.userId || req.user?.userId });
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors?.join(", "));
 
-    const submissions = await this._submissionSvc.getAllSubmissionsByUser(userId);
-    sendSuccess(res, HttpStatus.OK, submissions, "User submissions fetched successfully");
+    const submissions = await this._submissionSvc.getAllSubmissionsByUser(dto.userId);
+    sendSuccess(res, HttpStatus.OK, submissions);
   });
 
-  getAllSubmissionsByChallenge = asyncHandler(async (req: Request, res: Response) => {
-    const { challengeId } = req.params;
-    if (!challengeId) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Challenge ID is required");
-    }
+  getAllSubmissionsByChallenge = asyncHandler(async (req, res): Promise<void> => {
+    const dto = SubmissionsByChallengeDto.from({ challengeId: req.params.challengeId });
+    const valid = dto.validate();
+    if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors?.join(", "));
 
-    const submissions = await this._submissionSvc.getAllSubmissionsByChallenge(challengeId);
-    sendSuccess(res, HttpStatus.OK, submissions, "Challenge submissions fetched successfully");
+    const submissions = await this._submissionSvc.getAllSubmissionsByChallenge(dto.challengeId);
+    sendSuccess(res, HttpStatus.OK, submissions);
   });
 
-  getHeatmap = asyncHandler(async (req: Request, res: Response) => {
-    const year = req.query.year ? Number(req.query.year) : 2025;
-    if (!year) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Year is required");
+  getHeatmap = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const loggedUserId = req.user?.userId;
+    if (!loggedUserId) throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+
+    const userParam = req.params.userId;
+    const userId = userParam === "me" ? loggedUserId : userParam;
+    if (!userId) throw new AppError(HttpStatus.BAD_REQUEST, "User ID is required");
+
+    const dto = GetHeatmapRequestDto.from({
+      year: req.query.year ? Number(req.query.year) : undefined,
+      userId
+    });
+
+    const validation = dto.validate();
+    if (!validation.valid) {
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const userId = req.params.userId === "me" ? (req as any).user?.userId : req.params.userId;
-    if (!userId) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Username is required");
-    }
+    const year = dto.year ?? new Date().getFullYear();
 
-    const progress = await this._submissionSvc.getUserHeatmapData(userId, year);
+    const progress = await this._submissionSvc.getUserHeatmapData(dto.userId as string, year);
     sendSuccess(res, HttpStatus.OK, progress, "User heatmap data fetched successfully");
   });
 }

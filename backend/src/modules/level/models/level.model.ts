@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { LevelIF } from "@shared/types";
+import { LevelDocument } from "@shared/types";
 
 const levelRewardSchema = new Schema(
   {
@@ -20,7 +20,7 @@ const levelRewardSchema = new Schema(
 );
 
 
-const levelSchema = new Schema<LevelIF>(
+const levelSchema = new Schema<LevelDocument>(
   {
     levelNumber: { type: Number, required: true, unique: true },
     requiredXP: { type: Number, required: true },
@@ -32,6 +32,6 @@ const levelSchema = new Schema<LevelIF>(
   }
 );
 
-export const LevelModel = model<LevelIF>("Level", levelSchema);
+export const LevelModel = model<LevelDocument>("Level", levelSchema);
 
 

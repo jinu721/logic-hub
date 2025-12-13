@@ -4,8 +4,9 @@ import { MessageHandler } from "./socketHandlers/message.handler";
 import { GroupHandler } from "./socketHandlers/group.handler";
 import { NotificationHandler } from "./socketHandlers/notification.handler";
 import { UserHandler } from "./socketHandlers/user.handler";
+import { Container } from "@di";
 
-export const setupSocket = (io: Server,container: any) => {
+export const setupSocket = (io: Server,container: Container) => {
   const messageHandler = new MessageHandler(io,container);
   const groupHandler = new GroupHandler(io,container);
   const notificationHandler = new NotificationHandler(io,container);

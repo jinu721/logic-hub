@@ -305,8 +305,9 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
         redirectHome = false;
       }
 
+
       if (isCode) {
-        setPreviewResults(data.testResults);
+        setPreviewResults(data.results);
       }
 
       setChallengeCompleted(!!passed);

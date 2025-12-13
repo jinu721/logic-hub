@@ -1,5 +1,6 @@
-// types/socket.types.ts
 import { Socket } from "socket.io";
+import { GroupAttrs } from "./group.types";
+import { InventoryAttrs } from "./inventory.types";
 
 export interface ExtendedSocket extends Socket {
   userId?: string;
@@ -9,7 +10,6 @@ export interface MessageData {
   conversationId: string;
   content: string;
   type?: string;
-  // Add other message properties as needed
 }
 
 export interface PollVoteData {
@@ -25,7 +25,7 @@ export interface GroupUpdateData {
   groupId: string;
   members?: string[];
   userId?: string;
-  newGroupData?: any;
+  newGroupData?: GroupAttrs;
   removeMember?: string;
 }
 
@@ -39,15 +39,10 @@ export interface NotificationData {
   title: string;
   message: string;
   type: string;
-  data?: any;
+  data?: InventoryAttrs;
 }
 
 export interface ChallengeData {
   challengeId: string;
   accessToken: string;
-}
-
-export interface VoiceRoomData {
-  groupId: string;
-  roomData: any;
 }

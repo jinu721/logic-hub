@@ -1,29 +1,28 @@
 import { BaseService } from "@core/base.service";
 import { toPublicInventoryDTO, toPublicInventoryDTOs } from "@modules/inventory/dtos";
 import { IImageUploader } from "@providers";
-import { InventoryIF } from "@shared/types";
+import { InventoryDocument } from "@shared/types";
 
 type InventoryPublicDTO = ReturnType<typeof toPublicInventoryDTO>;
 
 export class InventoryService
-  extends BaseService<InventoryIF, InventoryPublicDTO>
-{
+  extends BaseService<InventoryDocument, InventoryPublicDTO> {
   constructor(
-    private readonly repo: any,
+    private readonly repo: IInventoryRepository,
     private readonly uploader: IImageUploader
   ) {
     super();
   }
 
-  protected toDTO(entity: InventoryIF): InventoryPublicDTO {
+  protected toDTO(entity: InventoryDocument): InventoryPublicDTO {
     return toPublicInventoryDTO(entity);
   }
 
-  protected toDTOs(entities: InventoryIF[]): InventoryPublicDTO[] {
+  protected toDTOs(entities: InventoryDocument[]): InventoryPublicDTO[] {
     return toPublicInventoryDTOs(entities);
   }
 
-  async create(data: InventoryIF) {
+  async create(data: InventoryDocument) {
     const uploaded = await this.uploader.upload(data.image);
 
     const created = await this.repo.create({
@@ -47,7 +46,7 @@ export class InventoryService
     return this.mapOne(item);
   }
 
-  async update(id: string, data: Partial<InventoryIF>) {
+  async update(id: string, data: Partial<InventoryDocument>) {
     const updated = await this.repo.update(id, data);
     return this.mapOne(updated);
   }

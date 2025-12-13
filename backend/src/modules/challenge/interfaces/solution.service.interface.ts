@@ -1,8 +1,8 @@
-import { SolutionIF } from "@shared/types";
+import { CreateSolutionData, SolutionIF } from "@shared/types";
 import { PublicSolutionDTO } from "@modules/challenge/dtos";
 
 export interface ISolutionService {
-  addSolution(data: Partial<SolutionIF>): Promise<PublicSolutionDTO>;
+  addSolution(data: CreateSolutionData): Promise<PublicSolutionDTO>;
   getSolutionsByChallenge(challengeId: string, search: string, page: number, limit: number, sortBy: string): Promise<PublicSolutionDTO[]>;
   getSolutionsByUser(userId: string): Promise<PublicSolutionDTO[]>;
   likeSolution(solutionId: string, userId: string): Promise<PublicSolutionDTO | null>;

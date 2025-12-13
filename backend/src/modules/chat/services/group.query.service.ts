@@ -5,8 +5,7 @@ import { PublicGroupDTO, toPublicGroupDTO, toPublicGroupDTOs } from "@modules/ch
 
 export class GroupQueryService
   extends BaseService<GroupIF, PublicGroupDTO>
-  implements IGroupQueryService
-{
+  implements IGroupQueryService {
   constructor(private readonly groupRepo: IGroupRepository) {
     super()
   }
@@ -29,8 +28,8 @@ export class GroupQueryService
     return group ? this.mapOne(group) : null
   }
 
-  async getAllGroups(filter: any): Promise<{ groups: PublicGroupDTO[]; totalItems: number }> {
-    const query: any = {}
+  async getAllGroups(filter: GroupQueryFilter): Promise<{ groups: PublicGroupDTO[]; totalItems: number }> {
+    const query: GroupQueryFilter = {}
     const page = filter.page ? Number(filter.page) : 1
     const limit = filter.limit ? Number(filter.limit) : 0
     const skip = (page - 1) * limit

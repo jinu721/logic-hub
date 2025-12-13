@@ -1,5 +1,8 @@
-import { Schema,model } from "mongoose";
-import { UserIF } from "@shared/types";
+import { Document,Schema,model } from "mongoose";
+import { UserAttrs } from "@shared/types";
+
+export interface UserDocument extends UserAttrs,Document {
+}
 
 const UserSchema = new Schema({
   email: { type: String, required: true, unique: true },
@@ -47,4 +50,4 @@ const UserSchema = new Schema({
 });
 
 
-export const UserModel =  model<UserIF>('User',UserSchema);
+export const UserModel =  model<UserDocument>('User',UserSchema);

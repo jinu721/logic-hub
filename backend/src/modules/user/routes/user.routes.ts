@@ -1,13 +1,13 @@
 import express from "express";
 import { authMiddleware } from "@middlewares";
 import { USER_ROUTES } from "@constants";
+import { Container } from "@di/types";
 
-export const userRoutes = (container: any) => {
+export const userRoutes = (container: Container) => {
   const router = express.Router();
   const userController = container.userCtrl;
 
   router.post(USER_ROUTES.CHECK_USER, userController.findUser.bind(userController));
-//   router.post(USER_ROUTES.RESEND_OTP, userController.resendOtp.bind(userController));
   router.post(USER_ROUTES.VERIFY_ADMIN, userController.verifyAdmin.bind(userController));
 
   router.get(USER_ROUTES.BASE, authMiddleware, userController.getUsers.bind(userController));

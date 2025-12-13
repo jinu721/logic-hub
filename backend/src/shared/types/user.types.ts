@@ -1,5 +1,5 @@
-import { Document, Types } from "mongoose";
-import { MembershipIF } from "./membership.types";
+import { Types } from "mongoose";
+import { MembershipAttrs } from "./membership.types";
 
 export enum UserRole {
   USER = "user",
@@ -12,22 +12,7 @@ export enum LoginType {
   GITHUB = "github",
 }
 
-// interface Badge {
-//   name: string;
-//   description: string;
-//   imageUrl: string;
-//   category: string;
-//   requirements: {
-//     type: string;
-//     value: number;
-//   };
-//   rarity: string;
-//   isActive: boolean;
-//   timestamp: Date;
-// }
-
-
-export interface UserIF extends Document {
+export interface UserAttrs{
   email: string;
   username: string;
   bio: string;
@@ -57,12 +42,26 @@ export interface UserIF extends Document {
   isBanned: boolean;
   isVerified: boolean;
   isOnline: boolean;
-  membership?: MembershipIF;
+  membership?: MembershipAttrs;
   dailyRewardDay: number;
   lastRewardClaimDate: Date;
   lastSeen: Date;
   notifications: boolean;
-  blockedUsers: [UserIF];
+  blockedUsers: [UserAttrs];
   timestamp: Date;
 }
+
+export interface CreateUserInput {
+    email: string;
+    username: string;
+    password: string;
+}
+
+export interface SocialLoginInput {
+    name: string;
+    email: string;
+    loginType: LoginType;
+    profileId: string;
+}
+
 

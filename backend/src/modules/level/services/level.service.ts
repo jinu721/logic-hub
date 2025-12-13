@@ -1,7 +1,7 @@
 import { ILevelService, PublicLevelDTO, toPublicLevelDTO, toPublicLevelDTOs } from "@modules/level";
 import { ILevelRepository } from "@modules/level";
 import { IUserRepository } from "@modules/user";
-import { LevelIF, UserIF } from "@shared/types";
+import { LevelIF, UserDocument } from "@shared/types";
 
 export class LevelService implements ILevelService {
   constructor(
@@ -71,7 +71,7 @@ export class LevelService implements ILevelService {
     userId: string,
     gainedXP: number
   ): Promise<{ levelUpdated: boolean; reward?: string }> {
-    const user: UserIF | null = await this._userRepo.getUserById(userId);
+    const user: UserDocument | null = await this._userRepo.getUserById(userId);
     if (!user) throw new Error("User not found");
 
     const newXP = user.stats.xpPoints + gainedXP;

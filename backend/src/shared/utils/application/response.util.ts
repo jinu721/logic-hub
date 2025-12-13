@@ -1,9 +1,9 @@
 import { Response } from "express";
 
-export const sendSuccess = (
+export const sendSuccess = <T>(
   res: Response,
   status: number,
-  result: any,
+  result: T,
   message?: string
 ) => {
   return res.status(status).json({
@@ -13,11 +13,11 @@ export const sendSuccess = (
   });
 };
 
-export const sendError = (
+export const sendError = <T>(
   res: Response,
   status: number,
   error: unknown,
-  result?: any
+  result?: T
 ) => {
   const message =
     error instanceof Error

@@ -7,7 +7,7 @@ import {
   toPublicConversationDTO
 } from "@modules/chat/dtos";
 
-import { 
+import {
   IConversationTypingService,
   IConversationRepository
 } from "@modules/chat";
@@ -16,8 +16,7 @@ import { ConversationIF } from "@shared/types";
 
 export class ConversationTypingService
   extends BaseService<ConversationIF, PublicConversationDTO>
-  implements IConversationTypingService
-{
+  implements IConversationTypingService {
   constructor(private readonly conversationRepo: IConversationRepository) {
     super();
   }
@@ -44,6 +43,6 @@ export class ConversationTypingService
 
   async getTypingUsers(conversationId: string): Promise<string[]> {
     const users = await this.conversationRepo.getTypingUsers(conversationId);
-    return users.map((u: any) => u.toString());
+    return users.map((u: { toString: () => string }) => u.toString());
   }
 }

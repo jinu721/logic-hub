@@ -9,12 +9,12 @@ import {
 import {
   ISubmissionService,
   ISubmissionRepository,
+  SubmissionDocument,
 } from "@modules/challenge";
 import {
   IUserRepository
 } from "@modules/user";
-import { SubmissionAttrs } from "@shared/types";
-import { UserIF } from "@shared/types/user.types";
+import { CreateSubmissionInput, SubmissionAttrs } from "@shared/types";
 import { Types } from "mongoose";
 
 export class SubmissionService
@@ -28,15 +28,15 @@ export class SubmissionService
     super();
   }
 
-  protected toDTO(entity: SubmissionAttrs): PublicSubmissionDTO {
+  protected toDTO(entity: SubmissionDocument): PublicSubmissionDTO {
     return toPublicSubmissionDTO(entity);
   }
 
-  protected toDTOs(entities: SubmissionAttrs[]): PublicSubmissionDTO[] {
+  protected toDTOs(entities: SubmissionDocument[]): PublicSubmissionDTO[] {
     return toPublicSubmissionDTOs(entities);
   }
 
-  async createSubmission(data: SubmissionAttrs) {
+  async createSubmission(data: CreateSubmissionInput) {
     const submission = await this.submissionRepo.createSubmission(data);
     return this.mapOne(submission);
   }
@@ -62,14 +62,14 @@ export class SubmissionService
   }
 
   async getRecentSubmissions(username: string) {
-    const user: UserIF | null = await this.userRepo.getUserByName(username);
+    const user: UserDocument | null = await this.userRepo.getUserByName(username);
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
     const submissions = await this.submissionRepo.getRecentSubmissions(user._id as Types.ObjectId);
     return this.mapMany(submissions);
   }
 
-  async updateSubmission(id: string, data: Partial<SubmissionIF>) {
+  async updateSubmission(id: string, data: Partial<SubmissionAttrs>) {
     const submission = await this.submissionRepo.updateSubmission(toObjectId(id), data);
     if (!submission) throw new AppError(HttpStatus.NOT_FOUND, "Submission not found");
     return this.mapOne(submission);

@@ -1,14 +1,12 @@
+import { TestCaseIF } from "@shared/types";
+
 export interface PublicChallengeDTO {
   _id: string;
   title: string;
   instructions: string;
   type: "code" | "cipher";
   level: "novice" | "adept" | "master";
-  testCases: {
-    input: any[];
-    output: any;
-    isHidden?: boolean;
-  }[];
+  testCases: TestCaseIF[];
   timeLimit: number;
   tags: string[];
   hints: string[];

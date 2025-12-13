@@ -1,10 +1,10 @@
 import { UpdateQuery } from "mongoose";
-import { InventoryIF } from "@shared/types";
+import { InventoryDocument } from "@shared/types";
 
 export interface IBannerRepository {
-  create(data: Partial<InventoryIF>): Promise<InventoryIF>;
-  getAll(query:any,skip:number,limit:number): Promise<InventoryIF[]>;
-  getById(id: string): Promise<InventoryIF | null>;
-  update(userId: string, update: UpdateQuery<InventoryIF>): Promise<InventoryIF | null>
+  create(data: Partial<InventoryDocument>): Promise<InventoryDocument>;
+  getAll(query:any,skip:number,limit:number): Promise<InventoryDocument[]>;
+  getById(id: string): Promise<InventoryDocument | null>;
+  update(userId: string, update: UpdateQuery<InventoryDocument>): Promise<InventoryDocument | null>
   delete(id: string): Promise<boolean>;
 }

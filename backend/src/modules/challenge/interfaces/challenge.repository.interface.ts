@@ -1,12 +1,13 @@
 import { Types } from "mongoose";
-import { ChallengeIF } from "@shared/types"; 
+import { ChallengeDocument } from "@modules/challenge"; 
+import { CreateChallengeInput, ChallengeDBQuery } from "@shared/types";
 
 export interface IChallengeRepository {
-  createChallenge(challengeData: Omit<ChallengeIF, '_id'>): Promise<ChallengeIF>;
-  getChallengeById(id: Types.ObjectId): Promise<ChallengeIF | null>;
-  getChallenges(query: object,skip:number,limit: number): Promise<ChallengeIF[]>;
-  getAllChallenges(search:string,skip:number,limit: number): Promise<ChallengeIF[]>;
+  createChallenge(challengeData: CreateChallengeInput): Promise<ChallengeDocument>;
+  getChallengeById(id: Types.ObjectId): Promise<ChallengeDocument | null>;
+  getChallenges(query: ChallengeDBQuery,skip:number,limit: number): Promise<ChallengeDocument[]>;
+  getAllChallenges(search:string,skip:number,limit: number): Promise<ChallengeDocument[]>;
   countAllChallenges(search:string): Promise<number>;
-  updateChallenge(id: Types.ObjectId, updateData: Partial<ChallengeIF>): Promise<ChallengeIF | null>;
+  updateChallenge(id: Types.ObjectId, updateData: Partial<ChallengeDocument>): Promise<ChallengeDocument | null>;
   deleteChallenge(id: Types.ObjectId): Promise<boolean>;
 }

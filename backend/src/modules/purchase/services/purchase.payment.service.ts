@@ -4,9 +4,10 @@ import * as crypto from "crypto";
 import { AppError } from "@utils/application";
 import { IPurchasePaymentService } from "@modules/purchase";
 import { env } from "@config/env";
+import Razorpay from "razorpay";
 
 export class PurchasePaymentService implements IPurchasePaymentService {
-  constructor(private razorpayInstance: any, private secretKey: string) {}
+  constructor(private razorpayInstance: Razorpay, private secretKey: string) { }
 
   async createOrder(amount: number) {
     const options = {

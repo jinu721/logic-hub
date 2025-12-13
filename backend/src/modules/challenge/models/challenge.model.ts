@@ -1,5 +1,8 @@
-import { Schema, model } from "mongoose";
-import { ChallengeIF, TestCaseIF } from "@shared/types";
+import { Document, Schema, model } from "mongoose";
+import { ChallengeAttrs, TestCaseIF } from "@shared/types";
+
+export interface ChallengeDocument extends ChallengeAttrs, Document {
+}
 
 const testCaseSchema = new Schema<TestCaseIF>(
   {
@@ -12,7 +15,7 @@ const testCaseSchema = new Schema<TestCaseIF>(
   }
 );
 
-const challengeDomainSchema = new Schema<ChallengeIF>({
+const challengeDomainSchema = new Schema<ChallengeDocument>({
   title: { type: String, required: true },
   instructions: { type: String, required: true },
   type: { type: String, enum: ["code", "cipher"], required: true },
@@ -50,7 +53,7 @@ const challengeDomainSchema = new Schema<ChallengeIF>({
   xpRewards: { type: Number, required: true },
 });
 
-export const ChallengeModel = model<ChallengeIF>(
+export const ChallengeModel = model<ChallengeDocument>(
   "Challenges",
   challengeDomainSchema
 );
