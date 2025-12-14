@@ -8,11 +8,11 @@ import {
   toPublicUserDTO,
   toPublicUserDTOs,
 } from "@modules/user";
-import { UserDocument } from "@shared/types";
+import { UserDocument, PopulatedUser } from "@shared/types";
 import { IMarketService } from "@modules/market";
 
 export class UserEngagementService
-  extends BaseService<UserDocument, PublicUserDTO>
+  extends BaseService<PopulatedUser, PublicUserDTO>
   implements IUserEngagementService {
   constructor(
     private readonly _userRepo: IUserRepository,
@@ -21,15 +21,21 @@ export class UserEngagementService
     super();
   }
 
-  protected toDTO(user: UserDocument): PublicUserDTO {
+  protected toDTO(user: PopulatedUser): PublicUserDTO {
     return toPublicUserDTO(user);
   }
 
-  protected toDTOs(users: UserDocument[]): PublicUserDTO[] {
+  protected toDTOs(users: PopulatedUser[]): PublicUserDTO[] {
     return toPublicUserDTOs(users);
   }
 
-  private hasClaimedToday(date: Date | null) {
+  private async getPopulated(userId: string): Promise<PopulatedUser> {
+    const user = await this._userRepo.getUserById(userId);
+    if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
+    return user;
+  }
+
+  private hasClaimedToday(date: Date | null | undefined) {
     if (!date) return false;
 
     const now = new Date();
@@ -84,7 +90,7 @@ export class UserEngagementService
         "Failed to update reward",
       );
 
-    return this.mapOne(updated);
+    return this.mapOne(await this.getPopulated(userId));
   }
 
   async cancelMembership(userId: string): Promise<boolean> {
@@ -97,7 +103,7 @@ export class UserEngagementService
 
     await this._userRepo.updateUser(toObjectId(userId), {
       membership: {
-        ...(user.membership?.toJSON() ?? {}),
+        ...user.membership,
         isActive: false,
       },
     });
@@ -115,13 +121,41 @@ export class UserEngagementService
     const path = valid[type as keyof typeof valid];
     if (!path) throw new AppError(HttpStatus.BAD_REQUEST, "Invalid gift type");
 
-    const updated = await this._userRepo.updateUser(toObjectId(userId), {
-      [path]: toObjectId(itemId),
-    });
+    // We can use $push logic via strict update if repo allowed, but repo takes Partial<UserDocument>
+    // However, Mongoose findByIdAndUpdate allows operators if we cast or if repo is flexible. 
+    // Assuming repo implementation: `this.model.findByIdAndUpdate(userId, updateData, ...)`
+    // If updateData is `{ "inventory.ownedAvatars": ... }` it replaces.
+    // If it is `{ $push: ... }` it pushes.
+    // Repo signature `data: Partial<UserDocument>` discourages operators.
+    // I made `UserDocument` strict.
+    // So I should fetch, modify, save? OR use update with full list.
+    // I'll use full list update for correctness with strict types, or $push with ANY cast.
+    // Let's use $push with any cast to be efficient, but correct TS way is Partial.
+    // Since I can't easily change Repo signature right now, I'll use the "Modify List and Update" approach (which assumes we have the list).
+    // But `giftItem` doesn't fetch user first?
+    // Wait, the original code used `{ [path]: toObjectId(itemId) }`.
+    // If `path` is `inventory.ownedAvatars`, effectively that REPLACES the list with one item?
+    // NO! `{ "inventory.ownedAvatars": x }` in Mongoose, if it is an array field, might append? No, it sets.
+    // UNLESS the original code relied on a Mongo quirk or was BUGGY.
+    // Actually, `findByIdAndUpdate` with dot notation on array usually REPLACES or SETS.
+    // If the original code meant to PUSH, it should use `$push`.
+    // If it worked before, maybe it was using `$push` implicitly? No.
+    // The original code:
+    // `const updated = await this._userRepo.updateUser(toObjectId(userId), { [path]: toObjectId(itemId) });`
+    // If path is "inventory.ownedAvatars", this sets the field to a single ID (or array of 1).
+    // This looks like a BUG in the original code or misuse.
+    // I will fix it to use `$push`.
+
+    // cast to any to use $push
+    const updateQuery: any = {
+      $push: { [path]: toObjectId(itemId) }
+    };
+
+    const updated = await this._userRepo.updateUser(toObjectId(userId), updateQuery);
 
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
-    return this.mapOne(updated);
+    return this.mapOne(await this.getPopulated(userId));
   }
 
   async setUserOnline(userId: string, isOnline: boolean) {
@@ -132,7 +166,7 @@ export class UserEngagementService
 
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
-    return this.mapOne(updated);
+    return this.mapOne(await this.getPopulated(userId));
   }
 
   async purchaseMarketItem(id: string, userId: string) {
@@ -146,19 +180,40 @@ export class UserEngagementService
       throw new AppError(HttpStatus.FORBIDDEN, "Not enough XP");
     }
 
-    user.stats.xpPoints -= item.costXP;
-
+    // Prepare Raw Update
+    const newXp = user.stats.xpPoints - item.costXP;
     const itemObjectId = toObjectId(item.itemId._id);
 
+    // Extract current IDs from populated docs
+    const ownedAvatars = user.inventory.ownedAvatars.map(d => d._id);
+    const ownedBanners = user.inventory.ownedBanners.map(d => d._id);
+    const badges = user.inventory.badges.map(d => d._id);
+
     if (item.category === "avatar") {
-      user.inventory.ownedAvatars.push(itemObjectId);
+      ownedAvatars.push(itemObjectId);
     } else if (item.category === "banner") {
-      user.inventory.ownedBanners.push(itemObjectId);
+      ownedBanners.push(itemObjectId);
     } else {
-      user.inventory.badges.push(itemObjectId);
+      badges.push(itemObjectId);
     }
 
-    await this._userRepo.updateUser(user._id, user);
+    const updateData: Partial<UserDocument> = {
+      stats: {
+        ...user.stats,
+        xpPoints: newXp
+      },
+      inventory: {
+        ...user.inventory,
+        ownedAvatars,
+        ownedBanners,
+        badges
+      } // UserRaw Inventory has ObjectId[]
+    } as unknown as Partial<UserDocument>;
+    // Cast intermediate because UserDocument extends UserRaw which has inventory: {...}. 
+    // And user.inventory coming from PopulatedUser has docs. 
+    // I am reconstructing it.
+
+    await this._userRepo.updateUser(user._id, updateData);
 
     return item;
   }

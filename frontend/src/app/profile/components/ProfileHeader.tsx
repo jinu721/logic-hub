@@ -215,7 +215,7 @@ const ProfileHeader: React.FC<Props> = ({
             ) : (
               <>
                 <button
-                  onClick={() => handleMessage(userData._id)}
+                  onClick={() => handleMessage(userData.userId)}
                   className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-500 font-medium shadow-lg shadow-blue-700/30 hover:shadow-blue-600/50 hover:scale-105 hover:translate-y-[-1px] focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transform active:scale-95 group/message cursor-pointer text-sm"
                 >
                   <MessageCircle

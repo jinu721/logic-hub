@@ -20,7 +20,7 @@ export class PurchasePaymentService implements IPurchasePaymentService {
 
     return {
       orderId: order.id,
-      amount: order.amount,
+      amount: Number(order.amount),
       currency: order.currency,
       key: env.RAZORPAY_KEY_ID
     };

@@ -1,6 +1,5 @@
 import { PublicChallengeDTO } from "@modules/challenge/dtos";
-import { ChallengeDocument } from "@modules/challenge/models";
-
+import { ChallengeDocument } from "@shared/types";
 
 export const toPublicChallengeDTO = (item: ChallengeDocument): PublicChallengeDTO => {
   return {

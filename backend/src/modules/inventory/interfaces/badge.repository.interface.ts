@@ -1,10 +1,4 @@
-import { UpdateQuery } from "mongoose";
-import { InventoryDocument } from "@shared/types";
+import { IInventoryRepository } from "./inventory.repository.interface";
 
-export interface IBadgeRepository {
-  create(data: Partial<InventoryDocument>): Promise<InventoryDocument>;
-  getAll(query:any,skip:number,limit:number): Promise<InventoryDocument[]>;
-  getById(id: string): Promise<InventoryDocument | null>;
-  update(userId: string, update: UpdateQuery<InventoryDocument>): Promise<InventoryDocument | null>
-  delete(id: string): Promise<boolean>;
+export interface IBadgeRepository extends IInventoryRepository {
 }

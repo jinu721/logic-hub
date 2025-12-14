@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Document, Types } from "mongoose";
 
 export interface LevelReward {
   type: string;
@@ -7,7 +7,7 @@ export interface LevelReward {
   rewardDescription: string;
 }
 
-export interface LevelAttrs {
+export interface LevelBase {
   levelNumber: number;
   requiredXP: number;
   rewards: LevelReward[];
@@ -16,5 +16,10 @@ export interface LevelAttrs {
   updatedAt: Date;
 }
 
+export interface LevelRaw extends LevelBase {
+  _id: Types.ObjectId;
+}
 
-export interface LevelDocument extends LevelAttrs, Document {}
+export interface LevelDocument extends LevelBase, Document {
+  _id: Types.ObjectId;
+}

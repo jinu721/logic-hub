@@ -1,14 +1,13 @@
-import { PublicSolutionDTO } from "@modules/challenge/dtos";
-import { ChallengeDocument, SolutionDocument } from "@modules/challenge/models";
+import { PublicSolutionDTO, toPublicChallengeDTO } from "@modules/challenge/dtos";
 import { toPublicUserDTO } from "@modules/user/dtos";
-import { UserDocument } from "@modules/user/models";
+import { PopulatedSolution } from "@shared/types";
 
 
-export const toPublicSolutionDTO = (solution: SolutionDocument): PublicSolutionDTO => {
+export const toPublicSolutionDTO = (solution: PopulatedSolution): PublicSolutionDTO => {
   return {
-    _id: solution._id ? solution._id.toString() : '',
-    user: toPublicUserDTO(solution.user as UserDocument),
-    challenge: solution.challenge as ChallengeDocument,
+    _id: solution._id.toString(),
+    user: toPublicUserDTO(solution.user),
+    challenge: toPublicChallengeDTO(solution.challenge),
     title: solution.title,
     content: solution.content,
     codeSnippet: solution.codeSnippet || null,
@@ -16,8 +15,8 @@ export const toPublicSolutionDTO = (solution: SolutionDocument): PublicSolutionD
     likesCount: solution.likes?.length || 0,
     likes: solution.likes?.map(like => like.toString()) || [],
     comments: solution.comments?.map(comment => ({
-      _id: comment._id?.toString(),
-      user: toPublicUserDTO(comment.user as UserDocument),
+      _id: comment._id.toString(),
+      user: toPublicUserDTO(comment.user),
       content: comment.content,
       commentedAt: comment.commentedAt,
     })) || [],
@@ -26,6 +25,6 @@ export const toPublicSolutionDTO = (solution: SolutionDocument): PublicSolutionD
   };
 };
 
-export const toPublicSolutionDTOs = (solutions: SolutionDocument[]): PublicSolutionDTO[] => {
+export const toPublicSolutionDTOs = (solutions: PopulatedSolution[]): PublicSolutionDTO[] => {
   return solutions.map(toPublicSolutionDTO);
 };

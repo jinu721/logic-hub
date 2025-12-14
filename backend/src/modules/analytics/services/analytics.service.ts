@@ -70,7 +70,7 @@ export class AnalyticsService implements IAnalyticsService {
 
     const users: LeaderboardUserDTO[] = rawData.map((item, index) => ({
       rank: (page - 1) * limit + index + 1,
-      user: toPublicUserDTO(item.user),
+      user: item.user,
       avgTimeTaken: item.avgTimeTaken ?? 0,
       avgMemoryUsed: item.avgMemoryUsed ?? 0,
       avgCpuTime: item.avgCpuTime ?? 0,

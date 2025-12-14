@@ -8,29 +8,30 @@ export interface TestCaseIF {
 }
 
 export interface SubmissionIF {
-    challengeId?: string;
-    execution?: {
-      language?: string;
-      codeSubmitted?: string;
-      resultOutput?: any;
-      testCasePassed?: number;
-      totalTestCases?: number;
-    };
-    level?: number;
-    passed?: boolean;
-    status?: string;
-    submittedAt?: Date;
-    tags?: string[];
-    timeTaken?: number;
-    type: "code" | "cipher";
-    userId: string;
-    xpPoints?: number;
+  challengeId?: string;
+  execution?: {
+    language?: string;
+    codeSubmitted?: string;
+    resultOutput?: any;
+    testCasePassed?: number;
+    totalTestCases?: number;
   };
+  level?: number;
+  passed?: boolean;
+  status?: string;
+  submittedAt?: Date;
+  tags?: string[];
+  timeTaken?: number;
+  type: "code" | "cipher";
+  userId: string;
+  xpPoints?: number;
+};
 
 
 export interface ChallengeDomainIF {
   _id?: string | undefined;
   title: string;
+  description?: string;
   instructions: string;
   type: "code" | "cipher";
   level: "novice" | "adept" | "master";
@@ -43,9 +44,9 @@ export interface ChallengeDomainIF {
   requiredSkills: string[];
   isPremium: boolean;
   isKeyRequired: boolean;
-  userStatus?:"completed" | "failed-timeout" | "failed-output" | "pending"
-  completedUsers?:number;
-  successRate?:number;
+  userStatus?: "completed" | "failed-timeout" | "failed-output" | "pending"
+  completedUsers?: number;
+  successRate?: number;
   functionName?: string;
   parameters?: { name: string; type: string }[];
   returnType?: string;
@@ -53,7 +54,7 @@ export interface ChallengeDomainIF {
   solutionCode?: any;
   status: "active" | "inactive" | "draft" | "archived";
   isActive: boolean;
-  startTime?: Date | string |null;
+  startTime?: Date | string | null;
   endTime?: Date | string | null;
   xpRewards: number;
 }

@@ -1,4 +1,4 @@
-import { Document, Schema, model } from "mongoose";
+import {  Schema, model } from "mongoose";
 import { SolutionDocument } from "@shared/types";
 
 const solutionSchema = new Schema<SolutionDocument>({

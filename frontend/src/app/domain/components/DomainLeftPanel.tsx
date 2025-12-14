@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { BookOpen, Lightbulb, Book, History, Lock } from "lucide-react";
+import { BookOpen, Lightbulb, Book, History} from "lucide-react";
 import DomainInstructions from "./DomainInstructions";
 import DomainHints from "./DomainHints";
 import SolutionsSection from "./Solution";
@@ -11,7 +11,6 @@ interface DomainLeftPanelProps {
   leftPanelWidth: number;
   activeTab: string;
   setActiveTab: (tabId: string) => void;
-  challengeStarted: boolean;
   challenge: ChallengeDomainIF;
   user: UserIF;
   isLoading: boolean;
@@ -22,7 +21,6 @@ const DomainLeftPanel: FC<DomainLeftPanelProps> = ({
   leftPanelWidth,
   activeTab,
   setActiveTab,
-  challengeStarted,
   challenge,
   user,
   isLoading,
@@ -30,12 +28,11 @@ const DomainLeftPanel: FC<DomainLeftPanelProps> = ({
 }) => {
   const tabs = [
     { id: "instructions", label: "Description", icon: BookOpen },
-    { id: "hints", label: "Hints", icon: Lightbulb, locked: !challengeStarted },
+    { id: "hints", label: "Hints", icon: Lightbulb },
     {
       id: "solutions",
       label: "Solutions",
       icon: Book,
-      locked: !challengeStarted,
     },
     { id: "history", label: "History", icon: History },
   ];
@@ -48,7 +45,7 @@ const DomainLeftPanel: FC<DomainLeftPanelProps> = ({
       <div className="h-full flex flex-col">
         <div className="flex-shrink-0 border-b border-slate-700/30 bg-slate-800/20 overflow-x-auto">
           <div className="flex min-w-max">
-            {tabs.map(({ id, label, icon: Icon, locked }) => {
+            {tabs.map(({ id, label, icon: Icon }) => {
               const isActive = activeTab === id;
               return (
                 <button
@@ -59,9 +56,8 @@ const DomainLeftPanel: FC<DomainLeftPanelProps> = ({
                     ? "text-[#c9d1d9] "
                     : "border-transparent text-slate-400 hover:text-slate-300 hover:bg-slate-800/30"
                 }
-                ${locked ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
               `}
-                  onClick={() => !locked && setActiveTab(id)}
+                  onClick={() => setActiveTab(id)}
                 >
                   <Icon
                     size={16}
@@ -72,7 +68,6 @@ const DomainLeftPanel: FC<DomainLeftPanelProps> = ({
                   <span className="font-semibold whitespace-nowrap">
                     {label}
                   </span>
-                  {locked && <Lock size={14} className="ml-auto opacity-60" />}
                 </button>
               );
             })}

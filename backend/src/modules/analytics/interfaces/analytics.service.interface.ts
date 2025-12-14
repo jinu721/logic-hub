@@ -1,8 +1,9 @@
-import { UserAnalytics, ChallengeStats, LeaderboardTrends, LeaderboardSortField, LeaderboardPeriod, SortOrder } from "@shared/types"
+import { LeaderboardSortField, LeaderboardPeriod, SortOrder } from "@shared/types"
+import { ChallengeStatsDTO, LeaderboardTrendsDTO, UserAnalyticsDTO } from "@modules/analytics/dtos";
 
 export interface IAnalyticsService {
-  fetchUserAnalytics(): Promise<UserAnalytics>;
-  fetchChallengeStats(): Promise<ChallengeStats>;
+  fetchUserAnalytics(): Promise<UserAnalyticsDTO>;
+  fetchChallengeStats(): Promise<ChallengeStatsDTO>;
   getLeaderboardData(
     based: LeaderboardSortField,
     category: string,
@@ -10,6 +11,6 @@ export interface IAnalyticsService {
     order: SortOrder,
     page: number,
     limit: number
-  ): Promise<LeaderboardTrends>;
+  ): Promise<LeaderboardTrendsDTO>;
 }
 

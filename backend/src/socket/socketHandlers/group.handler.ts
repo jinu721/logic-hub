@@ -2,18 +2,18 @@ import { Server } from "socket.io";
 import {
   ExtendedSocket,
   GroupUpdateData,
-  VoiceRoomData,
 } from "../../shared/types/socket.types";
 import { generateSystemMessage } from "../../shared/utils/application/generate.message";
 import { Types } from "mongoose";
 import { Container } from "@di";
+import { UpdateGroupInfoInput } from "@shared/types";
+import { PublicConversationDTO } from "@modules/chat";
 
 export class GroupHandler {
-  constructor(private io: Server, private container: Container) {}
+  constructor(private io: Server, private container: Container) { }
 
   public setupGroupHandlers(socket: ExtendedSocket): void {
     socket.on("update_group", this.handleUpdateGroup.bind(this, socket));
-    socket.on("host-voice-room", this.handleHostVoiceRoom.bind(this, socket));
     socket.on(
       "join_conversation",
       this.handleJoinConversation.bind(this, socket)
@@ -43,10 +43,11 @@ export class GroupHandler {
 
       console.log("Group Update Data:-", type, conversationId, groupId, members, userId, newGroupData, removeMember);
 
-      let updatedConversation;
+      let updatedConversation: PublicConversationDTO | null = null;
+
       let finalConversationId = conversationId;
       let finalUserId = userId;
-      let finalNewGroupData = newGroupData;
+      let finalNewGroupData;
 
       switch (type) {
         case "add_members":
@@ -76,10 +77,19 @@ export class GroupHandler {
           );
           break;
         case "edit_group_info":
+          let editedGroupDocument: UpdateGroupInfoInput = {
+            name: newGroupData?.name,
+            description: newGroupData?.description,
+            image: newGroupData?.image,
+            members: newGroupData?.members,
+            admins: newGroupData?.admins,
+            groupType: newGroupData?.groupType,
+            userRequests: newGroupData?.userRequests,
+          };
           updatedConversation = await this.container.groupCommandSvc.updateGroupInfo(
             conversationId,
             groupId,
-            newGroupData
+            editedGroupDocument
           );
           break;
         case "leave_group":
@@ -138,7 +148,7 @@ export class GroupHandler {
           if (systemMsg) {
             this.io
               .to(finalConversationId.toString())
-              .emit("recive_message", {conversationId:systemMsg.conversationId, message: systemMsg});
+              .emit("recive_message", { conversationId: systemMsg.conversationId, message: systemMsg });
           }
 
           const updatedGroup = await this.container.groupQuerySvc.findGroupById(
@@ -172,17 +182,4 @@ export class GroupHandler {
     }
   }
 
-  private async handleHostVoiceRoom(
-    socket: ExtendedSocket,
-    { groupId, roomData }: VoiceRoomData
-  ): Promise<void> {
-    try {
-      await this.container.groupCommandSvc.updateGroup(groupId, {
-        voiceRoom: roomData,
-      });
-      socket.emit("voice-room-created", "Thanks");
-    } catch (err) {
-      console.log("Error creating voice room:", err);
-    }
-  }
 }

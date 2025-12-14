@@ -1,23 +1,31 @@
 import { BaseService } from "@core"
 import { IMessageCommandService, IMessageRepository } from "@modules/chat"
 import { PublicMessageDTO, toPublicMessageDTO } from "@modules/chat/dtos"
-import { MessageIF, CreateMessageInput, JwtPayloadBase } from "@shared/types"
+import { PopulatedMessage, CreateMessageInput, JwtPayloadBase } from "@shared/types"
 import { verifyAccessToken } from "@utils/token"
 import { Types } from "mongoose"
+import { AppError } from "@utils/application"
+import { HttpStatus } from "@constants"
 
 export class MessageCommandService
-  extends BaseService<MessageIF, PublicMessageDTO>
+  extends BaseService<PopulatedMessage, PublicMessageDTO>
   implements IMessageCommandService {
   constructor(private readonly messageRepo: IMessageRepository) {
     super()
   }
 
-  protected toDTO(entity: MessageIF): PublicMessageDTO {
+  protected toDTO(entity: PopulatedMessage): PublicMessageDTO {
     return toPublicMessageDTO(entity)
   }
 
-  protected toDTOs(): PublicMessageDTO[] {
-    return []
+  protected toDTOs(entities: PopulatedMessage[]): PublicMessageDTO[] {
+    return entities.map(e => toPublicMessageDTO(e))
+  }
+
+  private async getPopulated(id: string): Promise<PopulatedMessage> {
+    const message = await this.messageRepo.getMessageById(id);
+    if (!message) throw new AppError(HttpStatus.NOT_FOUND, "Message not found");
+    return message;
   }
 
   async createMessage(
@@ -36,8 +44,9 @@ export class MessageCommandService
       sender = SYSTEM_USER_ID
     }
 
-    const message = await this.messageRepo.createMessage({ ...data, sender })
-    return this.mapOne(message)
+    // Cast data to any to bypass strict MessageDocument structure for creation input (which allows string IDs typically)
+    const message = await this.messageRepo.createMessage({ ...data, sender } as any)
+    return this.mapOne(await this.getPopulated(String(message._id)))
   }
 
   async editMessage(
@@ -45,11 +54,13 @@ export class MessageCommandService
     newText: string
   ): Promise<PublicMessageDTO | null> {
     const updated = await this.messageRepo.editMessage(messageId, newText)
-    return updated ? this.mapOne(updated) : null
+    if (!updated) return null;
+    return this.mapOne(await this.getPopulated(messageId))
   }
 
   async deleteMessage(messageId: string): Promise<PublicMessageDTO | null> {
     const deleted = await this.messageRepo.deleteMessage(messageId)
-    return deleted ? this.mapOne(deleted) : null
+    if (!deleted) return null;
+    return this.mapOne(await this.getPopulated(messageId))
   }
 }

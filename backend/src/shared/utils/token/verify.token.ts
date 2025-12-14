@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { env } from "@config/env";
+import { Types } from "mongoose";
 
 export interface AccessTokenPayload {
   userId: string;
@@ -7,6 +8,26 @@ export interface AccessTokenPayload {
   username: string;
   role: string;
   isBanned: boolean;
+  googleId?: string;
+  githubId?: string;
+  isVerified: boolean;
+  loginType: string;
+  stats?: {
+    xpPoints?: number;
+    totalXpPoints?: number;
+    level?: number;
+    currentStreak?: number;
+    longestStreak?: number;
+    lastSolvedDate?: Date;
+  };
+  inventory?: {
+    keys?: number;
+    badges?: [Types.ObjectId];
+    ownedAvatars?: [Types.ObjectId];
+    ownedBanners?: [Types.ObjectId];
+  };
+  timestamp?: Date;
+  [key: string]: unknown;
 };
 
 export interface RefreshTokenPayload {

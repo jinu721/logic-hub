@@ -21,7 +21,7 @@ import LoginForm from "./LoginForm";
 import GeometricBackground from "@/components/common/GeometricBackground";
 
 interface ErrorState {
-  emailOrUsername: string;
+  identifier: string;
   password: string;
 }
 
@@ -39,12 +39,12 @@ const Login: React.FC = () => {
   const auth = useSelector((state: RootState) => state.auth);
 
   const [form, setForm] = useState<LoginIF>({
-    emailOrUsername: "",
+    identifier: "",
     password: "",
   });
 
   const [errors, setErrors] = useState<ErrorState>({
-    emailOrUsername: "",
+    identifier: "",
     password: "",
   });
 

@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export interface GroupAttrs {
   name: string;
@@ -32,4 +32,34 @@ export interface GroupAllInput {
     isActive?: boolean;
     members?: string 
     createdBy?: string;
+}
+
+
+export interface CreateGroupInput {
+    name: string;
+    description?: string;
+    image?: string;
+    members?: string[];
+    groupType?: string;
+}
+
+export interface UpdateGroupInput {
+    name?: string;
+    description?: string;
+    isActive?: boolean;
+    settings?: {
+        allowMemberInvite?: boolean;
+        allowMemberRemove?: boolean;
+        allowNameChange?: boolean;
+    };
+}
+
+export interface UpdateGroupInfoInput {
+    name?: string;
+    description?: string;
+    members?: Types.ObjectId[] | string[];
+    admins?: Types.ObjectId[] | string[];
+    groupType?: string;
+    userRequests?: Types.ObjectId[] | string[];
+    [key: string]: unknown;
 }

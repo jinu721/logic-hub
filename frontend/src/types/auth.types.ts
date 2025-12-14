@@ -1,5 +1,5 @@
 export interface LoginIF {
-  emailOrUsername: string;
+  identifier: string;
   password: string;
 }
 

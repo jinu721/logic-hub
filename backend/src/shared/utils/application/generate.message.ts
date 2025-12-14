@@ -1,6 +1,7 @@
 import { Container } from "@di";
 import { Types } from "mongoose";
-import { MessageIF } from "@shared/types"; 
+import { CreateMessageInput } from "@shared/types"; 
+import { PublicMessageDTO } from "@modules/chat";
 
 export type SystemMessageType =
   | "add_members"
@@ -27,7 +28,7 @@ export const generateSystemMessage = async (
   members: string[],
   newGroupData?: GroupUpdateData,
   removeMemberId?: string
-): Promise<MessageIF | null> => {
+): Promise<PublicMessageDTO | null> => {
   const actingUser = await container.userQuerySvc.findUserById(userId);
   if (!actingUser) return null;
 
@@ -82,7 +83,7 @@ export const generateSystemMessage = async (
       return null;
   }
 
-  const systemMessage: MessageAttrs = {
+  const systemMessage: CreateMessageInput = {
     sender: new Types.ObjectId(), 
     conversationId: new Types.ObjectId(conversationId),
     type: "system",

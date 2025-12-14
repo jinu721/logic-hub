@@ -83,7 +83,7 @@ const UserProfileView = ({ username }: { username: string }) => {
       return;
     }
 
-    socket.emit("check-user-status", userData._id);
+    socket.emit("check-user-status", userData.userId);
 
     const handleUserOnline = ({
       userId,
@@ -92,7 +92,7 @@ const UserProfileView = ({ username }: { username: string }) => {
       userId: string;
       status: boolean;
     }) => {
-      if (userId === userData._id) {
+      if (userId === userData.userId) {
         setOnlineStatus(status);
       }
     };
@@ -121,7 +121,7 @@ const UserProfileView = ({ username }: { username: string }) => {
 
   const handleReport = async (reason: string) => {
     try {
-      await report({ reason, reportedId: userData?._id, reportedType: "User" });
+      await report({ reason, reportedId: userData?.userId, reportedType: "User" });
       showToast({ type: "success", message: "Report Sended" });
     } catch (err) {
       console.log(err);
@@ -159,7 +159,7 @@ const UserProfileView = ({ username }: { username: string }) => {
                     userData={userData}
                   />
                   <SubmissionHeatmap
-                    userId={userData._id}
+                    userId={userData.userId}
                     isCurrentUser={currentUser}
                   />
                   <RecentActivity progressData={progressData} />

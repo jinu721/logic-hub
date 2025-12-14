@@ -1,16 +1,30 @@
-import { Types} from "mongoose";
+import { Document, Types } from "mongoose";
+import { PopulatedUser } from "./user.types";
+import { PopulatedMessage } from "./message.types";
 
-export interface ConversationAttrs {
+export interface ConversationBase {
   type: string;
-  participants: Types.ObjectId[];
-  groupId?: Types.ObjectId | null;
-  typingUsers: Types.ObjectId[];      
-  seenBy: Types.ObjectId[];            
-  latestMessage?: Types.ObjectId;
-  unreadCounts: Map<string, number>;
   isDeleted: boolean;
+  unreadCounts: Map<string, number>;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface ConversationDocument extends ConversationAttrs, Document {}
+export interface ConversationRaw extends ConversationBase {
+  participants: Types.ObjectId[];
+  groupId?: Types.ObjectId | null;
+  typingUsers: Types.ObjectId[];
+  seenBy: Types.ObjectId[];
+  latestMessage?: Types.ObjectId;
+}
+
+export interface PopulatedConversation extends ConversationBase {
+  _id: Types.ObjectId;
+  participants: PopulatedUser[];
+  groupId?: Types.ObjectId | null;
+  typingUsers: PopulatedUser[];
+  seenBy: PopulatedUser[];
+  latestMessage?: PopulatedMessage;
+}
+
+export interface ConversationDocument extends ConversationRaw, Document { }

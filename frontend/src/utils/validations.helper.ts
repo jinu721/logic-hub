@@ -18,5 +18,7 @@ export const validation = (type:string,value:string)=>{
             if (!/[a-z]/.test(value)) return "Password must contain at least one lowercase letter";
             if (!/[0-9]/.test(value)) return "Password must contain at least one number";
             return "";
+        case "identifier":
+            if (!value) return "Identifier is required";
     }
 }

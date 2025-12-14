@@ -1,4 +1,5 @@
 import { PublicChallengeDTO } from "@modules/challenge/dtos";
+import { Document } from "mongoose";
 
 export type ChallengeLevel = "novice" | "adept" | "master";
 export type ChallengeType = "code" | "cipher";
@@ -35,6 +36,8 @@ export interface ChallengeAttrs {
 }
 
 
+export interface ChallengeDocument extends ChallengeAttrs, Document { }
+
 export interface CreateChallengeInput {
   title: string;
   instructions: string;
@@ -44,7 +47,6 @@ export interface CreateChallengeInput {
   timeLimit: number;
   tags: string[];
   xpRewards: number;
-
   hints?: string[];
   requiredSkills?: string[];
   functionName?: string;
@@ -59,62 +61,28 @@ export interface CreateChallengeInput {
   endTime?: Date;
 }
 
-export interface ChallengeExecutionResultItem {
-  input: unknown;
-  expected: unknown;
-  actual: unknown;
-  error: string | null;
-  passed: boolean;
+export interface UpdateChallengePayload {
+  title: string;
+  instructions: string;
+  type: "code" | "cipher";
+  level: "novice" | "adept" | "master";
+  testCases: TestCaseIF[];
+  timeLimit: number;
+  tags: string[];
+  xpRewards: number;
+  hints?: string[];
+  requiredSkills?: string[];
+  functionName?: string;
+  parameters?: { name: string; type: string }[];
+  returnType?: string;
+  initialCode?: string | Record<string, string>;
+  solutionCode?: string | Record<string, string>;
+  isPremium?: boolean;
+  isKeyRequired?: boolean;
+  status?: "active" | "inactive" | "draft" | "archived";
+  startTime?: Date;
+  endTime?: Date;
 }
-
-export interface ChallengeExecutionResult {
-  userId: string;
-  challengeId: string;
-  language: string;
-  results: ChallengeExecutionResultItem[];
-  allPassed: boolean;
-  rawExec: unknown;
-}
-
-export interface SubmitChallengeResult {
-  challengeId: string;
-  userId: string;
-  language: string;
-  passed: boolean;
-  score: number;
-  timeTaken: number;
-  results: ChallengeExecutionResultItem[];
-  rawExec: unknown;
-}
-
-
-export interface RunnerResult {
-  input?: unknown[] | null;
-  expected?: unknown | null;
-  actual?: unknown | null;
-  error?: string | null;
-}
-
-export interface ParsedRunnerOutput {
-  results?: RunnerResult[];
-  error?: string;
-  rawOutput?: string;
-}
-
-export interface ChallengeSubmitPayload {
-  challengeId: string;
-  userCode: string;
-  language: string;
-}
-
-export type ParsedValue =
-  | string
-  | number
-  | boolean
-  | null
-  | unknown[]
-  | Record<string, unknown>;
-
 
 export interface ChallengeDBQuery {
   type?: "code" | "cipher";

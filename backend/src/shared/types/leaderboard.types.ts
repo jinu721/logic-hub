@@ -2,14 +2,14 @@ import { Types } from "mongoose";
 import { SortOrder } from "./core.types";
 
 export interface LeaderboardUserDomain {
-  _id: Types.ObjectId; 
+  _id: Types.ObjectId;
   user: {
     _id: Types.ObjectId;
     username: string;
     stats: { xpPoints: number };
     avatar?: {
       _id: Types.ObjectId;
-      imageUrl: string; 
+      imageUrl: string;
     } | null;
   };
 
@@ -22,9 +22,20 @@ export interface LeaderboardUserDomain {
 }
 
 export interface LeaderboardTrendsDomain {
-  users: LeaderboardUserDomain[];
-  meta: LeaderboardMeta;
-  statistics: LeaderboardStatisticsDomain;
+  topUsers: {
+    username: string;
+    stats: {
+      xpPoints: number;
+    };
+  }[];
+  xpDistribution: {
+    _id: number | string;
+    count: number;
+  }[];
+  badgesUnlocked: {
+    badgeName: string;
+    count: number;
+  }[];
 }
 
 export interface TopCompletedChallengeDomain {
@@ -135,3 +146,13 @@ export interface LeaderboardMeta {
   period: LeaderboardPeriod;
   category: string;
 }
+
+
+export interface LeaderboardUser {
+  _id: Types.ObjectId;
+  username: string;
+  avatar?: {
+    _id: Types.ObjectId;
+    imageUrl: string;
+  } | null;
+};

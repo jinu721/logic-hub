@@ -11,7 +11,6 @@ import {
   toPublicChallengeDTO,
   toPublicChallengeDTOs,
 } from "@modules/challenge/dtos";
-import { ChallengeDocument } from "@modules/challenge/models";
 
 import {
   runCodeWithJudge0,
@@ -19,7 +18,7 @@ import {
   judge0Languages,
   deepEqual,
 } from "@execution";
-import { ChallengeExecutionResult, ChallengeExecutionResultItem, ChallengeSubmitPayload, ParsedRunnerOutput, RunnerResult, SubmitChallengeResult, TestCaseIF } from "@shared/types";
+import { ChallengeDocument, ChallengeExecutionResult, ChallengeExecutionResultItem, ChallengeSubmitPayload, ParsedRunnerOutput, RunnerResult, SubmitChallengeResult, TestCaseIF } from "@shared/types";
 
 export class ChallengeExecutionService
   extends BaseService<ChallengeDocument, PublicChallengeDTO>
@@ -188,7 +187,7 @@ export class ChallengeExecutionService
       type: challenge.type,
       level: challenge.level,
       tags: challenge.tags || [],
-      challengeVersion: challenge.version || 1,
+      challengeVersion: 1,
       status: allPassed
         ? "completed"
         : judgeStatus.includes("Time")

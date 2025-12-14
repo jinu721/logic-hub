@@ -1,6 +1,6 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
-export interface InventoryAttrs {
+export interface InventoryBase {
   name: string;
   description: string;
   image: string;
@@ -8,4 +8,8 @@ export interface InventoryAttrs {
   rarity: "common" | "uncommon" | "rare" | "epic" | "legendary";
 }
 
-export interface InventoryDocument extends InventoryAttrs, Document { }
+export interface PopulatedInventory extends InventoryBase {
+  _id: Types.ObjectId;
+}
+
+export interface InventoryDocument extends InventoryBase, Document { }

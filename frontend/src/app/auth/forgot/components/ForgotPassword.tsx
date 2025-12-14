@@ -7,10 +7,10 @@ import { useToast } from "@/context/Toast";
 import ForgotForm from "./ForgotForm";
 
 export default function ForgotPasswordForm() {
-  const [email, setEmail] = useState<string>("sample@gmail.com");
+  const [email, setEmail] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [emailSent, setEmailSent] = useState<boolean>(true);
+  const [emailSent, setEmailSent] = useState<boolean>(false);
 
   const { showToast } = useToast() as any;
 
@@ -43,7 +43,7 @@ export default function ForgotPasswordForm() {
       console.error(err);
       showToast({
         type: "error",
-        message: "Failed to send reset link",
+        message: err.response?.data?.message || "Failed to send reset link",
         duration: 3000,
       });
     } finally {

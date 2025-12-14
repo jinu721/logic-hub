@@ -82,7 +82,6 @@ export class ConversationQueryService
     const conv = await this.conversationRepo.findConversationById(conversationId);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-    // enrich for group / one-to-one “other side” details using strict DTOs
     let group: PublicGroupDTO | undefined;
     let otherUser: PublicUserDTO | undefined;
 

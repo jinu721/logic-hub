@@ -1,8 +1,8 @@
-import { PublicUserDTO } from "@modules/user";
+import { LeaderboardUser } from "@shared/types";
 
 export interface LeaderboardUserDTO {
   rank: number;
-  user: PublicUserDTO;
+  user: LeaderboardUser;
   avgTimeTaken: number;
   avgMemoryUsed: number;
   avgCpuTime: number;

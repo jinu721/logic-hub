@@ -7,13 +7,10 @@ import {
   toPublicChallengeDTOs,
 } from "@modules/challenge/dtos";
 import {
-  ChallengeDocument
-} from "@modules/challenge/models";
-import {
   IChallengeCommandService,
   IChallengeRepository,
 } from "@modules/challenge/interfaces";
-import { ChallengeAttrs, CreateChallengeInput, ParsedValue, TestCaseIF } from "@shared/types";
+import { ChallengeAttrs, ChallengeDocument, CreateChallengeInput, ParsedValue, TestCaseIF, UpdateChallengePayload } from "@shared/types";
 import { Types } from "mongoose";
 
 export class ChallengeCommandService
@@ -63,7 +60,7 @@ export class ChallengeCommandService
 
   async updateChallenge(
     id: Types.ObjectId | string,
-    data: Partial<ChallengeAttrs>
+    data: UpdateChallengePayload
   ) {
     if (data.testCases) {
       data.testCases = this.normalizeTestCases(data.testCases);

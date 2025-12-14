@@ -1,11 +1,11 @@
-import { InventoryDocument } from "@shared/types"
+import { PopulatedInventory } from "@shared/types"
 import { generateSignedImageUrl } from "@utils/application"
 import { IPublicInventoryDTO } from "@modules/inventory/dtos";
 
-export const toPublicInventoryDTO = (item: InventoryDocument): IPublicInventoryDTO | undefined => {
-  if(!item) return;
+export const toPublicInventoryDTO = (item: PopulatedInventory): IPublicInventoryDTO | undefined => {
+  if (!item) return;
   return {
-    _id: item._id ? item._id.toString() : "",
+    _id: item._id.toString(),
     name: item.name,
     description: item.description,
     image: generateSignedImageUrl(item.image),
@@ -14,6 +14,6 @@ export const toPublicInventoryDTO = (item: InventoryDocument): IPublicInventoryD
   };
 };
 
-export const toPublicInventoryDTOs = (items: InventoryDocument[]): IPublicInventoryDTO[] => {
-  return items.map((item) => toPublicInventoryDTO(item) as any);
+export const toPublicInventoryDTOs = (items: PopulatedInventory[]): IPublicInventoryDTO[] => {
+  return items.map((item) => toPublicInventoryDTO(item)!).filter(Boolean);
 };

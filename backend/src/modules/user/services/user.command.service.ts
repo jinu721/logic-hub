@@ -1,15 +1,14 @@
 import { BaseService } from "@core"
 import { AppError, toObjectId } from "@utils/application"
 import { HttpStatus } from "@constants"
-import { IUserCommandService, IUserRepository, PublicUserDTO, toPublicUserDTO, toPublicUserDTOs, UpdateUserDTO } from "@modules/user"
+import { IUserCommandService, IUserRepository, PublicUserDTO, toPublicUserDTO, toPublicUserDTOs } from "@modules/user"
 import { IHashProvider } from "@providers/hashing"
-import { UserDocument } from "@shared/types"
+import { UpdateUserInput, UserDocument, PopulatedUser } from "@shared/types"
 
 
 export class UserCommandService
-  extends BaseService<UserDocument, PublicUserDTO>
-  implements IUserCommandService
-{
+  extends BaseService<PopulatedUser, PublicUserDTO>
+  implements IUserCommandService {
   constructor(
     private readonly userRepo: IUserRepository,
     private readonly hashProv: IHashProvider
@@ -17,26 +16,37 @@ export class UserCommandService
     super();
   }
 
-  protected toDTO(user: UserDocument): PublicUserDTO {
+  protected toDTO(user: PopulatedUser): PublicUserDTO {
     return toPublicUserDTO(user);
   }
 
-  protected toDTOs(users: UserDocument[]): PublicUserDTO[] {
+  protected toDTOs(users: PopulatedUser[]): PublicUserDTO[] {
     return toPublicUserDTOs(users);
   }
 
-  async findUserByIdAndUpdate(id: string, data: Partial<UserDocument>) {
-    const updated = await this.userRepo.updateUser(toObjectId(id), data);
-    if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
-    return this.mapOne(updated);
+  private async getPopulated(userId: string): Promise<PopulatedUser> {
+    const user = await this.userRepo.getUserById(userId);
+    if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
+    return user;
   }
 
-  async updateUser(userId: string, data: UpdateUserDTO) {
-    console.log("UPDATE UPDATE DATA", userId);
-    console.log("UPDATE UPDATE DATA", data);
-    const updated = await this.userRepo.updateUser(toObjectId(userId), data);
+  async findUserByIdAndUpdate(id: string, data: Partial<UserDocument>) {
+
+    const updated = await this.userRepo.updateUser(toObjectId(id), data);
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
-    return this.mapOne(updated);
+    return this.mapOne(await this.getPopulated(id));
+  }
+
+  async updateUser(userId: string, data: UpdateUserInput) {
+    const updateData: Partial<UserDocument> = {
+      ...data,
+      avatar: data.avatar ? toObjectId(data.avatar) : undefined,
+      banner: data.banner ? toObjectId(data.banner) : undefined,
+    } as any; 
+
+    const updated = await this.userRepo.updateUser(toObjectId(userId), updateData);
+    if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
+    return this.mapOne(await this.getPopulated(userId));
   }
 
   async changePassword(
@@ -47,6 +57,7 @@ export class UserCommandService
     const user = await this.userRepo.getUserById(userId);
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
+    // PopulatedUser has password? Yes, extends UserBase.
     const valid = await this.hashProv.comparePasswords(
       oldPassword,
       user.password as string
@@ -65,7 +76,7 @@ export class UserCommandService
         "Unable to update password"
       );
 
-    return this.mapOne(updated);
+    return this.mapOne(await this.getPopulated(userId));
   }
 
   async toggleUserNotification(userId: string) {
@@ -77,7 +88,7 @@ export class UserCommandService
     });
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
-    return this.mapOne(updated);
+    return this.mapOne(await this.getPopulated(userId));
   }
 
   async toggleBanStatus(userId: string) {

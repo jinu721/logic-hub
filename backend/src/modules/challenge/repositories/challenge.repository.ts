@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
-import { ChallengeDocument, ChallengeModel, IChallengeRepository } from "@modules/challenge";
+import { ChallengeModel, IChallengeRepository } from "@modules/challenge";
 import { BaseRepository } from "@core";
-import { ChallengeDBQuery, CreateChallengeInput } from "@shared/types";
+import { ChallengeDBQuery, ChallengeDocument, CreateChallengeInput, UpdateChallengePayload } from "@shared/types";
 
 export class ChallengeRepository
   extends BaseRepository<ChallengeDocument>
@@ -28,7 +28,7 @@ export class ChallengeRepository
 
   async updateChallenge(
     id: Types.ObjectId,
-    updateData: Partial<ChallengeDocument>
+    updateData: UpdateChallengePayload
   ): Promise<ChallengeDocument | null> {
     return await this.model.findByIdAndUpdate(id, updateData, { new: true });
   }

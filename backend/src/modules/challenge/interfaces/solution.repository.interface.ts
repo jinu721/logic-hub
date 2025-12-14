@@ -1,25 +1,25 @@
 import {
   CreateSolutionInput,
-  SolutionWithUser,
-  SolutionWithFullComments,
-  SolutionWithChallenge,
+  PopulatedSolution,
   SolutionQuery,
-  SolutionSortOption
+  SolutionSortOption,
+  SolutionDocument
 } from "@shared/types";
 
-import { SolutionDocument } from "@modules/challenge";
 
 export interface ISolutionRepository {
-  createSolution(data: CreateSolutionInput): Promise<SolutionWithUser>;
+  createSolution(data: CreateSolutionInput): Promise<SolutionDocument>;
+
+  getSolutionById(solutionId: string): Promise<PopulatedSolution | null>;
 
   findSolutionsByChallenge(
     query: SolutionQuery,
     sort: SolutionSortOption,
     page: number,
     limit: number
-  ): Promise<SolutionWithFullComments[]>;
+  ): Promise<PopulatedSolution[]>;
 
-  findSolutionsByUser(userId: string): Promise<SolutionWithChallenge[]>;
+  findSolutionsByUser(userId: string): Promise<PopulatedSolution[]>;
 
   likeSolution(solutionId: string, userId: string): Promise<SolutionDocument | null>;
 
@@ -30,14 +30,14 @@ export interface ISolutionRepository {
   commentSolution(
     solutionId: string,
     comment: { user: string; content: string }
-  ): Promise<SolutionWithUser | null>;
+  ): Promise<SolutionDocument | null>;
 
   deleteComment(solutionId: string, commentId: string): Promise<SolutionDocument | null>;
 
   updateSolution(
     solutionId: string,
     data: Partial<SolutionDocument>
-  ): Promise<SolutionWithUser | null>;
+  ): Promise<SolutionDocument | null>;
 
   deleteSolution(solutionId: string): Promise<boolean>;
 }

@@ -1,6 +1,5 @@
 import { Types } from "mongoose";
-import { ChallengeDocument } from "@modules/challenge"; 
-import { CreateChallengeInput, ChallengeDBQuery } from "@shared/types";
+import { CreateChallengeInput, ChallengeDBQuery, ChallengeDocument, UpdateChallengePayload } from "@shared/types";
 
 export interface IChallengeRepository {
   createChallenge(challengeData: CreateChallengeInput): Promise<ChallengeDocument>;
@@ -8,6 +7,6 @@ export interface IChallengeRepository {
   getChallenges(query: ChallengeDBQuery,skip:number,limit: number): Promise<ChallengeDocument[]>;
   getAllChallenges(search:string,skip:number,limit: number): Promise<ChallengeDocument[]>;
   countAllChallenges(search:string): Promise<number>;
-  updateChallenge(id: Types.ObjectId, updateData: Partial<ChallengeDocument>): Promise<ChallengeDocument | null>;
+  updateChallenge(id: Types.ObjectId, updateData: UpdateChallengePayload): Promise<ChallengeDocument | null>;
   deleteChallenge(id: Types.ObjectId): Promise<boolean>;
 }

@@ -7,7 +7,7 @@ export interface ConversationIF extends Document {
   type: string;
   participants: UserIF[];
   group?: GroupIF;
-  typingUsers: string[];  
+  typingUsers: UserIF[] ;  
   otherUser?: UserIF & {isBlocked: boolean};    
   seenBy: string[];            
   currentUserId:string;

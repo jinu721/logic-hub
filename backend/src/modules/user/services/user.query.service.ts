@@ -9,13 +9,12 @@ import {
   toPublicUserDTOs
 } from "@modules/user";
 import { ISubmissionRepository } from "@modules/challenge";
-import { UserDocument } from "@modules/user/models";
+import { PopulatedUser } from "@shared/types";
 
 
 export class UserQueryService
-  extends BaseService<UserDocument, PublicUserDTO>
-  implements IUserQueryService
-{
+  extends BaseService<PopulatedUser, PublicUserDTO>
+  implements IUserQueryService {
   constructor(
     private readonly _userRepo: IUserRepository,
     private readonly _submissionRepo: ISubmissionRepository
@@ -23,25 +22,25 @@ export class UserQueryService
     super();
   }
 
-  protected toDTO(user: UserDocument): PublicUserDTO {
+  protected toDTO(user: PopulatedUser): PublicUserDTO {
     return toPublicUserDTO(user);
   }
 
-  protected toDTOs(users: UserDocument[]): PublicUserDTO[] {
+  protected toDTOs(users: PopulatedUser[]): PublicUserDTO[] {
     return toPublicUserDTOs(users);
   }
 
-  private async buildUserData(user: UserDocument, currentUserId: string) {
-    const rank = await this._userRepo.findUserRank(user._id as string);
+  private async buildUserData(user: PopulatedUser, currentUserId: string) {
+    const rank = await this._userRepo.findUserRank(user._id.toString());
     const completedDomains = await this._submissionRepo.findCompletedDomainsByUser(
-      toObjectId(user._id as string)
+      toObjectId(user._id.toString())
     );
 
     return {
       ...this.mapOne(user),
       userRank: rank,
       completedDomains: completedDomains,
-      currentUser: user._id?.toString() === currentUserId,
+      currentUser: user._id.toString() === currentUserId,
     } as PublicUserDTO;
   }
 

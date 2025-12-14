@@ -17,6 +17,7 @@ export class ConversationController implements IConversationController {
   ) { }
 
   createOneToOne = asyncHandler(async (req, res): Promise<void> => {
+    console.log(req.body);
     const dto = CreateOneToOneDto.from(req.body);
     const valid = dto.validate();
     if (!valid.valid) throw new AppError(HttpStatus.BAD_REQUEST, valid.errors?.join(", "));

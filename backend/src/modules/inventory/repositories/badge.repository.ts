@@ -1,37 +1,34 @@
+import { UpdateQuery } from "mongoose"
 import { BadgesModel, IBadgeRepository } from "@modules/inventory"
-import { InventoryDocument } from "@shared/types"
-import { BaseRepository } from "@core"
+import { InventoryDocument, PopulatedInventory } from "@shared/types"
 
 
-export class BadgeRepository
-  extends BaseRepository<InventoryDocument>
-  implements IBadgeRepository
-{
+export class BadgeRepository implements IBadgeRepository {
   constructor() {
-    super(BadgesModel);
   }
 
-  async create(data: InventoryDocument): Promise<InventoryDocument> {
-    return await this.model.create(data);
+  async create(data: Partial<InventoryDocument>): Promise<InventoryDocument> {
+    return await BadgesModel.create(data);
   }
 
-  async getAll(query:any,skip:number,limit:number): Promise<InventoryDocument[]> {
-    return await this.model.find(query).skip(skip).limit(limit).sort({_id:-1});
+  async getAll(query: any, skip: number, limit: number): Promise<PopulatedInventory[]> {
+    return await BadgesModel.find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ _id: -1 })
+      .lean<PopulatedInventory[]>();
   }
 
-  async getById(id: string): Promise<InventoryDocument | null> {
-    return await this.model.findById(id);
+  async getById(id: string): Promise<PopulatedInventory | null> {
+    return await BadgesModel.findById(id).lean<PopulatedInventory>();
   }
 
-  async update(
-    id: string,
-    data: Partial<InventoryDocument>
-  ): Promise<InventoryDocument | null> {
-    return await this.model.findByIdAndUpdate(id, data, { new: true });
+  async update(id: string, data: UpdateQuery<InventoryDocument>): Promise<InventoryDocument | null> {
+    return await BadgesModel.findByIdAndUpdate(id, data, { new: true });
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.model.findByIdAndDelete(id);
+    const result = await BadgesModel.findByIdAndDelete(id);
     return !!result;
   }
 }

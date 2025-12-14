@@ -3,8 +3,8 @@ import { PublicChallengeDTO } from "@modules/challenge/dtos";
 
 export interface PublicSolutionDTO {
   _id: string;
-  user: PublicUserDTO; 
-  challenge: PublicChallengeDTO;
+  user: PublicUserDTO | string; 
+  challenge: PublicChallengeDTO | string;
   title: string;
   content: string;
   codeSnippet?: string | null;
@@ -13,7 +13,7 @@ export interface PublicSolutionDTO {
   likesCount: number;
   comments: {
     _id?: string;
-    user: PublicUserDTO;
+    user: PublicUserDTO | string;
     content: string;
     commentedAt: Date;
   }[];

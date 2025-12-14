@@ -1,11 +1,12 @@
 import { Request, Response } from "express"
 import { HttpStatus } from "@constants"
-import { IAuthController, UserDocument } from "@modules/user"
+import { IAuthController } from "@modules/user"
 import { IAuthService } from "@modules/user"
 import { asyncHandler, sendSuccess, AppError } from "@utils/application"
 
 
 import { RegisterRequestDto, LoginRequestDto, VerifyOtpRequestDto, ResetPasswordRequestDto, ChangePasswordRequestDto, LogoutRequestDto, VerifyLoginDto, RefreshTokenDto, ForgotPasswordDto } from "@modules/user/dtos";
+import { UserDocument } from "@shared/types"
 
 export class AuthController implements IAuthController {
   constructor(private readonly authSvc: IAuthService) { }

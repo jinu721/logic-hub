@@ -1,8 +1,9 @@
 import { BaseDto } from "@shared/dtos/base.dto";
+import { UpdateSubmissionPayload } from "@shared/types";
 
 export class UpdateSubmissionDto extends BaseDto {
   id!: string;
-  payload!: Record<string, any>;
+  payload!: UpdateSubmissionPayload;
 
   validate() {
     const errors: string[] = [];

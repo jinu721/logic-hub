@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
-import { MessageModel, IMessageRepository, MessageDocument } from "@modules/chat";
-import {  MessageQueryFilter } from "@shared/types";
+import { MessageModel, IMessageRepository } from "@modules/chat";
+import { MessageDocument, PopulatedMessage, MessageQueryFilter } from "@shared/types";
 import { BaseRepository } from "@core";
 
 
@@ -13,72 +13,21 @@ export class MessageRepository
   async createMessage(
     data: MessageDocument & { replyTo?: string }
   ): Promise<MessageDocument> {
-    const message = await this.model.create(data);
-
-    return await message.populate([
-      {
-        path: "sender",
-        select: "username avatar banner membership stats",
-        populate: [{ path: "avatar" }, { path: "banner" }],
-      },
-      {
-        path: "replyTo",
-        populate: {
-          path: "sender",
-          select: "username avatar banner membership stats",
-          populate: [{ path: "avatar" }, { path: "banner" }],
-        },
-      },
-      {
-        path: "reactions.userId",
-        select: "username avatar banner membership stats",
-        populate: [{ path: "avatar" }, { path: "banner" }],
-      },
-      {
-        path: "seenBy",
-        select: "username avatar banner isOnline",
-        populate: [{ path: "avatar" }, { path: "banner" }],
-      },
-    ]);
+    return await this.model.create(data);
   }
 
   async editMessage(
     messageId: string,
     newText: string
-  ): Promise<MessageIF | null> {
+  ): Promise<MessageDocument | null> {
     return await this.model
       .findByIdAndUpdate(
         messageId,
         { content: newText, isEdited: true },
         { new: true }
-      )
-      .populate([
-        {
-          path: "sender",
-          select: "username avatar banner",
-          populate: [{ path: "avatar" }, { path: "banner" }],
-        },
-        {
-          path: "replyTo",
-          populate: {
-            path: "sender",
-            select: "username avatar banner",
-            populate: [{ path: "avatar" }, { path: "banner" }],
-          },
-        },
-        {
-          path: "reactions.userId",
-          select: "username avatar banner",
-          populate: [{ path: "avatar" }, { path: "banner" }],
-        },
-        {
-          path: "seenBy",
-          select: "username avatar banner isOnline",
-          populate: [{ path: "avatar" }, { path: "banner" }],
-        },
-      ]);
+      );
   }
-  async getMessages(limit: number, query: MessageQueryFilter): Promise<MessageIF[]> {
+  async getMessages(limit: number, query: MessageQueryFilter): Promise<PopulatedMessage[]> {
     return await this.model
       .find(query)
       .sort({ createdAt: 1 })
@@ -108,9 +57,9 @@ export class MessageRepository
           select: "username avatar banner isOnline",
           populate: [{ path: "avatar" }, { path: "banner" }],
         },
-      ]);
+      ]) as unknown as PopulatedMessage[];
   }
-  async deleteMessage(messageId: string): Promise<MessageIF | null> {
+  async deleteMessage(messageId: string): Promise<MessageDocument | null> {
     return await this.model.findByIdAndUpdate(
       messageId,
       { isDeleted: true },
@@ -121,7 +70,7 @@ export class MessageRepository
     messageId: string,
     userId: string,
     emoji: string
-  ): Promise<MessageIF | null> {
+  ): Promise<MessageDocument | null> {
     const message = await this.model.findOne({
       _id: messageId,
       "reactions.userId": userId,
@@ -139,84 +88,32 @@ export class MessageRepository
         { new: true }
       );
 
-    return await query.populate([
-      {
-        path: "sender",
-        select: "username avatar banner",
-        populate: [{ path: "avatar" }, { path: "banner" }],
-      },
-      {
-        path: "replyTo",
-        populate: {
-          path: "sender",
-          select: "username avatar banner",
-          populate: [{ path: "avatar" }, { path: "banner" }],
-        },
-      },
-      {
-        path: "reactions.userId",
-        select: "username avatar banner",
-        populate: [{ path: "avatar" }, { path: "banner" }],
-      },
-      {
-        path: "seenBy",
-        select: "username avatar banner isOnline",
-        populate: [{ path: "avatar" }, { path: "banner" }],
-      },
-    ]);
+    return await query;
   }
 
   async removeReaction(
     messageId: string,
     userId: string,
     reaction: string
-  ): Promise<MessageIF | null> {
+  ): Promise<MessageDocument | null> {
     return await this.model
       .findByIdAndUpdate(
         messageId,
         { $pull: { reactions: { userId, emoji: reaction } } },
         { new: true }
-      )
-      .populate([
-        {
-          path: "sender",
-          select: "username avatar banner",
-          populate: [{ path: "avatar" }, { path: "banner" }],
-        },
-        {
-          path: "replyTo",
-          populate: {
-            path: "sender",
-            select: "username avatar banner",
-            populate: [{ path: "avatar" }, { path: "banner" }],
-          },
-        },
-        {
-          path: "reactions.userId",
-          select: "username avatar banner",
-          populate: [{ path: "avatar" }, { path: "banner" }],
-        },
-        {
-          path: "seenBy",
-          select: "username avatar banner isOnline",
-          populate: [{ path: "avatar" }, { path: "banner" }],
-        },
-      ]);
+      );
   }
 
   async markAsSeen(
     messageId: string,
     userId: string
-  ): Promise<MessageIF | null> {
+  ): Promise<MessageDocument | null> {
     return await this.model.findByIdAndUpdate(messageId, {
       $push: { seenBy: { userId } },
     });
   }
 
-  async getMessageById(messageId: string): Promise<MessageIF | null> {
-    return this.model.findById(messageId);
-  }
-  async findMessageById(messageId: string) {
+  async getMessageById(messageId: string): Promise<PopulatedMessage | null> {
     return this.model.findById(messageId).populate([
       {
         path: "sender",
@@ -231,14 +128,31 @@ export class MessageRepository
           populate: [{ path: "avatar" }, { path: "banner" }],
         },
       },
-    ]);
+    ]) as unknown as PopulatedMessage;
+  }
+  async findMessageById(messageId: string): Promise<PopulatedMessage | null> {
+    return this.model.findById(messageId).populate([
+      {
+        path: "sender",
+        select: "username avatar banner",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      },
+      {
+        path: "replyTo",
+        populate: {
+          path: "sender",
+          select: "username avatar banner",
+          populate: [{ path: "avatar" }, { path: "banner" }],
+        },
+      },
+    ]) as unknown as PopulatedMessage;
   }
 
-  async save(message: MessageIF) {
+  async save(message: MessageDocument): Promise<MessageDocument | null> {
     return message.save();
   }
 
-  async closePoll(pollId: string) {
+  async closePoll(pollId: string): Promise<MessageDocument | null> {
     return this.model.findByIdAndUpdate(
       pollId,
       { isOpen: false },

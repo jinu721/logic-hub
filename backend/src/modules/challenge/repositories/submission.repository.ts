@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
-import { SubmissionModel, ISubmissionRepository, SubmissionDocument } from "@modules/challenge";
+import { SubmissionModel, ISubmissionRepository } from "@modules/challenge";
 import { BaseRepository } from "@core";
-import { CreateSubmissionInput, SubmissionAttrs, SubmissionFilter } from "@shared/types";
+import { CreateSubmissionInput, SubmissionAttrs, SubmissionDocument, SubmissionFilter, UpdateSubmissionPayload } from "@shared/types";
 
 export class SubmissionRepository
   extends BaseRepository<SubmissionDocument>
@@ -47,7 +47,7 @@ export class SubmissionRepository
 
   async updateSubmission(
     id: Types.ObjectId,
-    data: Partial<SubmissionAttrs>
+    data: UpdateSubmissionPayload
   ): Promise<SubmissionDocument | null> {
     return await this.model.findByIdAndUpdate(id, data, { new: true });
   }

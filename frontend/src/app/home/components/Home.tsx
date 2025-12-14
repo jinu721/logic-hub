@@ -42,9 +42,33 @@ const hasClaimedToday = (lastRewardClaimDate: Date | null) => {
   );
 };
 
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setChallenges,
+  setUser,
+  setFilters,
+  setLoading,
+  setError,
+  selectAllChallenges,
+  selectFilteredChallenges,
+  selectIsLoading,
+  selectError,
+  selectUser,
+  selectFilters,
+  selectLastFetch,
+} from "@/redux/slices/homeSlice";
+
+
 const Home = () => {
-  const [initialDomains, setInitialDomains] = useState<ChallengeDomainIF[]>([]);
-  const [user, setUser] = useState<UserIF | null>(null);
+  const dispatch = useDispatch();
+
+  const challenges = useSelector(selectAllChallenges);
+  const filteredChallenges = useSelector(selectFilteredChallenges);
+  const isLoading = useSelector(selectIsLoading);
+  const error = useSelector(selectError);
+  const user = useSelector(selectUser);
+  const filters = useSelector(selectFilters);
+  const lastFetch = useSelector(selectLastFetch);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -53,50 +77,56 @@ const Home = () => {
   const [showNotification, setShowNotification] = useState(false);
   const [showGiftRecive, setShowGiftRecive] = useState(false);
   const [challangeData, setChallengeData] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
   const [showDailyReward, setShowDailyReward] = useState(false);
-
-  const [highlightedDomain, setHighlightedDomain] =
-    useState<ChallengeDomainIF | null>(null);
-
-  const [filters, setFilters] = useState({
-    type: [],
-    level: [],
-    status: [],
-    tags: [],
-    searchQuery: "",
-  });
-  const [searchQuery, setSearchQuery] = useState("");
+  const [highlightedDomain, setHighlightedDomain] = useState<ChallengeDomainIF | null>(null);
 
   const { levelUpData, clearLevelUp } = useLevelUp() as any;
   const { showToast } = useToast() as any;
 
-  const fetchInitalData = async () => {
-    setIsLoading(true);
-    try {
-      const userData = await getMyProfile();
-      const data = await getChallenges({});
-      setInitialDomains(data.challenges);
-      setHighlightedDomain(data.popularChallange);
-      const cliamed = hasClaimedToday(userData.user?.lastRewardClaimDate);
-      if (!cliamed) {
-        setShowDailyReward(true);
-      }
-      setUser(userData.user);
-      setError("");
-    } catch (error) {
-      console.error("Error fetching domains:", error);
-      setError("Failed to load domains. Please try again later.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const CACHE_DURATION = 5 * 60 * 1000;
 
   useEffect(() => {
+    const initData = async () => {
+      const isStale = Date.now() - lastFetch > CACHE_DURATION;
+
+      if (challenges.length === 0 || isStale) {
+        dispatch(setLoading(true));
+        try {
+          const [userData, data] = await Promise.all([
+            getMyProfile(),
+            getChallenges({}) 
+          ]);
+
+          dispatch(setUser(userData.user));
+          dispatch(setChallenges(data.challenges));
+
+          if (data.popularChallange) {
+            setHighlightedDomain(data.popularChallange);
+          }
+
+          const cliamed = hasClaimedToday(userData.user?.lastRewardClaimDate);
+          if (!cliamed) {
+            setShowDailyReward(true);
+          }
+        } catch (err) {
+          console.error("Error loading home data:", err);
+          dispatch(setError("Failed to load challenges."));
+        } finally {
+          dispatch(setLoading(false));
+        }
+      } else {
+        if (!highlightedDomain && challenges.length > 0) {
+          setHighlightedDomain(challenges[0]);
+        }
+      }
+    };
+
+    initData();
     socket.emit("user-online", localStorage.getItem("accessToken"));
-    fetchInitalData();
-  }, []);
+  }, [dispatch, lastFetch, challenges.length]); 
+
+
+
 
   useEffect(() => {
     const logged = searchParams.get("logged");
@@ -193,19 +223,18 @@ const Home = () => {
     router.push(`/domain/${challangeId}`);
   };
 
-  const handleFiltersChange = useCallback((filter: any) => {
-    setFilters(filter);
-  }, []);
+  const handleFiltersChange = useCallback((newFilters: any) => {
+    dispatch(setFilters(newFilters));
+  }, [dispatch]);
 
   const handleFilterReset = () => {
-    setSearchQuery("");
-    setFilters({
-      status: [],
-      level: [],
+    dispatch(setFilters({
       type: [],
+      level: [],
+      status: [],
       tags: [],
       searchQuery: "",
-    });
+    }));
   };
 
   const debouncedSearch = useMemo(
@@ -216,11 +245,8 @@ const Home = () => {
     [],
   );
 
-  const handleSearchChange = (searchQuery: string) => {
-    setSearchQuery(searchQuery);
-    debouncedSearch(() => {
-      setFilters((prev) => ({ ...prev, searchQuery }));
-    });
+  const handleSearchChange = (query: string) => {
+    dispatch(setFilters({ ...filters, searchQuery: query }));
   };
 
   return (
@@ -254,7 +280,7 @@ const Home = () => {
                             : highlightedDomain?.userStatus === "failed-timeout"
                               ? "Timed Out"
                               : highlightedDomain?.userStatus ===
-                                  "failed-output"
+                                "failed-output"
                                 ? "Failed"
                                 : "Available"}
                         </span>
@@ -365,17 +391,17 @@ const Home = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div className="lg:col-span-3 xl:col-span-2">
                       <AdvancedFilterSidebar
-                        challenges={initialDomains}
+                        challenges={challenges}
                         filters={filters}
                         onFiltersChange={handleFiltersChange}
-                        searchQuery={searchQuery}
+                        searchQuery={filters.searchQuery}
                         handleSearchChange={handleSearchChange}
                         onClearFilters={handleFilterReset}
                       />
                     </div>
 
                     <div className="lg:col-span-6 xl:col-span-8">
-                      <DomainsSection filters={filters} user={user as UserIF} />
+                      <DomainsSection challenges={filteredChallenges} user={user as UserIF} />
                     </div>
 
                     <div className="lg:col-span-3 xl:col-span-2">
@@ -404,7 +430,7 @@ const Home = () => {
         />
       )}
       {showGiftRecive && <GiftReceivedModal />}
-      {showDailyReward && <DailyReward user={user} />} 
+      {showDailyReward && <DailyReward user={user} />}
     </>
   );
 };

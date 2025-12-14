@@ -12,50 +12,55 @@ import {
   IConversationRepository
 } from "@modules/chat";
 
-import { ConversationIF } from "@shared/types";
+import { PopulatedConversation } from "@shared/types";
 
 
 export class ConversationCommandService
-  extends BaseService<ConversationIF, PublicConversationDTO>
-  implements IConversationCommandService
-{
+  extends BaseService<PopulatedConversation, PublicConversationDTO>
+  implements IConversationCommandService {
   constructor(private readonly conversationRepo: IConversationRepository) {
     super();
   }
 
-  protected toDTO(entity: ConversationIF): PublicConversationDTO {
+  protected toDTO(entity: PopulatedConversation): PublicConversationDTO {
     return toPublicConversationDTO(entity);
   }
 
-  protected toDTOs(entities: ConversationIF[]): PublicConversationDTO[] {
+  protected toDTOs(entities: PopulatedConversation[]): PublicConversationDTO[] {
     return entities.map(e => toPublicConversationDTO(e));
+  }
+
+  private async getPopulated(id: string): Promise<PopulatedConversation> {
+    const conversation = await this.conversationRepo.findConversationById(id);
+    if (!conversation) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
+    return conversation;
   }
 
   async createOneToOne(userA: string, userB: string): Promise<string> {
     const existing = await this.conversationRepo.findOneToOne(userA, userB);
-    if (existing) return existing._id!.toString();
+    if (existing) return String(existing._id);
 
     const created = await this.conversationRepo.createOneToOne(userA, userB);
     if (!created) throw new AppError(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create conversation");
 
-    return created._id!.toString();
+    return String(created._id);
   }
 
   async updateLastMessage(conversationId: string, messageId: string): Promise<PublicConversationDTO> {
     const updated = await this.conversationRepo.updateLastMessage(conversationId, messageId);
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
-    return this.mapOne(updated);
+    return this.mapOne(await this.getPopulated(conversationId));
   }
 
   async addUnreadCounts(conversationId: string, userIds: string[]): Promise<PublicConversationDTO> {
     const updated = await this.conversationRepo.addUnreadCountsForUsers(conversationId, userIds);
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
-    return this.mapOne(updated);
+    return this.mapOne(await this.getPopulated(conversationId));
   }
 
   async markAsRead(conversationId: string, userId: string): Promise<PublicConversationDTO> {
     const updated = await this.conversationRepo.markRead(conversationId, userId);
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
-    return this.mapOne(updated);
+    return this.mapOne(await this.getPopulated(conversationId));
   }
 }

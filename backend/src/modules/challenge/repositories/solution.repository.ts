@@ -1,15 +1,11 @@
 import { BaseRepository } from "@shared/core";
 import {
-  SolutionQuery, 
-  SolutionSortOption, 
-  SolutionWithUser,
-  SolutionWithFullComments,
-  SolutionWithChallenge,
-  CreateSolutionInput
+  SolutionQuery,
+  SolutionSortOption,
+  CreateSolutionInput,
+  PopulatedSolution,
+  SolutionDocument
 } from "@shared/types";
-
-import { SolutionDocument } from "@modules/challenge";
-
 import { ISolutionRepository, SolutionModel } from "@modules/challenge";
 
 export class SolutionRepository extends BaseRepository<SolutionDocument>
@@ -18,9 +14,16 @@ export class SolutionRepository extends BaseRepository<SolutionDocument>
     super(SolutionModel);
   }
 
-  async createSolution(data: CreateSolutionInput): Promise<SolutionWithUser> {
-    const doc = await this.model.create(data);
-    return (await doc.populate("user")) as SolutionWithUser;
+  async getSolutionById(solutionId: string): Promise<PopulatedSolution | null> {
+    return this.model
+      .findById(solutionId)
+      .populate("user")
+      .populate("challenge")
+      .populate("comments.user") as unknown as PopulatedSolution;
+  }
+
+  async createSolution(data: CreateSolutionInput): Promise<SolutionDocument> {
+    return this.model.create(data);
   }
 
   async findSolutionsByChallenge(
@@ -28,21 +31,23 @@ export class SolutionRepository extends BaseRepository<SolutionDocument>
     sort: SolutionSortOption,
     page: number,
     limit: number
-  ): Promise<SolutionWithFullComments[]> {
+  ): Promise<PopulatedSolution[]> {
     return this.model
       .find(query)
       .sort(sort)
       .skip((page - 1) * limit)
       .limit(limit)
       .populate("user")
-      .populate("comments.user") as unknown as SolutionWithFullComments[];
+      .populate("challenge")
+      .populate("comments.user") as unknown as PopulatedSolution[];
   }
 
-  async findSolutionsByUser(userId: string): Promise<SolutionWithChallenge[]> {
+  async findSolutionsByUser(userId: string): Promise<PopulatedSolution[]> {
     return this.model
       .find({ user: userId })
+      .populate("user")
       .populate("challenge")
-      .populate("user") as unknown as SolutionWithChallenge[];
+      .populate("comments.user") as unknown as PopulatedSolution[];
   }
 
   async likeSolution(solutionId: string, userId: string): Promise<SolutionDocument | null> {
@@ -69,7 +74,7 @@ export class SolutionRepository extends BaseRepository<SolutionDocument>
   async commentSolution(
     solutionId: string,
     comment: { user: string; content: string }
-  ): Promise<SolutionWithUser | null> {
+  ): Promise<SolutionDocument | null> {
     return this.model
       .findByIdAndUpdate(
         solutionId,
@@ -82,8 +87,7 @@ export class SolutionRepository extends BaseRepository<SolutionDocument>
           },
         },
         { new: true }
-      )
-      .populate("user") as unknown as SolutionWithUser;
+      );
   }
 
   async deleteComment(solutionId: string, commentId: string): Promise<SolutionDocument | null> {
@@ -97,10 +101,9 @@ export class SolutionRepository extends BaseRepository<SolutionDocument>
   async updateSolution(
     solutionId: string,
     data: Partial<SolutionDocument>
-  ): Promise<SolutionWithUser | null> {
+  ): Promise<SolutionDocument | null> {
     return this.model
-      .findByIdAndUpdate(solutionId, data, { new: true })
-      .populate("user") as unknown as SolutionWithUser;
+      .findByIdAndUpdate(solutionId, data, { new: true });
   }
 
   async deleteSolution(solutionId: string): Promise<boolean> {

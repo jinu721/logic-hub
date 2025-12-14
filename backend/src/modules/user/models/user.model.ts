@@ -1,25 +1,23 @@
-import { Document,Schema,model } from "mongoose";
-import { UserAttrs } from "@shared/types";
+import { UserDocument } from "@shared/types";
+import { Schema, model } from "mongoose";
 
-export interface UserDocument extends UserAttrs,Document {
-}
 
-const UserSchema = new Schema({
+const UserSchema = new Schema<UserDocument>({
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
   bio: { type: String, default: "" },
-  avatar: { type: Schema.Types.ObjectId, ref: "Avatar",default:null },
+  avatar: { type: Schema.Types.ObjectId, ref: "Avatar", default: null },
   banner: { type: Schema.Types.ObjectId, ref: "Banner" },
-  password: { type: String},
+  password: { type: String },
   phoneNumber: { type: String, unique: true, sparse: true },
   twoFactorEnabled: { type: Boolean, default: false },
   role: { type: String, enum: ["user", "moderator", "admin"], default: "user" },
-  loginType:{ type: String, enum: ["normal", "google", "github"], default: "normal" },
-  googleId:{ type: String },
-  githubId:{ type: String },
+  loginType: { type: String, enum: ["normal", "google", "github"], default: "normal" },
+  googleId: { type: String },
+  githubId: { type: String },
   stats: {
     xpPoints: { type: Number, default: 0 },
-    totalXpPoints: { type: Number, default: 0,index:true },
+    totalXpPoints: { type: Number, default: 0, index: true },
     level: { type: Number, default: 1 },
     currentStreak: { type: Number, default: 0 },
     longestStreak: { type: Number, default: 0 },
@@ -33,8 +31,8 @@ const UserSchema = new Schema({
   },
   isBanned: { type: Boolean, default: false },
   isOnline: { type: Boolean, default: false },
-  membership:{
-    planId:{ type: Schema.Types.ObjectId, ref: "PremiumPlan",default: null },
+  membership: {
+    planId: { type: Schema.Types.ObjectId, ref: "PremiumPlan", default: null },
     startDate: { type: Date, default: null },
     endDate: { type: Date, default: null },
     type: { type: String, enum: ["silver", "gold"], default: null },
@@ -47,7 +45,7 @@ const UserSchema = new Schema({
   notifications: { type: Boolean, default: true },
   blockedUsers: [{ type: Schema.Types.ObjectId, ref: "User" }],
   timestamp: { type: Date, default: Date.now },
-});
+} as any);
 
 
-export const UserModel =  model<UserDocument>('User',UserSchema);
+export const UserModel = model<UserDocument>('User', UserSchema);

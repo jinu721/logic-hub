@@ -12,10 +12,10 @@ import {
   toPublicConversationDTO,
   PublicGroupDTO
 } from "@modules/chat/dtos";
-import { ConversationIF } from "@shared/types";
+import { ConversationDocument } from "@shared/types";
 
 export class GroupMemberService
-  extends BaseService<ConversationIF, PublicConversationDTO>
+  extends BaseService<ConversationDocument, PublicConversationDTO>
   implements IGroupMemberService
 {
   constructor(
@@ -25,11 +25,11 @@ export class GroupMemberService
     super();
   }
 
-  protected toDTO(conv: ConversationIF): PublicConversationDTO {
+  protected toDTO(conv: ConversationDocument): PublicConversationDTO {
     return toPublicConversationDTO(conv);
   }
 
-  protected toDTOs(_: ConversationIF[]): PublicConversationDTO[] {
+  protected toDTOs(_: ConversationDocument[]): PublicConversationDTO[] {
     return [];
   }
 
@@ -40,7 +40,7 @@ export class GroupMemberService
     const conv = await this.conversationRepo.addParticipants(groupId, group.members);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-    return this.mapOne(conv as ConversationIF);
+    return this.mapOne(conv);
   }
 
   async removeMember(groupId: string, userId: string) {
@@ -52,7 +52,7 @@ export class GroupMemberService
     ]);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-    return this.mapOne(conv as ConversationIF);
+    return this.mapOne(conv);
   }
 
   async makeAdmin(conversationId: string, groupId: string, userId: string) {
@@ -71,7 +71,7 @@ export class GroupMemberService
     const conv = await this.conversationRepo.findConversationById(conversationId);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-    return this.mapOne(conv as ConversationIF);
+    return this.mapOne(conv);
   }
 
   async removeAdmin(conversationId: string, groupId: string, userId: string) {
@@ -88,13 +88,13 @@ export class GroupMemberService
     const conv = await this.conversationRepo.findConversationById(conversationId);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-    return this.mapOne(conv as ConversationIF);
+    return this.mapOne(conv);
   }
 
   async sendJoinRequest(groupId: string, userId: string): Promise<{
     updatedConversation: PublicConversationDTO | null;
     userId: string;
-    conversationId: Types.ObjectId | null;
+    conversationId: string;
     newGroupData: PublicGroupDTO;
   }> {
     const group = await this.groupRepo.findGroupById(groupId);
@@ -117,10 +117,10 @@ export class GroupMemberService
       const saved = await this.conversationRepo.saveConversation(conv);
 
       return {
-        updatedConversation: this.mapOne(saved as ConversationIF),
+        updatedConversation: this.mapOne(saved),
         userId,
-        conversationId: saved?._id as any,
-        newGroupData: updatedGroup as any, 
+        conversationId: saved?._id,
+        newGroupData: updatedGroup, 
       };
     }
 
@@ -158,7 +158,7 @@ export class GroupMemberService
     }
 
     const saved = await this.conversationRepo.saveConversation(conv);
-    return this.mapOne(saved as ConversationIF);
+    return this.mapOne(saved );
   }
 
   async leaveGroup(conversationId: string, groupId: string, userId: string) {
@@ -173,6 +173,6 @@ export class GroupMemberService
     const conv = await this.conversationRepo.removeParticipants(groupId, [uid]);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-    return this.mapOne(conv as ConversationIF);
+    return this.mapOne(conv);
   }
 }

@@ -1,9 +1,9 @@
-// file: update-solution.dto.ts
 import { BaseDto } from "@shared/dtos/base.dto";
+import { SolutionUpdatePayload } from "@shared/types";
 
 export class UpdateSolutionDto extends BaseDto {
   solutionId!: string;
-  payload!: Record<string, any>;
+  payload!: SolutionUpdatePayload;
 
   validate() {
     const errors: string[] = [];

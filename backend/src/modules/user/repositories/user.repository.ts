@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Types, UpdateQuery } from "mongoose";
 import { BaseRepository } from "@core";
 import { UserModel, IUserRepository } from "@modules/user";
 import {
@@ -8,7 +8,7 @@ import {
   populateAndLean,
   populateAndLeanMany,
 } from "@utils/database";
-import { UserDocument } from "@modules/user";
+import { UserDocument, PopulatedUser } from "@shared/types";
 
 export class UserRepository
   extends BaseRepository<UserDocument>
@@ -21,15 +21,15 @@ export class UserRepository
     return await this.model.create(data);
   }
 
-  async getByEmailOrUsername(value: string): Promise<UserDocument | null> {
-    return populateAndLean<UserDocument>(
+  async getByEmailOrUsername(value: string): Promise<PopulatedUser | null> {
+    return populateAndLean<PopulatedUser>(
       this.model.findOne({ $or: [{ email: value }, { username: value }] }),
       populateUser
     );
   }
 
-  async getUserByEmail(email: string): Promise<UserDocument | null> {
-    return populateAndLean<UserDocument>(
+  async getUserByEmail(email: string): Promise<PopulatedUser | null> {
+    return populateAndLean<PopulatedUser>(
       this.model.findOne({ email }),
       populateUser
     );
@@ -39,8 +39,8 @@ export class UserRepository
     return toLeanMany<UserDocument>(this.model.find({ role }));
   }
 
-  async getUserByName(username: string): Promise<UserDocument | null> {
-    return populateAndLean<UserDocument>(
+  async getUserByName(username: string): Promise<PopulatedUser | null> {
+    return populateAndLean<PopulatedUser>(
       this.model.findOne({ username }),
       populateUser
     );
@@ -69,7 +69,7 @@ export class UserRepository
 
   async updateUser(
     userId: Types.ObjectId,
-    updateData: Partial<UserDocument>
+    updateData: UpdateQuery<UserDocument> 
   ): Promise<UserDocument | null> {
     return toLean<UserDocument>(
       this.model.findByIdAndUpdate(userId, updateData, { new: true })
@@ -84,8 +84,8 @@ export class UserRepository
     search: string,
     skip: number,
     limit: number
-  ): Promise<UserDocument[]> {
-    return populateAndLeanMany<UserDocument>(
+  ): Promise<PopulatedUser[]> {
+    return populateAndLeanMany<PopulatedUser>(
       this.model
         .find({ username: { $regex: search || "", $options: "i" } })
         .sort({ _id: -1 })
@@ -101,8 +101,8 @@ export class UserRepository
     });
   }
 
-  async searchUsers(search: string): Promise<UserDocument[]> {
-    return populateAndLeanMany<UserDocument>(
+  async searchUsers(search: string): Promise<PopulatedUser[]> {
+    return populateAndLeanMany<PopulatedUser>(
       this.model
         .find({
           $or: [
@@ -115,12 +115,12 @@ export class UserRepository
     );
   }
 
-  async getUserById(userId: string): Promise<UserDocument | null> {
-    return populateAndLean<UserDocument>(this.model.findById(userId), populateUser);
+  async getUserById(userId: string): Promise<PopulatedUser | null> {
+    return populateAndLean<PopulatedUser>(this.model.findById(userId), populateUser);
   }
 
-  async findUsersByIds(userIds: Types.ObjectId[]): Promise<UserDocument[]> {
-    return populateAndLeanMany<UserDocument>(
+  async findUsersByIds(userIds: Types.ObjectId[]): Promise<PopulatedUser[]> {
+    return populateAndLeanMany<PopulatedUser>(
       this.model.find({ _id: { $in: userIds } }),
       populateUser
     );

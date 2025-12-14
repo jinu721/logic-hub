@@ -1,7 +1,7 @@
-import { LevelIF,LevelReward } from "@shared/types";
+import { LevelDocument, LevelReward } from "@shared/types";
 import { PublicLevelDTO } from "@modules/level";
 
-export const toPublicLevelDTO = (level: LevelIF): PublicLevelDTO => {
+export const toPublicLevelDTO = (level: LevelDocument): PublicLevelDTO => {
   return {
     _id: level._id ? level._id.toString() : "",
     levelNumber: level.levelNumber,
@@ -18,6 +18,6 @@ export const toPublicLevelDTO = (level: LevelIF): PublicLevelDTO => {
   };
 };
 
-export const toPublicLevelDTOs = (levels: LevelIF[]): PublicLevelDTO[] => {
+export const toPublicLevelDTOs = (levels: LevelDocument[]): PublicLevelDTO[] => {
   return levels.map(toPublicLevelDTO);
 };

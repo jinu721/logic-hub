@@ -1,8 +1,8 @@
-import { SubmissionIF } from "@shared/types";
 import { PublicSubmissionDTO } from "@modules/challenge/dtos";
+import { SubmissionDocument } from "@shared/types";
 
 export const toPublicSubmissionDTO = (
-  submission: SubmissionIF
+  submission: SubmissionDocument
 ): PublicSubmissionDTO => {
   return {
     _id: submission._id ? submission?._id.toString() : "",
@@ -29,7 +29,7 @@ export const toPublicSubmissionDTO = (
 };
 
 export const toPublicSubmissionDTOs = (
-  submissionList: SubmissionIF[]
+  submissionList: SubmissionDocument[]
 ): PublicSubmissionDTO[] => {
   return submissionList.map(toPublicSubmissionDTO);
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import socket from "@/utils/socket.helper";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/context/Toast";
@@ -20,7 +20,6 @@ import TestConsole from "./TestConsole.tsx";
 import { Language } from "./CodeEditor";
 import DomainCompletePopup from "./DomainCompletePopup";
 import Spinner from "@/components/shared/CustomLoader";
-import TimeUpPopup from "./TimeUpPopup";
 
 interface DomainViewProps {
   challengeId: string;
@@ -35,10 +34,6 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
   const [challenge, setChallenge] = useState<ChallengeDomainIF | null>(null);
   const [user, setUser] = useState<UserIF | null>(null);
   const [activeTab, setActiveTab] = useState<string>("instructions");
-  const [timeLeft, setTimeLeft] = useState<number>(
-    challenge?.timeLimit || 1800
-  );
-  const [challengeStarted, setChallengeStarted] = useState<boolean>(false);
   const [challengeCompleted, setChallengeCompleted] = useState<boolean>(false);
   const [xpReward, setXpReward] = useState<number>(0);
   const [consoleOutput, setConsoleOutput] = useState<ConsoleOutput[]>([]);
@@ -49,7 +44,12 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [onlineUsers, setOnlineUsers] = useState<number>(0);
   const [currentLanguage, setCurrentLanguage] = useState<Language>("python");
-  const [codeToShow, setCodeToShow] = useState<any>();
+  const [codeToShow, setCodeToShow] = useState<any>(null);
+  const [timerMode, setTimerMode] = useState<"stopwatch" | "timer">("stopwatch");
+  const [timerDuration, setTimerDuration] = useState<number>(0);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [hasStartedTyping, setHasStartedTyping] = useState(false);
 
   const [leftPanelWidth, setLeftPanelWidth] = useState(45);
   const [bottomPanelHeight, setBottomPanelHeight] = useState(35);
@@ -58,9 +58,7 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
   const [activeRightTab, setActiveRightTab] = useState<"console" | "testcases">(
     "testcases"
   );
-  const [timeExpired, setTimeExpired] = useState(false);
   const [userInput, setUserInput] = useState("");
-  const latestUserInputRef = useRef("");
   const containerRef = useRef<HTMLDivElement>(null);
   const { queueLevelUp }: any = useLevelUp();
 
@@ -68,78 +66,81 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
   const { showToast }: any = useToast();
 
   useEffect(() => {
+    if (!timerRunning) return;
+
+    const interval = setInterval(() => {
+      setElapsedTime((prev) => {
+        if (timerMode === "stopwatch") {
+          return prev + 1;
+        } else {
+          const next = prev - 1;
+          if (next <= 0) {
+            setTimerRunning(false);
+            return 0;
+          }
+          return next;
+        }
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timerRunning, timerMode]);
+
+  useEffect(() => {
+    if (!timerRunning) {
+      if (timerMode === "timer") {
+        setElapsedTime(timerDuration);
+      } else {
+        setElapsedTime(0);
+      }
+    }
+  }, [timerMode, timerDuration, timerRunning]);
+  useEffect(() => {
     const fetchData = async (challengeId: string) => {
       try {
         setIsLoading(true);
-        const challenge = await getDomain(challengeId);
-        const user = await getMyProfile();
-        setChallenge(challenge);
-        setCurrentLanguage(Object.keys(challenge.initialCode)[0] as Language);
-        setCodeToShow(() => {
-          const base = { ...challenge?.initialCode };
-          const recent = challenge?.recentSubmission;
 
-          if (
-            recent &&
-            recent.execution &&
-            recent.execution.language &&
-            recent.execution.codeSubmitted &&
-            base[recent.execution.language]
-          ) {
-            base[recent.execution.language] = recent.execution.codeSubmitted;
-          }
+        const [challengeData, userData] = await Promise.all([
+          getDomain(challengeId),
+          getMyProfile()
+        ]);
 
-          return base;
-        });
-        setUser(user.user);
+        setChallenge(challengeData);
+        setCurrentLanguage(Object.keys(challengeData.initialCode)[0] as Language);
+        setUser(userData.user);
+
+        const initialCodeState = { ...challengeData.initialCode };
+        const recent = challengeData.recentSubmission;
+
+        if (
+          recent?.execution?.language &&
+          recent?.execution?.codeSubmitted &&
+          initialCodeState[recent.execution.language]
+        ) {
+          initialCodeState[recent.execution.language] = recent.execution.codeSubmitted;
+        }
+
+        setCodeToShow(initialCodeState);
+
+        const firstLang = Object.keys(challengeData.initialCode)[0] as Language;
+        setUserInput(initialCodeState[firstLang] || "");
+
       } catch (error) {
         console.error("Error fetching challenge:", error);
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchData(challengeId);
   }, [challengeId]);
-
   useEffect(() => {
-    const wasInChallenge = sessionStorage.getItem("challengeActive");
-    const storedChallengeId = sessionStorage.getItem("currentChallengeId");
-
-    if (wasInChallenge && storedChallengeId) {
-      socket.emit("challenge-ended", {
-        challengeId: storedChallengeId,
-        accessToken: localStorage.getItem("accessToken"),
-        reason: "reload-before-start",
-      });
-
-      sessionStorage.removeItem("challengeActive");
-      sessionStorage.removeItem("currentChallengeId");
-    }
-  }, []);
-
-  useEffect(() => {
-    latestUserInputRef.current = userInput;
-  }, [userInput]);
-
-  useEffect(() => {
-    if (!challengeStarted) return;
-    sessionStorage.setItem("challengeActive", "true");
-    sessionStorage.setItem("currentChallengeId", challenge?._id || "");
+    if (!challenge?._id) return;
 
     socket.emit("challenge-started", {
-      challengeId: challenge?._id,
+      challengeId: challenge._id,
       accessToken: localStorage.getItem("accessToken"),
     });
-
-    const handleBeforeUnload = () => {
-      socket.emit("challenge-ended", {
-        challengeId: challenge?._id,
-        accessToken: localStorage.getItem("accessToken"),
-        reason: "close-or-reload",
-      });
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
 
     const handleStartedCount = ({
       challengeId,
@@ -148,7 +149,7 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
       challengeId: string;
       startedCount: number;
     }) => {
-      if (challenge?._id === challengeId) {
+      if (challenge._id === challengeId) {
         setOnlineUsers(startedCount);
       }
     };
@@ -156,12 +157,18 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
     socket.on("challenge-started-count", handleStartedCount);
 
     return () => {
+      socket.emit("challenge-ended", {
+        challengeId: challenge._id,
+        accessToken: localStorage.getItem("accessToken"),
+        reason: "close-or-reload",
+      });
       socket.off("challenge-started-count", handleStartedCount);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [challengeStarted, challenge?._id]);
+  }, [challenge?._id]);
 
   useEffect(() => {
+    if (!isResizingHorizontal && !isResizingVertical) return;
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return;
 
@@ -190,10 +197,8 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
       document.body.style.cursor = "";
     };
 
-    if (isResizingHorizontal || isResizingVertical) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    }
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
@@ -202,36 +207,6 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
       document.body.style.cursor = "";
     };
   }, [isResizingHorizontal, isResizingVertical]);
-
-  useEffect(() => {
-    if (!challengeStarted) return;
-
-    const timerInterval = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(timerInterval);
-          setTimeExpired(true);
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timerInterval);
-  }, [challengeStarted]);
-
-  useEffect(() => {
-    if (timeExpired) {
-      handleSubmitSolution(true, latestUserInputRef.current);
-    }
-  }, [timeExpired]);
-
-  const startChallenge = () => {
-    setChallengeStarted(true);
-    if (challenge?.timeLimit) {
-      setTimeLeft(challenge?.timeLimit * 60 || 1800);
-    }
-  };
 
   const runCode = async () => {
     setIsRunning(true);
@@ -247,7 +222,6 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
         sourceCode: userInput,
         userId: user?._id,
       });
-
 
       setConsoleOutput([
         { type: "success", message: data.results[0].actualOutput },
@@ -267,10 +241,7 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
     }
   };
 
-  const handleSubmitSolution = async (
-    isAutoSubmit: boolean = false,
-    codeToSubmit: string | null = null
-  ) => {
+  const handleSubmitSolution = async (codeToSubmit: string | null = null) => {
     const finalCode = codeToSubmit || userInput;
 
     if (isSubmitting) return;
@@ -278,15 +249,9 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
     setIsSubmitting(true);
 
     try {
-      const timeTakenInSeconds = challenge
-        ? challenge.timeLimit * 60 - timeLeft
-        : 0;
-      const timeTaken = Math.ceil(timeTakenInSeconds / 60);
-
       const payload = {
         challengeId: challenge?._id,
         token: localStorage.getItem("accessToken"),
-        finishTime: timeTaken,
         language: currentLanguage,
         userCode: finalCode,
       };
@@ -304,7 +269,6 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
         setTimeout(() => serCipherFailed(false), 2000);
         redirectHome = false;
       }
-
 
       if (isCode) {
         setPreviewResults(data.results);
@@ -325,15 +289,6 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
         redirectHome = true;
       }
 
-      if (isAutoSubmit) {
-        setTimeExpired(false);
-        if (!isCipher || (isCipher && passed)) {
-          redirectHome = true;
-        } else {
-          redirectHome = false;
-        }
-      }
-
       if (redirectHome) {
         router.push("/home");
       }
@@ -345,24 +300,11 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
     setIsSubmitting(false);
   };
 
-  const handleBack = () => {
-    const wasInChallenge = sessionStorage.getItem("challengeActive");
-    const storedChallengeId = sessionStorage.getItem("currentChallengeId");
-
-    if (wasInChallenge && storedChallengeId) {
-      socket.emit("challenge-ended", {
-        challengeId: storedChallengeId,
-        accessToken: localStorage.getItem("accessToken"),
-        reason: "reload-before-start",
-      });
-
-      sessionStorage.removeItem("challengeActive");
-      sessionStorage.removeItem("currentChallengeId");
-    }
+  const handleBack = useCallback(() => {
     router.push("/home");
-  };
+  }, [router]);
 
-  const handleMouseDown =
+  const handleMouseDown = useCallback(
     (type: "horizontal" | "vertical") => (e: React.MouseEvent) => {
       e.preventDefault();
       document.body.style.userSelect = "none";
@@ -374,9 +316,11 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
       } else {
         setIsResizingVertical(true);
       }
-    };
+    },
+    []
+  );
 
-  const getLastSubmission = () => {
+  const getLastSubmission = useCallback(() => {
     setUserInput(challenge?.recentSubmission?.execution?.codeSubmitted || "");
     if (
       challenge?.recentSubmission?.execution &&
@@ -388,27 +332,49 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
           challenge?.recentSubmission?.execution?.codeSubmitted,
       }));
     }
-  };
+  }, [challenge, currentLanguage]);
 
-  const resetCode = () => {
-    setUserInput(challenge?.initialCode[currentLanguage]);
+  const resetCode = useCallback(() => {
+    if (!challenge) return;
+    setUserInput(challenge.initialCode[currentLanguage]);
     setCodeToShow((prev: any) => ({
       ...prev,
-      [currentLanguage]: challenge?.initialCode[currentLanguage],
+      [currentLanguage]: challenge.initialCode[currentLanguage],
     }));
-  };
+  }, [challenge, currentLanguage]);
 
-  const handleReuseCode = (code: string) => {
-    if (!challengeStarted) {
-      showToast({ type: "info", message: "Challenge not started yet" });
-      return;
-    }
+  const handleReuseCode = useCallback((code: string) => {
     setCodeToShow((prev: any) => ({
       ...prev,
       [currentLanguage]: code,
     }));
     setUserInput(code);
-  };
+  }, [currentLanguage]);
+
+  const handleCodeChange = useCallback(
+    (newCode: string) => {
+      setUserInput(newCode);
+
+      if (
+        !hasStartedTyping &&
+        codeToShow &&
+        codeToShow[currentLanguage] &&
+        newCode !== codeToShow[currentLanguage]
+      ) {
+        setHasStartedTyping(true);
+        setTimerRunning(true);
+      }
+    },
+    [hasStartedTyping, codeToShow, currentLanguage]
+  );
+
+  const pauseTimer = useCallback(() => setTimerRunning(false), []);
+  const resumeTimer = useCallback(() => setTimerRunning(true), []);
+  const resetTimer = useCallback(() => {
+    setTimerRunning(false);
+    setElapsedTime(0);
+    setHasStartedTyping(false);
+  }, []);
 
   return (
     <div
@@ -424,8 +390,14 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
           <div className="absolute inset-0 filter blur-sm pointer-events-none">
             <DomainHeader
               challenge={challenge}
-              challengeStarted={challengeStarted}
-              timeLeft={timeLeft}
+              elapsedTime={elapsedTime}
+              timerRunning={timerRunning}
+              timerMode={timerMode}
+              onPause={pauseTimer}
+              onResume={resumeTimer}
+              onReset={resetTimer}
+              onSwitchMode={setTimerMode}
+              onSetDuration={setTimerDuration}
               onlineUsers={onlineUsers}
               handleBack={handleBack}
             />
@@ -435,7 +407,6 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
                 leftPanelWidth={leftPanelWidth}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
-                challengeStarted={challengeStarted}
                 challenge={challenge}
                 user={user as UserIF}
                 isLoading={isLoading}
@@ -455,18 +426,16 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
                 <DomainWorkspace
                   bottomPanelHeight={bottomPanelHeight}
                   challenge={challenge}
-                  challengeStarted={challengeStarted}
                   isRunning={isRunning}
                   isSubmitting={isSubmitting}
                   currentLanguage={currentLanguage}
                   cipherFailed={cipherFailed}
                   codeToShow={codeToShow}
                   userInput={userInput}
-                  setUserInput={setUserInput}
+                  setUserInput={handleCodeChange}
                   setCurrentLanguage={(lang: string) =>
                     setCurrentLanguage(lang as Language)
                   }
-                  startChallenge={startChallenge}
                   runCode={runCode}
                   resetCode={resetCode}
                   getLastSubmission={getLastSubmission}
@@ -547,8 +516,14 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
         <>
           <DomainHeader
             challenge={challenge}
-            challengeStarted={challengeStarted}
-            timeLeft={timeLeft}
+            elapsedTime={elapsedTime}
+            timerRunning={timerRunning}
+            timerMode={timerMode}
+            onPause={pauseTimer}
+            onResume={resumeTimer}
+            onReset={resetTimer}
+            onSwitchMode={setTimerMode}
+            onSetDuration={setTimerDuration}
             onlineUsers={onlineUsers}
             handleBack={handleBack}
           />
@@ -558,7 +533,6 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
               leftPanelWidth={leftPanelWidth}
               activeTab={activeTab}
               setActiveTab={setActiveTab}
-              challengeStarted={challengeStarted}
               challenge={challenge}
               user={user}
               isLoading={isLoading}
@@ -578,18 +552,16 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
               <DomainWorkspace
                 bottomPanelHeight={bottomPanelHeight}
                 challenge={challenge}
-                challengeStarted={challengeStarted}
                 isRunning={isRunning}
                 isSubmitting={isSubmitting}
                 currentLanguage={currentLanguage}
                 cipherFailed={cipherFailed}
                 codeToShow={codeToShow}
                 userInput={userInput}
-                setUserInput={setUserInput}
+                setUserInput={handleCodeChange}
                 setCurrentLanguage={(lang: string) =>
                   setCurrentLanguage(lang as Language)
                 }
-                startChallenge={startChallenge}
                 runCode={runCode}
                 resetCode={resetCode}
                 getLastSubmission={getLastSubmission}
@@ -617,7 +589,6 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
           </div>
 
           {challengeCompleted && <DomainCompletePopup xp={xpReward} />}
-          {timeExpired && <TimeUpPopup />}
         </>
       ) : null}
     </div>

@@ -1,12 +1,12 @@
 import React, { FC, ChangeEvent, FormEvent } from "react";
 
 interface FormData {
-  emailOrUsername: string;
+  identifier: string;
   password: string;
 }
 
 interface FormErrors {
-  emailOrUsername?: string;
+  identifier?: string;
   password?: string;
 }
 
@@ -48,19 +48,19 @@ const LoginForm: FC<LoginFormProps> = ({
           </svg>
           <input
             type="text"
-            name="emailOrUsername"
-            value={form.emailOrUsername}
+            name="identifier"
+            value={form.identifier}
             onChange={handleChange}
             className={`w-full pl-10 pr-12 py-3 bg-[var(--logichub-secondary-bg)] border rounded-lg ${
-              errors.emailOrUsername
+              errors.identifier
                 ? "border-red-500"
                 : "border-[var(--logichub-border)]"
             } focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] text-[var(--logichub-primary-text)]`}
             placeholder="Enter your login ID"
           />
         </div>
-        {errors.emailOrUsername && (
-          <p className="text-red-400 mt-1">{errors.emailOrUsername}</p>
+        {errors.identifier && (
+          <p className="text-red-400 mt-1">{errors.identifier}</p>
         )}
       </div>
 

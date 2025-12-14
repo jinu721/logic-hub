@@ -41,7 +41,6 @@ const ForgotForm: React.FC<ForgotFormProps> = ({
               error ? "border-red-500" : "border-[var(--logichub-border)]"
             } focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] text-[var(--logichub-primary-text)]`}
             placeholder="Enter your email"
-            required
           />
         </div>
         {error && <p className="text-red-400 mt-1">{error}</p>}

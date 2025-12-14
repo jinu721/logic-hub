@@ -1,28 +1,47 @@
 import { Document, Types } from "mongoose";
+import { PopulatedUser } from "./user.types";
 
-export interface MessageAttrs {
+export interface MessageReactionRaw {
+  emoji: string;
+  userId: Types.ObjectId;
+}
+
+export interface MessageReactionPopulated {
+  emoji: string;
+  userId: PopulatedUser;
+}
+
+export interface MessageBase {
   conversationId: Types.ObjectId;
-  sender: Types.ObjectId;
   content?: string;
   type: 'text' | 'image' | 'video' | 'audio' | 'document' | 'voice' | 'poll' | 'system' | 'sticker';
-  mentionedUsers?: Types.ObjectId[];
-  seenBy?: Types.ObjectId[];
   media?: {
     url: string;
     type: 'image' | 'video' | 'audio' | 'document' | 'voice' | 'sticker';
   };
-  reactions?: {
-    emoji: string;
-    userId: Types.ObjectId;
-  }[];
-  replyTo?: Types.ObjectId;
   isEdited: boolean;
   isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
+export interface MessageRaw extends MessageBase {
+  sender: Types.ObjectId;
+  mentionedUsers?: Types.ObjectId[];
+  seenBy?: Types.ObjectId[];
+  reactions?: MessageReactionRaw[];
+  replyTo?: Types.ObjectId;
+}
 
-export interface MessageDocument extends MessageAttrs, Document {}
+export interface PopulatedMessage extends MessageBase {
+  _id: Types.ObjectId;
+  sender: PopulatedUser;
+  mentionedUsers?: PopulatedUser[];
+  seenBy?: PopulatedUser[];
+  reactions?: MessageReactionPopulated[];
+  replyTo?: PopulatedMessage;
+}
+
+export interface MessageDocument extends MessageRaw, Document { }
 
 

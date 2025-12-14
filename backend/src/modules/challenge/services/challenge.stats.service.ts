@@ -9,9 +9,8 @@ import {
 import { IUserRepository } from "@modules/user";
 import { ILevelRepository } from "@modules/level";
 
-import { ChallengeDocument } from "@modules/challenge/models";
 import { PublicChallengeDTO, toPublicChallengeDTO, toPublicChallengeDTOs } from "@modules/challenge/dtos";
-import { LevelDocument, SubmissionAttrs, SubmissionEffectsData, SubmissionEffectsResult, UserAttrs } from "@shared/types";
+import { ChallengeDocument, LevelDocument, SubmissionAttrs, SubmissionEffectsData, SubmissionEffectsResult} from "@shared/types";
 import { Types } from "mongoose";
 
 export class ChallengeStatsService
@@ -48,8 +47,8 @@ export class ChallengeStatsService
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
     const existing = await this.submissionRepo.getSubmissionsByUserAndChallenge(
-      toObjectId(user._id as string),
-      toObjectId(challenge._id as string)
+      user._id,
+      toObjectId(challengeId)
     );
 
     const alreadyCompleted = !!existing;
@@ -73,9 +72,22 @@ export class ChallengeStatsService
       user.stats.xpPoints = newXP;
       user.stats.totalXpPoints += xpGained;
       user.stats.level = newLevel;
+          const updateData = {
+      $set: {
+        "stats.xpPoints": newXP,
+        "stats.level": newLevel,
+      },
+      $inc: {
+        "stats.totalXpPoints": xpGained,
+      },
+    };
+
+    await this.userRepo.updateUser(user._id, updateData);
+
     }
 
-    await this.userRepo.saveUser(user);
+
+
 
     return {
       passed,

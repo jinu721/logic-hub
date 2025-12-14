@@ -1,10 +1,10 @@
-import { GroupIF } from "@shared/types";
 import { toPublicUserDTO, toPublicUserDTOs } from "@modules/user/dtos";
 import { PublicGroupDTO } from "@modules/chat/dtos";
+import { GroupDocument } from "@shared/types";
 
 
 
-export const toPublicGroupDTO = (group: GroupIF): PublicGroupDTO => {
+export const toPublicGroupDTO = (group: GroupDocument): PublicGroupDTO => {
   return {
     _id: group._id ? group._id.toString() : "",
     name: group.name,

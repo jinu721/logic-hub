@@ -1,3 +1,5 @@
+import { TestCaseIF } from "./challenge.types";
+
 export interface UserAnalyticsDomain {
   totalUsers: number;
   activeUsersToday: number;
@@ -48,4 +50,26 @@ export interface BadgesUnlockedDomain {
   count: number;
 }
 
-  
+export interface ChallengeInput {
+    title: string,
+    instructions: string,
+    type: "code" | "cipher",
+    level: "novice" | "adept" | "master",
+    timeLimit: number,
+    tags: string[],
+    requiredSkills: string[],
+    functionName: string,
+    parameters: string[],
+    returnType: string,
+    isPremium: boolean,
+    isKeyRequired: boolean,
+    initialCode: string,
+    solutionCode: string,
+    isActive: boolean,
+    testCases: TestCaseIF[],
+    hints: string[],
+    status: "active" | "inactive",
+    xpRewards: number,
+    startTime: Date | null,
+    endTime: Date | null,
+}

@@ -1,8 +1,6 @@
-import { Document, Schema, model } from "mongoose";
-import { ChallengeAttrs, TestCaseIF } from "@shared/types";
+import { Schema, model } from "mongoose";
+import { ChallengeDocument, TestCaseIF } from "@shared/types";
 
-export interface ChallengeDocument extends ChallengeAttrs, Document {
-}
 
 const testCaseSchema = new Schema<TestCaseIF>(
   {

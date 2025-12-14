@@ -19,23 +19,25 @@ import {
 } from "lucide-react";
 import { ChallengeDomainIF } from "@/types/domain.types";
 
-function getCountByKey(data, key) {
+function getCountByKey(data: any[], key: string): Record<string, number> {
   return data.reduce((acc, item) => {
     const value = item[key];
     if (Array.isArray(value)) {
       value.forEach((v) => {
-        acc[v] = (acc[v] || 0) + 1;
+        const vKey = String(v);
+        acc[vKey] = (acc[vKey] || 0) + 1;
       });
     } else if (value !== undefined && value !== null && value !== "") {
-      acc[value] = (acc[value] || 0) + 1;
+      const vKey = String(value);
+      acc[vKey] = (acc[vKey] || 0) + 1;
     }
     return acc;
-  }, {});
+  }, {} as Record<string, number>);
 }
 
-function getIconForType(type) {
+function getIconForType(type: string) {
   const typeString = String(type).toLowerCase();
-  const iconMap = {
+  const iconMap: Record<string, any> = {
     code: Code,
     coding: Code,
     programming: Code,
@@ -67,9 +69,9 @@ function getIconForType(type) {
   return iconMap[typeString] || Puzzle;
 }
 
-function getLevelColor(level) {
+function getLevelColor(level: string) {
   const levelString = String(level).toLowerCase();
-  const colorMap = {
+  const colorMap: Record<string, { color: string; bgColor: string }> = {
     novice: { color: "text-emerald-400", bgColor: "bg-emerald-500/20" },
     beginner: { color: "text-emerald-400", bgColor: "bg-emerald-500/20" },
     easy: { color: "text-emerald-400", bgColor: "bg-emerald-500/20" },
@@ -91,9 +93,9 @@ function getLevelColor(level) {
   );
 }
 
-function getStatusColor(status) {
+function getStatusColor(status: string) {
   const statusString = String(status).toLowerCase();
-  const colorMap = {
+  const colorMap: Record<string, string> = {
     available: "text-emerald-400",
     open: "text-emerald-400",
     active: "text-emerald-400",
@@ -146,21 +148,7 @@ const AdvancedFilterSidebar = ({
     const statusCounts = getCountByKey(challenges, "userStatus");
     const tagCounts = getCountByKey(challenges, "tags");
 
-    const booleanFields = {};
-    if (challenges.length > 0) {
-      Object.keys(challenges[0]).forEach((key) => {
-        const sampleValues = challenges.slice(0, 10).map((c) => c[key]);
-        const allBoolean = sampleValues.every(
-          (val) => typeof val === "boolean" || val === undefined
-        );
-        if (allBoolean && sampleValues.some((val) => val === true)) {
-          booleanFields[key] = getCountByKey(
-            challenges.filter((c) => c[key] === true),
-            key
-          );
-        }
-      });
-    }
+
 
     return {
       type: Object.entries(typeCounts)
@@ -204,18 +192,18 @@ const AdvancedFilterSidebar = ({
           label: String(tag),
           count,
         })),
-      booleanFields: Object.keys(booleanFields),
+
     };
   }, [challenges]);
 
-  const toggleSection = (section) => {
+  const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
     }));
   };
 
-  const handleFilterChange = (filterType, value) => {
+  const handleFilterChange = (filterType: string, value: string) => {
     const currentValues = filters[filterType] || [];
     const newValues = currentValues.includes(value)
       ? currentValues.filter((v) => v !== value)
@@ -234,9 +222,7 @@ const AdvancedFilterSidebar = ({
     count += filters.status?.length || 0;
     count += filters.tags?.length || 0;
 
-    filterConfig.booleanFields?.forEach((field) => {
-      count += filters[field] ? 1 : 0;
-    });
+
 
     count += filters.timeLimit?.min || filters.timeLimit?.max ? 1 : 0;
     count += filters.xpRewards?.min || filters.xpRewards?.max ? 1 : 0;
@@ -244,7 +230,7 @@ const AdvancedFilterSidebar = ({
     return count;
   };
 
-  const FilterSection = ({ title, sectionKey, children, icon: Icon }) => {
+  const FilterSection = ({ title, sectionKey, children, icon: Icon }: { title: string, sectionKey: keyof typeof expandedSections, children: React.ReactNode, icon?: any }) => {
     const isExpanded = expandedSections[sectionKey];
 
     return (
@@ -427,11 +413,10 @@ const AdvancedFilterSidebar = ({
                 <button
                   key={value}
                   onClick={() => handleFilterChange("tags", value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 flex items-center space-x-1 ${
-                    filters.tags?.includes(value)
-                      ? "bg-gradient-to-r from-purple-600/30 to-blue-600/30 text-[var(--logichub-accent)] border border-purple-500/50 shadow-lg"
-                      : "bg-[var(--logichub-card-bg)] text-[var(--logichub-muted-text)] border border-[var(--logichub-border)] hover:bg-[var(--logichub-secondary-bg)]/50 hover:text-[var(--logichub-secondary-text)] hover:border-[var(--logichub-border)]"
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 flex items-center space-x-1 ${filters.tags?.includes(value)
+                    ? "bg-gradient-to-r from-purple-600/30 to-blue-600/30 text-[var(--logichub-accent)] border border-purple-500/50 shadow-lg"
+                    : "bg-[var(--logichub-card-bg)] text-[var(--logichub-muted-text)] border border-[var(--logichub-border)] hover:bg-[var(--logichub-secondary-bg)]/50 hover:text-[var(--logichub-secondary-text)] hover:border-[var(--logichub-border)]"
+                    }`}
                 >
                   <span>{label}</span>
                   <span className="text-xs opacity-70">({count})</span>

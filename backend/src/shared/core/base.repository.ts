@@ -1,4 +1,4 @@
-import { SortOrder } from "@shared/types";
+import { SortDirection, SortOrder } from "@shared/types";
 import {
   Document,
   Model,
@@ -84,7 +84,7 @@ export abstract class BaseRepository<T extends Document> {
     filter: FilterQuery<T> = {},
     page: number = 1,
     limit: number = 10,
-    sort: Record<string, SortOrder> = { createdAt: -1 }
+    sort: Record<string, SortDirection> = { createdAt: -1 }
   ): Promise<{ data: T[]; total: number }> {
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([

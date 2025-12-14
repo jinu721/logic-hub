@@ -1,20 +1,21 @@
 import { Types } from "mongoose";
-import { ConversationIF } from "@shared/types";
+import { ConversationDocument, PopulatedConversation } from "@shared/types";
 
 export interface IConversationRepository {
-    findOneToOne(userA: string, userB: string): Promise<ConversationIF | null>;
-    findConversationById(conversationId: string): Promise<ConversationIF | null>;
-    createOneToOne(userA: string, userB: string): Promise<ConversationIF | null>;
-    setTypingUser(conversationId:string,userId:string):Promise<ConversationIF | null>;
-    removeTypingUser(conversationId:string,userId:string):Promise<ConversationIF | null>;
-    getTypingUsers(conversationId: string): Promise<any[]>;
-    softDeleteByGroupId(groupId: string): Promise<ConversationIF | null>;
-    createGroup(participants: string[], groupId: string): Promise<ConversationIF | null>;
-    findConversationsByUser(userId: string): Promise<ConversationIF[] | null>;
-    addParticipants(groupId: string, userIds: Types.ObjectId[]): Promise<ConversationIF | null>;
-    removeParticipants(groupId: string, userIds: Types.ObjectId[]): Promise<ConversationIF | null>;
-    addUnreadCountsForUsers(conversationId: string, userIds: string[]): Promise<ConversationIF | null>;
-    markRead(conversationId: string, userId: string): Promise<ConversationIF | null>;
-    findConversationByGroup(groupId: string): Promise<ConversationIF | null>;
-  }
-  
+  findOneToOne(userA: string, userB: string): Promise<PopulatedConversation | null>;
+  findConversationById(conversationId: string): Promise<PopulatedConversation | null>;
+  createOneToOne(userA: string, userB: string): Promise<ConversationDocument | null>;
+  setTypingUser(conversationId: string, userId: string): Promise<ConversationDocument | null>;
+  removeTypingUser(conversationId: string, userId: string): Promise<ConversationDocument | null>;
+  getTypingUsers(conversationId: string): Promise<any[]>;
+  softDeleteByGroupId(groupId: string): Promise<ConversationDocument | null>;
+  createGroup(participants: string[], groupId: string): Promise<ConversationDocument | null>;
+  findConversationsByUser(userId: string): Promise<PopulatedConversation[] | null>;
+  addParticipants(groupId: string, userIds: Types.ObjectId[]): Promise<ConversationDocument | null>;
+  removeParticipants(groupId: string, userIds: Types.ObjectId[]): Promise<ConversationDocument | null>;
+  addUnreadCountsForUsers(conversationId: string, userIds: string[]): Promise<ConversationDocument | null>;
+  markRead(conversationId: string, userId: string): Promise<ConversationDocument | null>;
+  findConversationByGroup(groupId: string): Promise<PopulatedConversation | null>;
+  saveConversation(conversation: ConversationDocument): Promise<ConversationDocument | null>;
+  updateLastMessage(conversationId: string, messageId: string): Promise<ConversationDocument | null>;
+}

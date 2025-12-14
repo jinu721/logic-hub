@@ -1,60 +1,33 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { getChallenges } from "@/services/client/clientServices";
+import React, { useState, useEffect } from "react";
 import DomainListing from "./DomainListing";
 import { UserIF } from "@/types/user.types";
 import { ChallengeDomainIF } from "@/types/domain.types";
-import { mockChallenges } from "@/utils/mock.data";
-
-interface Filters {
-  category?: string;
-  difficulty?: string;
-  [key: string]: any;
-}
 
 interface DomainsSectionProps {
-  filters: Filters;
+  challenges: ChallengeDomainIF[];
   user: UserIF;
 }
 
-const DomainsSection: React.FC<DomainsSectionProps> = ({ filters, user }) => {
-  const [domains, setDomains] = useState<ChallengeDomainIF[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [totalItems, setTotalItems] = useState<number>(0);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  
-  const itemsPerPage = 10;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-  const fetchDomains = useCallback(async (filterParams: Filters = {}, page: number = 1) => {
-    setIsLoading(true);
-    try {
-      const data = await getChallenges({
-        ...filterParams,
-        page,
-        limit: itemsPerPage,
-      });
-      console.log("Domains", data);
-      setTotalItems(data.totalItems);
-      setDomains(data.challenges);
-      setError(null);
-    } catch (error) {
-      console.error("Error fetching domains:", error);
-      setError("Failed to load domains. Please try again later.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [itemsPerPage]);
+const DomainsSection: React.FC<DomainsSectionProps> = ({ challenges, user }) => {
+  const [itemsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [displayedDomains, setDisplayedDomains] = useState<ChallengeDomainIF[]>([]);
 
   useEffect(() => {
     setCurrentPage(1);
-    fetchDomains(filters, 1);
-  }, [filters, fetchDomains]);
+  }, [challenges]);
+
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    setDisplayedDomains(challenges.slice(startIndex, endIndex));
+  }, [currentPage, challenges, itemsPerPage]);
+
+  const totalPages = Math.ceil(challenges.length / itemsPerPage);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages && page !== currentPage) {
       setCurrentPage(page);
-      fetchDomains(filters, page);
     }
   };
 
@@ -62,18 +35,18 @@ const DomainsSection: React.FC<DomainsSectionProps> = ({ filters, user }) => {
     <div className="mb-12 mt-2">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <h2 className="text-2xl font-bold text-white">Available Domains</h2>
+          <h2 className="text-2xl font-bold text-white">Available Domains ({challenges.length})</h2>
         </div>
       </div>
-      
+
       <DomainListing
-        domains={domains}
-        isLoading={isLoading}
-        error={error}
+        domains={displayedDomains}
+        isLoading={false}
+        error={null}
         user={user}
       />
-      
-      {totalPages > 1 && !isLoading && !error && (
+
+      {totalPages > 1 && (
         <div className="flex justify-center mt-8">
           <div className="flex items-center gap-2">
             <button
@@ -83,7 +56,7 @@ const DomainsSection: React.FC<DomainsSectionProps> = ({ filters, user }) => {
             >
               ←
             </button>
-            
+
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               let pageNum;
               if (totalPages <= 5) {
@@ -95,22 +68,21 @@ const DomainsSection: React.FC<DomainsSectionProps> = ({ filters, user }) => {
               } else {
                 pageNum = currentPage - 2 + i;
               }
-              
+
               return (
                 <button
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
-                  className={`w-8 h-8 text-sm rounded-md transition-colors ${
-                    currentPage === pageNum
+                  className={`w-8 h-8 text-sm rounded-md transition-colors ${currentPage === pageNum
                       ? 'bg-gradient-to-r from-purple-600 to-purple-900 text-white'
                       : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                  }`}
+                    }`}
                 >
                   {pageNum}
                 </button>
               );
             })}
-            
+
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}

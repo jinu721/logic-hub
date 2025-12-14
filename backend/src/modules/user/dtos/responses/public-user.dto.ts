@@ -5,8 +5,8 @@ export interface PublicUserDTO {
   email: string;
   username: string;
   bio: string;
-  avatar: IPublicInventoryDTO | null | undefined;
-  banner: IPublicInventoryDTO | null | undefined;
+  avatar: IPublicInventoryDTO | string | null | undefined;
+  banner: IPublicInventoryDTO | string | null | undefined;
   role: string;
   googleId: string | null;
   githubId: string | null;

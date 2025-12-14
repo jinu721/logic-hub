@@ -11,8 +11,7 @@ import {
   IChallengeRepository,
   ISubmissionRepository
 } from "@modules/challenge/interfaces";
-import { ChallengeDocument } from "@modules/challenge/models";
-import { ChallengeDBQuery, ChallengeQueryFilter } from "@shared/types";
+import { ChallengeDBQuery, ChallengeQueryFilter, ChallengeDocument } from "@shared/types";
 
 export class ChallengeQueryService
   extends BaseService<ChallengeDocument, PublicChallengeDTO>
@@ -92,7 +91,6 @@ export class ChallengeQueryService
   }> {
 
 
-    console.log("Filter received in service:", filter);
 
 
     const query: ChallengeDBQuery = {};

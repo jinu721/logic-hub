@@ -9,18 +9,16 @@ import {
 import {
   ISubmissionService,
   ISubmissionRepository,
-  SubmissionDocument,
 } from "@modules/challenge";
 import {
   IUserRepository
 } from "@modules/user";
-import { CreateSubmissionInput, SubmissionAttrs } from "@shared/types";
+import { CreateSubmissionInput, SubmissionAttrs, PopulatedUser, SubmissionDocument, UpdateSubmissionPayload } from "@shared/types";
 import { Types } from "mongoose";
 
 export class SubmissionService
-  extends BaseService<SubmissionAttrs, PublicSubmissionDTO>
-  implements ISubmissionService
-{
+  extends BaseService<SubmissionDocument, PublicSubmissionDTO>
+  implements ISubmissionService {
   constructor(
     private readonly submissionRepo: ISubmissionRepository,
     private readonly userRepo: IUserRepository
@@ -62,14 +60,14 @@ export class SubmissionService
   }
 
   async getRecentSubmissions(username: string) {
-    const user: UserDocument | null = await this.userRepo.getUserByName(username);
+    const user: PopulatedUser | null = await this.userRepo.getUserByName(username);
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
     const submissions = await this.submissionRepo.getRecentSubmissions(user._id as Types.ObjectId);
     return this.mapMany(submissions);
   }
 
-  async updateSubmission(id: string, data: Partial<SubmissionAttrs>) {
+  async updateSubmission(id: string, data: UpdateSubmissionPayload) {
     const submission = await this.submissionRepo.updateSubmission(toObjectId(id), data);
     if (!submission) throw new AppError(HttpStatus.NOT_FOUND, "Submission not found");
     return this.mapOne(submission);

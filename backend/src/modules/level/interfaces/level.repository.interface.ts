@@ -1,13 +1,12 @@
-
-import { LevelIF } from "@shared/types";
+import { LevelDocument } from "@shared/types";
 
 export interface ILevelRepository {
-    createLevel(data: LevelIF): Promise<LevelIF>;
-    getLevelById(id: string): Promise<LevelIF | null>;
-    getAllLevels(skip: number, limit:number): Promise<LevelIF[]>;
+    createLevel(data: LevelDocument): Promise<LevelDocument>;
+    getLevelById(id: string): Promise<LevelDocument | null>;
+    getAllLevels(skip: number, limit: number): Promise<LevelDocument[]>;
     countAllLevels(): Promise<number>;
-    updateLevel(id: string, data: Partial<LevelIF>): Promise<LevelIF | null>;
-    deleteLevel(id: string): Promise<LevelIF | null>;
-    getLevelByXP(xp: number): Promise<LevelIF | null>;
-    getLevelByLevel(level: number): Promise<LevelIF | null>;
+    updateLevel(id: string, data: Partial<LevelDocument>): Promise<LevelDocument | null>;
+    deleteLevel(id: string): Promise<LevelDocument | null>;
+    getLevelByXP(xp: number): Promise<LevelDocument | null>;
+    getLevelByLevel(level: number): Promise<LevelDocument | null>;
 }

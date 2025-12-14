@@ -157,7 +157,6 @@ export default function ChatPage() {
     try {
       setIsChatsLoading(true);
       const chats = await getCurrentUserChats({ search, activeTab });
-      console.log("USER CHATS", chats);
       setCurrentUsersChatsList(chats.data);
     } catch (error) {
       console.log(error);
@@ -188,7 +187,6 @@ export default function ChatPage() {
       try {
         setIsChatsLoading(true);
         const user = await getMyProfile();
-        console.log("CURRENT USER",user);
         await fetchCurrentUsersChats();
         setCurrentUser(user.user);
         setIsChatsLoading(false);

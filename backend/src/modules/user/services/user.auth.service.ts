@@ -1,9 +1,8 @@
 import jwt from "jsonwebtoken"
-
 import { BaseService } from "@core"
 import { AppError, generateOTP, generateUsername, toObjectId } from "@utils/application"
 import { HttpStatus } from "@constants"
-import { IAuthService, IUserRepository, IPendingUserRepository, PublicUserDTO, CreateUserDTO, VerifyOtpDTO, toPublicUserDTO, toPublicUserDTOs, UserDocument } from "@modules/user"
+import { IAuthService, IUserRepository, IPendingUserRepository, PublicUserDTO, RegisterRequestDto, VerifyOtpRequestDto, toPublicUserDTO, toPublicUserDTOs } from "@modules/user"
 import { ITokenProvider } from "@providers/token"
 import { IEmailProvider } from "@providers/email"
 import { IHashProvider } from "@providers/hashing"
@@ -12,26 +11,26 @@ import { env } from "@config/env"
 import { setAccessToken, setRefreshToken, clearAuthCookies, verifyLinkToken } from "@utils/token"
 import { RedisHelper } from "@utils/database"
 import { HttpContext } from "@shared/types/core.types"
-import { SocialLoginInput } from "@shared/types"
+import { SocialLoginInput, PopulatedUser, UserDocument } from "@shared/types"
 import { Response } from "express"
 
 
-export class AuthService extends BaseService<UserDocument, PublicUserDTO> implements IAuthService {
+export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> implements IAuthService {
   constructor(
     private readonly userRepo: IUserRepository,
     private readonly pendingRepo: IPendingUserRepository,
     private readonly tokenProv: ITokenProvider,
     private readonly emailProv: IEmailProvider,
     private readonly hashProv: IHashProvider,
-    private readonly tokenSvc: ITokenService, 
+    private readonly tokenSvc: ITokenService,
   ) {
     super();
   }
 
-  protected toDTO(user: UserDocument): PublicUserDTO { return toPublicUserDTO(user); }
-  protected toDTOs(users: UserDocument[]): PublicUserDTO[] { return toPublicUserDTOs(users); }
+  protected toDTO(user: PopulatedUser): PublicUserDTO { return toPublicUserDTO(user); }
+  protected toDTOs(users: PopulatedUser[]): PublicUserDTO[] { return toPublicUserDTOs(users); }
 
-  async register(dto: CreateUserDTO) {
+  async register(dto: RegisterRequestDto) {
     const exists =
       (await this.userRepo.getByEmailOrUsername(dto.username)) ||
       (await this.userRepo.getByEmailOrUsername(dto.email));
@@ -55,7 +54,7 @@ export class AuthService extends BaseService<UserDocument, PublicUserDTO> implem
     return { email };
   }
 
-  async verifyOTP(dto: VerifyOtpDTO, ctx: HttpContext) {
+  async verifyOTP(dto: VerifyOtpRequestDto, ctx: HttpContext) {
     const pend = await this.pendingRepo.findPendingUserByEmail(dto.email);
     if (!pend) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
     if (pend.otp !== Number(dto.otp)) throw new AppError(HttpStatus.UNAUTHORIZED, "Invalid OTP");
@@ -67,8 +66,8 @@ export class AuthService extends BaseService<UserDocument, PublicUserDTO> implem
     await this.pendingRepo.deletePendingUser(dto.email);
 
     const pub = this.mapOne(user);
-    const accessToken = this.tokenProv.generateAccessToken(pub);
-    const refreshToken = this.tokenProv.generateRefreshToken(pub);
+    const accessToken = this.tokenProv.generateAccessToken(pub as any);
+    const refreshToken = this.tokenProv.generateRefreshToken(pub as any);
 
     await this.tokenSvc.createToken({
       userId: String(user._id),
@@ -81,8 +80,6 @@ export class AuthService extends BaseService<UserDocument, PublicUserDTO> implem
       setAccessToken(ctx.res, accessToken);
       setRefreshToken(ctx.res, refreshToken);
     }
-
-
 
     return { accessToken, refreshToken, user: pub };
   }
@@ -97,8 +94,8 @@ export class AuthService extends BaseService<UserDocument, PublicUserDTO> implem
     if (!valid) throw new AppError(HttpStatus.UNAUTHORIZED, "Invalid credentials");
 
     const pub = this.mapOne(user);
-    const accessToken = this.tokenProv.generateAccessToken(pub);
-    const refreshToken = this.tokenProv.generateRefreshToken(pub);
+    const accessToken = this.tokenProv.generateAccessToken(pub as any);
+    const refreshToken = this.tokenProv.generateRefreshToken(pub as any);
 
     await this.tokenSvc.createToken({
       userId: String(user._id),
@@ -121,8 +118,8 @@ export class AuthService extends BaseService<UserDocument, PublicUserDTO> implem
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
     const pub = this.mapOne(user);
-    const accessToken = this.tokenProv.generateAccessToken(pub);
-    const refreshToken = this.tokenProv.generateRefreshToken(pub);
+    const accessToken = this.tokenProv.generateAccessToken(pub as any);
+    const refreshToken = this.tokenProv.generateRefreshToken(pub as any);
 
     await this.tokenSvc.createToken({
       userId: String(user._id),
@@ -153,43 +150,53 @@ export class AuthService extends BaseService<UserDocument, PublicUserDTO> implem
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
     const pub = this.mapOne(user);
-    const newAccessToken = this.tokenProv.generateAccessToken(pub);
+    const newAccessToken = this.tokenProv.generateAccessToken(pub as any);
 
     if (ctx.res) setAccessToken(ctx.res, newAccessToken);
     return { accessToken: newAccessToken };
   }
 
-async socialLogin(data: SocialLoginInput) {
-  const user = await this.userRepo.getByEmailOrUsername(data.email);
+  async socialLogin(data: SocialLoginInput) {
+    const user = await this.userRepo.getByEmailOrUsername(data.email);
 
-  if (user) {
-    if (user.loginType !== data.loginType) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Login type mismatch");
+    if (user) {
+      // user is PopulatedUser.
+      if (user.loginType !== data.loginType) {
+        throw new AppError(HttpStatus.BAD_REQUEST, "Login type mismatch");
+      }
+      // Return document (Raw or Populated? Strategy expects a user to pass to callback).
+      // DTOs usually work with Raw in Strategy? No, standard is Document.
+      // I can return user (Populated via inheritance matches UserRaw structure closely enough for strategy usage, except reference types).
+      return user as unknown as UserDocument; // Casting for now to satisfy return type if it expects Document. 
+      // Ideally socialLogin return type should be explicit.
     }
-    return user;
+
+    const username = await generateUsername(data.name);
+
+    const newUser = await this.userRepo.createUser({
+      username,
+      email: data.email,
+      loginType: data.loginType,
+      isVerified: true,
+      ...(data.loginType === "google" && { googleId: data.profileId }),
+      ...(data.loginType === "github" && { githubId: data.profileId }),
+    });
+
+    return newUser;
   }
-
-  const username = await generateUsername(data.name);
-
-  const newUser = await this.userRepo.createUser({
-    username,
-    email: data.email,
-    loginType: data.loginType,
-    isVerified: true,
-    ...(data.loginType === "google" && { googleId: data.profileId }),
-    ...(data.loginType === "github" && { githubId: data.profileId }),
-  });
-
-  return newUser;
-}
 
 
   async socialAuthCallback(oauthUser: UserDocument, ctx: HttpContext) {
     const userId = String(oauthUser._id || oauthUser.id);
-    const pub: PublicUserDTO = this.mapOne(oauthUser);
 
-    const accessToken = this.tokenProv.generateAccessToken(pub);
-    const refreshToken = this.tokenProv.generateRefreshToken(pub);
+    // FETCH POPULATED
+    const user = await this.userRepo.getUserById(userId);
+    if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
+
+    const pub: PublicUserDTO = this.mapOne(user);
+
+    const accessToken = this.tokenProv.generateAccessToken(pub as any);
+    const refreshToken = this.tokenProv.generateRefreshToken(pub as any);
 
     await this.tokenSvc.createToken({
       userId,
@@ -210,7 +217,7 @@ async socialLogin(data: SocialLoginInput) {
     const user = await this.userRepo.getByEmailOrUsername(email);
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "Email not found");
 
-    const token = this.tokenProv.generateResetToken(this.mapOne(user));
+    const token = this.tokenProv.generateResetToken(this.mapOne(user) as any);
     const link = `${env.FRONTEND_URL}/auth/reset?token=${token}`;
     await this.emailProv.sendLink(email, link);
 

@@ -1,12 +1,12 @@
 import { PublicSubmissionDTO } from "@modules/challenge/dtos";
-import { CreateSubmissionInput, SubmissionAttrs } from "@shared/types";
+import { CreateSubmissionInput, SubmissionAttrs, UpdateSubmissionPayload } from "@shared/types";
 
 export interface ISubmissionService {
   createSubmission(data: CreateSubmissionInput): Promise<PublicSubmissionDTO>;
   getSubmissionsByUserAndChallenge(data: { userId: string; challengeId: string }): Promise<PublicSubmissionDTO[]>;
   getRecentSubmissions(username: string): Promise<PublicSubmissionDTO[] | null>;
   getSubmissionById(id: string): Promise<PublicSubmissionDTO | null>;
-  updateSubmission(id: string, data: Partial<SubmissionAttrs>): Promise<PublicSubmissionDTO | null>;
+  updateSubmission(id: string, data: UpdateSubmissionPayload): Promise<PublicSubmissionDTO | null>;
   deleteSubmissionById(id: string): Promise<boolean>;
   getAllSubmissionsByUser(userId: string): Promise<PublicSubmissionDTO[]>;
   getAllSubmissionsByChallenge(challengeId: string): Promise<PublicSubmissionDTO[]>;

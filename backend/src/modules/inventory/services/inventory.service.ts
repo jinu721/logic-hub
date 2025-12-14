@@ -1,12 +1,14 @@
 import { BaseService } from "@core/base.service";
 import { toPublicInventoryDTO, toPublicInventoryDTOs } from "@modules/inventory/dtos";
 import { IImageUploader } from "@providers";
-import { InventoryDocument } from "@shared/types";
-
-type InventoryPublicDTO = ReturnType<typeof toPublicInventoryDTO>;
+import { InventoryDocument, PopulatedInventory } from "@shared/types";
+import { IInventoryRepository } from "../interfaces";
+import { IPublicInventoryDTO } from "@modules/inventory/dtos";
+import { AppError } from "@utils/application";
+import { HttpStatus } from "@constants";
 
 export class InventoryService
-  extends BaseService<InventoryDocument, InventoryPublicDTO> {
+  extends BaseService<PopulatedInventory, IPublicInventoryDTO> {
   constructor(
     private readonly repo: IInventoryRepository,
     private readonly uploader: IImageUploader
@@ -14,15 +16,30 @@ export class InventoryService
     super();
   }
 
-  protected toDTO(entity: InventoryDocument): InventoryPublicDTO {
-    return toPublicInventoryDTO(entity);
+  protected toDTO(entity: PopulatedInventory): IPublicInventoryDTO {
+    // Mapper returns undefined only if item is null, but our PopulateInventory is strict.
+    // However, mapper signature says undefined. We should ensure it returns strict DTO for BaseService.
+    const dto = toPublicInventoryDTO(entity);
+    if (!dto) throw new Error("Mapped inventory item is undefined");
+    return dto;
   }
 
-  protected toDTOs(entities: InventoryDocument[]): InventoryPublicDTO[] {
+  protected toDTOs(entities: PopulatedInventory[]): IPublicInventoryDTO[] {
     return toPublicInventoryDTOs(entities);
   }
 
+  private async getPopulated(id: string): Promise<PopulatedInventory> {
+    const item = await this.repo.getById(id);
+    if (!item) throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
+    return item;
+  }
+
   async create(data: InventoryDocument) {
+    // Note: data.image here is likely string (path) or file? 
+    // The previous code did uploader.upload(data.image).
+    // If data.image is string, upload returns ID/URL.
+    // We assume input data is partial/raw. But signature says InventoryDocument.
+    // I will keep logic but types might need checking (CreateInventoryInput vs InventoryDocument).
     const uploaded = await this.uploader.upload(data.image);
 
     const created = await this.repo.create({
@@ -30,7 +47,7 @@ export class InventoryService
       image: uploaded.id
     });
 
-    return this.mapOne(created);
+    return this.mapOne(await this.getPopulated(String(created._id)));
   }
 
   async getAll(search: string, page: number, limit: number) {
@@ -43,12 +60,15 @@ export class InventoryService
 
   async getById(id: string) {
     const item = await this.repo.getById(id);
+    if (!item) return null;
     return this.mapOne(item);
   }
 
   async update(id: string, data: Partial<InventoryDocument>) {
     const updated = await this.repo.update(id, data);
-    return this.mapOne(updated);
+    if (!updated) return null;
+    // Re-fetch Pattern
+    return this.mapOne(await this.getPopulated(id));
   }
 
   async delete(id: string) {

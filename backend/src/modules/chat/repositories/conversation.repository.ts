@@ -1,13 +1,12 @@
 import { Types } from "mongoose";
 import { IConversationRepository, ConversationModel } from "@modules/chat";
 import { BaseRepository } from "@core";
-import { ConversationIF } from "@shared/types";
+import { ConversationDocument, PopulatedConversation } from "@shared/types";
 
 
 export class ConversationRepository
-  extends BaseRepository<ConversationIF>
-  implements IConversationRepository
-{
+  extends BaseRepository<ConversationDocument>
+  implements IConversationRepository {
   constructor() {
     super(ConversationModel);
   }
@@ -15,16 +14,67 @@ export class ConversationRepository
   async findOneToOne(
     userA: string,
     userB: string
-  ): Promise<ConversationIF | null> {
+  ): Promise<PopulatedConversation | null> {
     return await this.model.findOne({
       type: "one-to-one",
       participants: { $all: [userA, userB] },
-    });
+    }).populate([
+      {
+        path: "participants",
+        select: "username bio avatar banner isOnline lastSeen",
+        populate: [
+          {
+            path: "avatar",
+            select: "url",
+          },
+          {
+            path: "banner",
+            select: "url",
+          },
+        ],
+      },
+      {
+        path: "typingUsers",
+        select: "username avatar",
+        populate: {
+          path: "avatar",
+          select: "url",
+        },
+      },
+      {
+        path: "latestMessage",
+        populate: [
+          {
+            path: "sender",
+            select: "username avatar",
+            populate: {
+              path: "avatar",
+              select: "url",
+            },
+          },
+          {
+            path: "replyTo",
+            populate: {
+              path: "sender",
+              select: "username avatar",
+              populate: {
+                path: "avatar",
+                select: "url",
+              },
+            },
+          },
+          {
+            path: "media",
+            select: "url type",
+          },
+        ],
+      },
+    ]) as unknown as PopulatedConversation;
   }
 
   async findConversationById(
     conversationId: string
-  ): Promise<ConversationIF | null> {
+  ): Promise<PopulatedConversation | null> {
     return await this.model.findById(conversationId).populate([
       {
         path: "participants",
@@ -76,12 +126,12 @@ export class ConversationRepository
           },
         ],
       },
-    ]);
+    ]) as unknown as PopulatedConversation;
   }
 
   async findConversationsByUser(
     userId: string
-  ): Promise<ConversationIF[] | null> {
+  ): Promise<PopulatedConversation[] | null> {
     const objectId = new Types.ObjectId(userId);
     const conversation = await this.model
       .find({ participants: objectId })
@@ -138,7 +188,7 @@ export class ConversationRepository
         },
       ]);
 
-    return conversation;
+    return conversation as unknown as PopulatedConversation[];
   }
 
   async addParticipants(groupId: string, userIds: Types.ObjectId[]) {
@@ -147,17 +197,7 @@ export class ConversationRepository
         { groupId },
         { $addToSet: { participants: { $each: userIds } } },
         { new: true }
-      )
-      .populate({
-        path: "participants",
-        select: "username bio avatar banner",
-        populate: [
-          { path: "avatar", select: "image" },
-          { path: "banner", select: "image" },
-        ],
-      })
-      .populate("latestMessage")
-      .populate("typingUsers");
+      );
   }
 
   async removeParticipants(groupId: string, userIds: Types.ObjectId[]) {
@@ -166,17 +206,7 @@ export class ConversationRepository
         { groupId },
         { $pull: { participants: { $in: userIds } } },
         { new: true }
-      )
-      .populate({
-        path: "participants",
-        select: "username bio avatar banner",
-        populate: [
-          { path: "avatar", select: "image" },
-          { path: "banner", select: "image" },
-        ],
-      })
-      .populate("latestMessage")
-      .populate("typingUsers");
+      );
   }
 
   async addUnreadCountsForUsers(conversationId: string, userIds: string[]) {
@@ -199,23 +229,13 @@ export class ConversationRepository
         conversationId,
         { $unset: { [`unreadCounts.${userId}`]: "" } },
         { new: true }
-      )
-      .populate({
-        path: "participants",
-        select: "username bio avatar banner",
-        populate: [
-          { path: "avatar", select: "image" },
-          { path: "banner", select: "image" },
-        ],
-      })
-      .populate("latestMessage")
-      .populate("typingUsers");
+      );
   }
 
   async createOneToOne(
     userA: string,
     userB: string
-  ): Promise<ConversationIF | null> {
+  ): Promise<ConversationDocument | null> {
     return await this.model.create({
       type: "one-to-one",
       participants: [userA, userB],
@@ -225,7 +245,7 @@ export class ConversationRepository
   async createGroup(
     participants: string[],
     groupId: string
-  ): Promise<ConversationIF | null> {
+  ): Promise<ConversationDocument | null> {
     return await this.model.create({
       type: "group",
       participants: participants,
@@ -235,42 +255,24 @@ export class ConversationRepository
   async setTypingUser(
     conversationId: string,
     userId: string
-  ): Promise<ConversationIF | null> {
+  ): Promise<ConversationDocument | null> {
     return await this.model
       .findByIdAndUpdate(
         conversationId,
         { $addToSet: { typingUsers: userId } },
         { new: true }
-      )
-      .populate({
-        path: "typingUsers",
-        select: "avatar username _id",
-        populate: {
-          path: "avatar",
-          model: "Avatar",
-          select: "image name",
-        },
-      });
+      ).populate("typingUsers");
   }
   async removeTypingUser(
     conversationId: string,
     userId: string
-  ): Promise<ConversationIF | null> {
+  ): Promise<ConversationDocument | null> {
     return await this.model
       .findByIdAndUpdate(
         conversationId,
         { $pull: { typingUsers: userId } },
         { new: true }
-      )
-      .populate({
-        path: "typingUsers",
-        select: "avatar username _id",
-        populate: {
-          path: "avatar",
-          model: "Avatar",
-          select: "image name",
-        },
-      });
+      ).populate("typingUsers");
   }
   async getTypingUsers(conversationId: string): Promise<any[]> {
     const conversation = await this.model
@@ -278,7 +280,7 @@ export class ConversationRepository
       .select("typingUsers");
     return conversation?.typingUsers || [];
   }
-  async softDeleteByGroupId(groupId: string): Promise<ConversationIF | null> {
+  async softDeleteByGroupId(groupId: string): Promise<ConversationDocument | null> {
     return await this.model.findOneAndUpdate(
       { groupId },
       { isDeleted: true },
@@ -287,8 +289,8 @@ export class ConversationRepository
   }
 
   async saveConversation(
-    conversation: ConversationIF
-  ): Promise<ConversationIF | null> {
+    conversation: ConversationDocument
+  ): Promise<ConversationDocument | null> {
     return await this.model.findByIdAndUpdate(conversation._id, conversation, {
       new: true,
     });
@@ -296,7 +298,7 @@ export class ConversationRepository
 
   async findConversationByGroup(
     groupId: string
-  ): Promise<ConversationIF | null> {
+  ): Promise<PopulatedConversation | null> {
     return this.model
       .findOne({ groupId })
       .populate([
@@ -327,29 +329,18 @@ export class ConversationRepository
         },
       ])
       .populate("latestMessage")
-      .populate("typingUsers");
+      .populate("typingUsers") as unknown as PopulatedConversation;
   }
 
   async updateLastMessage(
     conversationId: string,
     messageId: string
-  ): Promise<ConversationIF | null> {
+  ): Promise<ConversationDocument | null> {
     return await this.model
       .findByIdAndUpdate(
         conversationId,
         { latestMessage: messageId },
         { new: true }
-      )
-      .populate({
-        path: "latestMessage",
-        populate: {
-          path: "sender",
-          select: "username avatar",
-          populate: {
-            path: "avatar",
-            select: "url",
-          },
-        },
-      });
+      );
   }
 }
