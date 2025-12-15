@@ -139,7 +139,6 @@ export default function useChat({
       lastMessage,
       unreadCounts,
     }: any) => {
-
       // Map sender ID in lastMessage if needed
       if (lastMessage?.sender && !lastMessage.sender._id && lastMessage.sender.userId) {
         lastMessage.sender._id = lastMessage.sender.userId;
@@ -153,33 +152,33 @@ export default function useChat({
 
         if (existingChatIndex !== -1) {
           const chat = updated[existingChatIndex];
-          const isSelected = chat._id === selectedChatIdRef.current;
 
+          // CRITICAL FIX: Always replace unreadCounts if provided, otherwise keep existing
+          // Also ensure latestMessage is strictly updated
           const updatedChat = {
             ...chat,
-            latestMessage: lastMessage,
+            latestMessage: lastMessage || chat.latestMessage,
             unreadCounts: unreadCounts !== undefined ? unreadCounts : chat.unreadCounts,
           };
 
           updated.splice(existingChatIndex, 1);
           return [updatedChat, ...updated];
         } else {
-          // If chat is not in list, handling it might require fetching full conversation or minimal data
-          // For now, adhere to existing logic but safe check
+          // New chat or not in list - handle carefully
+          // If we have lastMessage, we can construct a basic chat object
+          if (!lastMessage) return prevChats;
+
           const isChatOpen = conversationId === selectedChatIdRef.current;
+
           const newChat = {
             _id: conversationId,
             latestMessage: lastMessage,
-            unreadCounts: isChatOpen ? {} : unreadCounts,
-            // We might be missing participants/otherUser here if it's a fresh chat push
-            // But we keep the structure consistent
+            unreadCounts: isChatOpen ? {} : unreadCounts || {},
             type: lastMessage.conversationId ? 'one-to-one' : 'group',
-            // Note: In a real scenario we might want to fetch the chat here
-            // but we'll stick to updating if exists logic primarily
-            participants: [],
+            participants: [], // Will be filled by next fetch or event
             typingUsers: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: lastMessage.createdAt || new Date().toISOString(),
+            updatedAt: lastMessage.createdAt || new Date().toISOString(),
           } as any;
 
           return [newChat, ...updated];
@@ -240,11 +239,26 @@ export default function useChat({
       }
 
       setCurrentUsersChats((prevChats) =>
-        prevChats.map((chat) =>
-          chat._id === message.conversationId
-            ? { ...chat, lastMessage: message } // Updates preview
-            : chat
-        )
+        prevChats.map((chat) => {
+          if (chat._id === message.conversationId) {
+            // Optimistically update unread count if it's not from us
+            const isFromMe = message.sender._id === currentUserId;
+            // Handle unreadCounts usually coming as Object from JSON, though typed as Map potentially
+            const counts: any = chat.unreadCounts || {};
+            const currentUnread = counts[currentUserId] || 0;
+            const newUnread = !isFromMe ? currentUnread + 1 : currentUnread;
+
+            return {
+              ...chat,
+              latestMessage: message,
+              unreadCounts: {
+                ...counts,
+                [currentUserId]: newUnread
+              }
+            };
+          }
+          return chat;
+        })
       );
     };
 

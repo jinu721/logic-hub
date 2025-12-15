@@ -45,20 +45,16 @@ export class MessageHandler {
         conversationId: data.conversationId,
         message: msg,
       });
-      this.io.to(data.conversationId).emit("conversation_updated");
 
-      console.log("MESSAGE SEND :- ", msg);
-
-      const conversation =
-        await this.container.conversationQuerySvc.getConversationById(
-          msg.conversationId.toString()
-        );
+      const conversation = await this.container.conversationQuerySvc.getConversationById(
+        msg.conversationId.toString()
+      );
 
       if (!conversation) {
-        console.log("Conversation not found");
         throw new Error("Conversation not found");
       }
 
+      // Identify other participants (excluding sender) to increment unread count
       const participantIds = conversation.participants.map((p) =>
         p.userId.toString()
       );
@@ -66,31 +62,50 @@ export class MessageHandler {
         (id) => id !== msg.sender?.userId
       );
 
+      // Increment Unread Counts for others
       const updatedConv =
         await this.container.conversationCommandSvc.addUnreadCounts(
           msg.conversationId.toString(),
           otherUserIds
         );
 
-
-      console.log("UPDATED CONV", updatedConv);
-
       if (!updatedConv) {
-        console.log("Conversation not found");
         throw new Error("Conversation not found");
       }
 
+      // Emit conversation_updated to ALL participants (including sender)
+      // calculated individually if needed, but here updatedConv has all counts.
+      // We must map the Map to a plain object if it isn't one already.
+      const unreadCountsObj = updatedConv.unreadCounts instanceof Map
+        ? Object.fromEntries(updatedConv.unreadCounts)
+        : updatedConv.unreadCounts || {};
+
+      // Emit conversation_updated to the ROOM first (ensures list sort updates for everyone)
+      // This sends the latest message, but NOT user-specific unread counts (or sends empty/generic)
+      this.io.to(data.conversationId).emit("conversation_updated", {
+        conversationId: msg.conversationId.toString(),
+        lastMessage: msg,
+        // We cannot send specific unread counts to the room effectively without exposing data
+        // So we send it merely to trigger the sort/preview update
+      });
+
+
       updatedConv.participants.forEach(async (user: PublicUserDTO) => {
-        const socketId = await redisClient.get(`socket:${user}`);
-        console.log("SocketId", socketId);
-        if (socketId) {
-          this.io.to(socketId).emit("conversation_updated", {
-            conversationId: msg.conversationId.toString(),
-            lastMessage: conversation.latestMessage,
-            unreadCounts: updatedConv.unreadCounts instanceof Map
-              ? Object.fromEntries(updatedConv.unreadCounts)
-              : updatedConv.unreadCounts || {},
-          });
+        // Correct Redis Key: sockets:{userId} (Set)
+        const socketIds = await redisClient.sMembers(`sockets:${user.userId}`);
+
+        if (socketIds && socketIds.length > 0) {
+          const unreadForUser = updatedConv.unreadCounts instanceof Map
+            ? Object.fromEntries(updatedConv.unreadCounts)
+            : updatedConv.unreadCounts || {};
+
+          for (const socketId of socketIds) {
+            this.io.to(socketId).emit("conversation_updated", {
+              conversationId: msg.conversationId.toString(),
+              lastMessage: msg, // or msg
+              unreadCounts: unreadForUser,
+            });
+          }
         }
       });
     } catch (err) {
@@ -106,43 +121,49 @@ export class MessageHandler {
     { conversationId, userId }: { conversationId: string; userId: string }
   ): Promise<void> {
     try {
-      console.log("Marking User started", userId);
+      // 1. Mark messages as seen
       await this.container.messageEngagementSvc.markMessagesAsSeen(
         conversationId,
         userId
       );
-      const conversations = await this.container.conversationCommandSvc.markAsRead(
+
+      // 2. Reset unread count for user in conversation
+      const updatedConv = await this.container.conversationCommandSvc.markAsRead(
         conversationId,
         userId
       );
-      if (!conversations) {
+
+      if (!updatedConv) {
         throw new Error("Conversation not found");
       }
 
-
-      console.log("Message Marked as Read");
-
-
+      // 3. Emit message_seen to the room (so others see 'seen' status)
       const user = await this.container.userQuerySvc.findUserById(userId);
-
-      if (!user) {
-        throw new Error("User not found");
-      }
-
-      this.io.to(conversationId).emit("message_seen", {
-        conversationId,
-        seenBy: user,
-      });
-      const socketId = await redisClient.get(`socket:${userId}`);
-      if (socketId) {
-        this.io.to(socketId).emit("conversation_updated", {
-          conversationId: conversationId,
-          lastMessage: conversations.latestMessage,
-          unreadCounts: conversations.unreadCounts instanceof Map
-            ? Object.fromEntries(conversations.unreadCounts)
-            : conversations.unreadCounts || {},
+      if (user) {
+        this.io.to(conversationId).emit("message_seen", {
+          conversationId,
+          seenBy: user,
         });
       }
+
+      // 4. Emit conversation_updated to the USER ONLY (to clear their badge)
+      // 4. Emit conversation_updated to the USER ONLY (to clear their badge)
+      const socketIds = await redisClient.sMembers(`sockets:${userId}`);
+
+      if (socketIds && socketIds.length > 0) {
+        const unreadCountsObj = updatedConv.unreadCounts instanceof Map
+          ? Object.fromEntries(updatedConv.unreadCounts)
+          : updatedConv.unreadCounts || {};
+
+        for (const socketId of socketIds) {
+          this.io.to(socketId).emit("conversation_updated", {
+            conversationId: conversationId,
+            lastMessage: updatedConv.latestMessage,
+            unreadCounts: unreadCountsObj,
+          });
+        }
+      }
+
     } catch (err) {
       console.log(`Error in mark_all_conv_as_read: ${err}`);
       socket.emit("send_error", {

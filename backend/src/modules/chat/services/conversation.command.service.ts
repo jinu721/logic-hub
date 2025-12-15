@@ -55,7 +55,10 @@ export class ConversationCommandService
   async addUnreadCounts(conversationId: string, userIds: string[]): Promise<PublicConversationDTO> {
     const updated = await this.conversationRepo.addUnreadCountsForUsers(conversationId, userIds);
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
-    return this.mapOne(await this.getPopulated(conversationId));
+
+    // Ensure we fetch the completely fresh populated conversation
+    const populated = await this.getPopulated(conversationId);
+    return this.mapOne(populated);
   }
 
   async markAsRead(conversationId: string, userId: string): Promise<PublicConversationDTO> {
