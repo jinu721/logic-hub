@@ -820,7 +820,8 @@ export default function ChatPage() {
             </div>
           ) : currentConversationData &&
             currentUserId &&
-            !isConversationLoading ? (
+            !isConversationLoading &&
+            currentConversationData._id === selectedChatId ? (
             <>
               <ChatHeader
                 isGroupChat={isGroup}

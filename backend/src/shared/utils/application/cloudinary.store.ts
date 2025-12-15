@@ -5,9 +5,9 @@ export const uploadFile = (file: Express.Multer.File, type: string): Promise<str
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        resource_type: type === 'video' || type === 'audio' ? 'video' : 'image',
-        folder: "chat_media", 
-        timeout: 60000 
+        resource_type: type === 'video' || type === 'audio' || type === 'voice' ? 'video' : 'image',
+        folder: "chat_media",
+        timeout: 60000
       },
       (error, result) => {
         if (error) {

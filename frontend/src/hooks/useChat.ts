@@ -68,11 +68,16 @@ export default function useChat({
       if (conversationId === selectedChatIdRef.current) {
         setMessages((prevMsgs) =>
           prevMsgs.map((msg) => {
-            const alreadySeen = msg.seenBy?.includes(seenBy._id);
+            // Handle seenBy being string IDs or User Objects
+            const seenByList = msg.seenBy || [];
+            const alreadySeen = seenByList.some((s: any) =>
+              (typeof s === 'string' ? s : s._id) === seenBy._id
+            );
+
             if (msg.sender._id !== seenBy._id && !alreadySeen) {
               return {
                 ...msg,
-                seenBy: [...(msg.seenBy || []), seenBy._id],
+                seenBy: [...seenByList, seenBy], // Append the full user object
               };
             }
             return msg;
@@ -153,7 +158,7 @@ export default function useChat({
           const updatedChat = {
             ...chat,
             latestMessage: lastMessage,
-            unreadCounts: isSelected ? chat.unreadCounts : unreadCounts,
+            unreadCounts: unreadCounts !== undefined ? unreadCounts : chat.unreadCounts,
           };
 
           updated.splice(existingChatIndex, 1);
@@ -219,7 +224,11 @@ export default function useChat({
           // Check if current user has already seen it (e.g. they sent it from another device)
           // or mark as read immediately if it's incoming and we are viewing
           const seenByList = message.seenBy || [];
-          if (!seenByList.includes(currentUserId) && message.sender._id !== currentUserId) {
+          const isSeenByMe = seenByList.some((s: any) =>
+            (typeof s === 'string' ? s : s._id) === currentUserId
+          );
+
+          if (!isSeenByMe && message.sender._id !== currentUserId) {
             socket.emit("mark-all-conv-as-read", {
               conversationId,
               userId: currentUserId,
@@ -353,30 +362,30 @@ export default function useChat({
       typingUsers: UserIF[];
     }) => {
       // If the event corresponds to      console.log("Typing Users", typingUsers);
-      if (conversationId === selectedChatIdRef.current) {
-        // Map backend DTO (userId) to Frontend shape (_id) if needed
-        const mappedUsers = typingUsers.map(u => ({
-          ...u,
-          _id: u.userId || u._id
-        }));
+      // Map backend DTO (userId) to Frontend shape (_id) if needed
+      const mappedUsers = typingUsers.map(u => ({
+        ...u,
+        _id: u.userId || u._id
+      }));
 
+      if (conversationId === selectedChatIdRef.current) {
         // Filter out current user to be safe (UI shouldn't show "You are typing")
         const othersTyping = mappedUsers.filter(u => u._id !== currentUserId);
         setTypingUsers(othersTyping);
-
-        // Also update the chat list preview
-        setCurrentUsersChats((prevChats) => {
-          return prevChats.map((chat) => {
-            if (chat._id === conversationId) {
-              return {
-                ...chat,
-                typingUsers: mappedUsers,
-              };
-            }
-            return chat;
-          });
-        });
       }
+
+      // Also update the chat list preview
+      setCurrentUsersChats((prevChats) => {
+        return prevChats.map((chat) => {
+          if (chat._id === conversationId) {
+            return {
+              ...chat,
+              typingUsers: mappedUsers,
+            };
+          }
+          return chat;
+        });
+      });
     };
 
     socket.on("typing_users", handleTypingUsers);

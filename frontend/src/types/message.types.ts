@@ -7,7 +7,7 @@ export interface MessageIF {
   content?: string;
   type: 'text' | 'image' | 'video' | 'audio' | 'document' | 'voice' | 'poll' | 'system' | 'sticker' | 'date' | "typing";
   mentionedUsers?: string[];
-  seenBy?: string[];
+  seenBy?: (string | UserIF)[];
   media?: {
     url: string;
     type: 'image' | 'video' | 'audio' | 'document' | 'voice' | 'sticker';

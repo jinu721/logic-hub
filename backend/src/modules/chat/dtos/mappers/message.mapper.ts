@@ -6,8 +6,13 @@ import { PublicMessageDTO } from "@modules/chat/dtos";
 export const toPublicMessageDTO = (message: PopulatedMessage): PublicMessageDTO => {
   const SYSTEM_USER_ID = "000000000000000000000000";
 
-  const isSystemSender = message.sender._id.toString() === SYSTEM_USER_ID;
+  // Safe sender check
+  const senderId = message.sender?._id?.toString() || message.sender?.toString();
+  const isSystemSender = senderId === SYSTEM_USER_ID;
   const isSystemMessage = message.type === "system" || isSystemSender;
+
+  // Helper to safely get ID from potentially populated or unpopulated field
+  const getSafeId = (user: any) => (user?._id ? user._id.toString() : user?.toString());
 
   return {
     _id: message._id.toString(),
@@ -20,17 +25,25 @@ export const toPublicMessageDTO = (message: PopulatedMessage): PublicMessageDTO 
         banner: null,
         bio: undefined,
       }
-      : toPublicUserDTO(message.sender),
+      : (message.sender && typeof message.sender === 'object' && 'username' in message.sender
+        ? toPublicUserDTO(message.sender)
+        : { _id: senderId, username: "Unknown", email: "", avatar: null, bio: "" } as any), // Fallback for unpopulated sender
     content: message.content,
     type: message.type,
-    mentionedUsers: message.mentionedUsers?.map(user => user._id.toString()) || [],
-    seenBy: message.seenBy?.map(user => user._id.toString()),
+    mentionedUsers: message.mentionedUsers?.map(getSafeId) || [],
+    seenBy: message.seenBy?.map(u =>
+      typeof u === 'object' && 'username' in u
+        ? toPublicUserDTO(u)
+        : getSafeId(u)
+    ) || [],
     media: message.media,
     reactions: message.reactions?.map(r => ({
       emoji: r.emoji,
-      userId: r.userId._id.toString(),
+      userId: getSafeId(r.userId),
     })) || [],
-    replyTo: message.replyTo?._id.toString(),
+    replyTo: message.replyTo && typeof message.replyTo === 'object' && '_id' in message.replyTo
+      ? toPublicMessageDTO(message.replyTo as PopulatedMessage)
+      : null,
     isEdited: message.isEdited,
     isDeleted: message.isDeleted,
     createdAt: message.createdAt,

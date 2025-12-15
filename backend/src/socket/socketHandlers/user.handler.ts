@@ -5,13 +5,13 @@ import redisClient from "../../config/redis.config";
 import { Container } from "@di";
 
 export class UserHandler {
-  constructor(private io: Server, private container: Container) {}
+  constructor(private io: Server, private container: Container) { }
 
   public setupUserHandlers(socket: ExtendedSocket): void {
     socket.on("register_user", this.handleRegisterUser.bind(this, socket));
     socket.on("user-online", this.handleUserOnline.bind(this, socket));
-    socket.on("check-user-status",this.handleCheckUserStatus.bind(this, socket));
-    socket.on("challenge-started",this.handleChallengeStarted.bind(this, socket));
+    socket.on("check-user-status", this.handleCheckUserStatus.bind(this, socket));
+    socket.on("challenge-started", this.handleChallengeStarted.bind(this, socket));
     socket.on("challenge-ended", this.handleChallengeEnded.bind(this, socket));
     socket.on("disconnect", this.handleDisconnect.bind(this, socket));
   }
@@ -22,7 +22,7 @@ export class UserHandler {
   ): Promise<void> {
     const user = verifyAccessToken(accessToken);
     try {
-      await redisClient.set(`socket:${user?.userId}`, socket.id);
+      await redisClient.sAdd(`sockets:${user?.userId}`, socket.id);
       socket.userId = user?.userId;
     } catch (err) {
       console.log(err);
@@ -35,10 +35,13 @@ export class UserHandler {
   ): Promise<void> {
     try {
       const user = verifyAccessToken(accessToken);
-      await this.container.userCommandSvc.updateUser(user?.userId as string, { isOnline: true });
+      await this.container.userCommandSvc.updateUser(user?.userId as string, { isOnline: true } as any);
       await redisClient.set(`user:online:${String(user?.userId)}`, "true");
       this.io.emit("user-status", { userId: user?.userId, status: true });
-      await redisClient.set(`socket:user:${socket.id}`, user?.userId);
+
+      await redisClient.sAdd(`sockets:${user?.userId}`, socket.id);
+      // Map socket to user for quick lookup if needed, though socket.userId covers it for disconnect
+      await redisClient.set(`socket:user:${socket.id}`, String(user?.userId));
     } catch (err) {
       console.log(err);
     }
@@ -112,18 +115,27 @@ export class UserHandler {
   private async handleDisconnect(socket: ExtendedSocket): Promise<void> {
     const userId = socket.userId;
     if (!userId) return;
-    console.log(`User ${userId} disconnected and marked offline`);
+    console.log(`User ${userId} disconnected logic started`);
 
     try {
-      await this.container.userCommandSvc.updateUser(userId, {
-        isOnline: false,
-        lastSeen: new Date(),
-      });
+      await redisClient.sRem(`sockets:${userId}`, socket.id);
+      const remainingSockets = await redisClient.sCard(`sockets:${userId}`);
 
-      // await redisClient.del(`socket:${userId}`);
-      await redisClient.set(`user:online:${userId}`, "false");
+      if (remainingSockets <= 0) {
+        console.log(`User ${userId} marked offline (no remaining sockets)`);
+        await this.container.userCommandSvc.updateUser(userId, {
+          isOnline: false,
+          lastSeen: new Date(),
+        } as any);
+        await redisClient.set(`user:online:${userId}`, "false");
+        this.io.emit("user-status", { userId, status: false });
+      } else {
+        console.log(`User ${userId} still online on ${remainingSockets} other sockets`);
+      }
 
-      this.io.emit("user-status", { userId, status: false });
+      // Clean up socket mapping
+      await redisClient.del(`socket:user:${socket.id}`);
+
     } catch (err) {
       console.error("Error in disconnect handler:", err);
     }

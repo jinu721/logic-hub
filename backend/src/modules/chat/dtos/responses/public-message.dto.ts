@@ -7,7 +7,7 @@ export interface PublicMessageDTO {
   content?: string;
   type: 'text' | 'image' | 'video' | 'audio' | 'document' | 'voice' | 'poll' | 'system' | 'sticker';
   mentionedUsers?: string[];
-  seenBy?: string[];
+  seenBy?: (string | PublicUserDTO)[];
   media?: {
     url: string;
     type: 'image' | 'video' | 'audio' | 'document' | 'voice' | 'sticker';
@@ -16,7 +16,7 @@ export interface PublicMessageDTO {
     emoji: string;
     userId: string;
   }[];
-  replyTo?: string;
+  replyTo?: string | PublicMessageDTO | null;
   isEdited: boolean;
   isDeleted: boolean;
   createdAt: Date;

@@ -87,9 +87,9 @@ export class MessageHandler {
           this.io.to(socketId).emit("conversation_updated", {
             conversationId: msg.conversationId.toString(),
             lastMessage: conversation.latestMessage,
-            unreadCounts: conversation.unreadCounts instanceof Map
-              ? Object.fromEntries(conversation.unreadCounts)
-              : conversation.unreadCounts || {},
+            unreadCounts: updatedConv.unreadCounts instanceof Map
+              ? Object.fromEntries(updatedConv.unreadCounts)
+              : updatedConv.unreadCounts || {},
           });
         }
       });
@@ -138,7 +138,9 @@ export class MessageHandler {
         this.io.to(socketId).emit("conversation_updated", {
           conversationId: conversationId,
           lastMessage: conversations.latestMessage,
-          unreadCounts: null,
+          unreadCounts: conversations.unreadCounts instanceof Map
+            ? Object.fromEntries(conversations.unreadCounts)
+            : conversations.unreadCounts || {},
         });
       }
     } catch (err) {

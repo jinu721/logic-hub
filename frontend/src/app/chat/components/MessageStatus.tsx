@@ -25,6 +25,11 @@ const MessageStatus: FC<MessageStatusProps> = ({
   console.log("SEEN BY", seenBy);
   console.log("IS SEEN", isSeen);
 
+  // Filter out any string IDs or invalid objects to prevent excessive crashes
+  const validSeenBy = seenBy.filter((u): u is SeenByUser =>
+    typeof u === 'object' && u !== null && 'username' in u
+  );
+
   return (
     <div className="flex items-center mt-1 text-xs relative">
       {!isGroup ? (
@@ -84,14 +89,14 @@ const MessageStatus: FC<MessageStatusProps> = ({
           )}
         </div>
       ) : (
-        seenBy.length > 0 && (
+        validSeenBy.length > 0 && (
           <div
             className="text-gray-400 flex items-center cursor-pointer"
             onMouseEnter={() => setShowSeenBy(true)}
             onMouseLeave={() => setShowSeenBy(false)}
           >
             <div className="flex -space-x-1">
-              {seenBy.slice(0, 2).map((user, idx) => (
+              {validSeenBy.slice(0, 2).map((user, idx) => (
                 <div
                   key={idx}
                   className="relative w-4 h-4 rounded-full border border-gray-600 bg-gray-700"
@@ -114,9 +119,9 @@ const MessageStatus: FC<MessageStatusProps> = ({
               ))}
             </div>
 
-            {seenBy.length > 2 && (
+            {validSeenBy.length > 2 && (
               <span className="ml-1 text-[9px] text-gray-500 font-medium">
-                +{seenBy.length - 2}
+                +{validSeenBy.length - 2}
               </span>
             )}
 
@@ -124,10 +129,10 @@ const MessageStatus: FC<MessageStatusProps> = ({
               <div className="absolute bottom-6 right-0 bg-gray-800 rounded-lg p-2 shadow-xl z-50 w-48 border border-gray-700">
                 <div className="text-[10px] font-medium text-gray-300 mb-1.5 flex items-center">
                   <div className="w-1 h-1 bg-blue-400 rounded-full mr-1.5"></div>
-                  Seen by {seenBy.length}
+                  Seen by {validSeenBy.length}
                 </div>
                 <div className="max-h-24 overflow-y-auto space-y-0.5">
-                  {seenBy.map((user, idx) => (
+                  {validSeenBy.map((user, idx) => (
                     <div
                       key={idx}
                       className="flex items-center py-1 hover:bg-gray-700 rounded px-1 -mx-1 transition-colors"
