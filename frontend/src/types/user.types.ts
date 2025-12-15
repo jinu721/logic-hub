@@ -12,8 +12,9 @@ export enum LoginType {
   GITHUB = "github",
 }
 
-export interface UserIF{
+export interface UserIF {
   _id: string;
+  userId?: string; // Backend DTO field
   email: string;
   username: string;
   bio: string;

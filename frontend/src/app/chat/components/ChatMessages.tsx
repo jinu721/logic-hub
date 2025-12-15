@@ -72,8 +72,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
         {messages && messages.length > 0 ? (
           <>
             {messages.map((message, index) => {
-              const isOther =
-                message.sender?.userId !== currentConversationData.currentUserId;
+              const senderId = message.sender?._id || message.sender?.userId;
+              const isOther = senderId !== currentUserId;
 
               return (
                 <div

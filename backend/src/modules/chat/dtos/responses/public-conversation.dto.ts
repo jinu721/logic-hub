@@ -9,7 +9,7 @@ export interface PublicConversationDTO {
   latestMessage?: PublicMessageDTO | null;
   isDeleted?: boolean;
   typingUsers: PublicUserDTO[];
-  unreadCounts: Map<string, number>;
+  unreadCounts: Record<string, number> | any;
   createdAt: Date;
   updatedAt: Date;
 }

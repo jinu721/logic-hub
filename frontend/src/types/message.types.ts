@@ -7,20 +7,20 @@ export interface MessageIF {
   content?: string;
   type: 'text' | 'image' | 'video' | 'audio' | 'document' | 'voice' | 'poll' | 'system' | 'sticker' | 'date' | "typing";
   mentionedUsers?: string[];
-  seenBy?: UserIF[];
+  seenBy?: string[];
   media?: {
     url: string;
     type: 'image' | 'video' | 'audio' | 'document' | 'voice' | 'sticker';
   };
   reactions?: {
     emoji: string;
-    userId: UserIF;
+    userId: string;
   }[];
   replyTo?: MessageIF;
   isEdited: boolean;
   isSeen: boolean;
   isDeleted: boolean;
-  
+
   createdAt: Date | string;
   updatedAt: Date | string;
 }

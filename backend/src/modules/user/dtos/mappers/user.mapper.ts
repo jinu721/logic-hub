@@ -8,7 +8,6 @@ export const toPublicUserDTO = (user: PopulatedUser & { currentUser?: boolean })
     email: user.email,
     username: user.username,
     bio: user.bio,
-    // Strictly typed: avatar is InventoryDocument | null.
     avatar: user.avatar ? toPublicInventoryDTO(user.avatar) : null,
     banner: user.banner ? toPublicInventoryDTO(user.banner) : null,
     role: user.role,
@@ -25,7 +24,6 @@ export const toPublicUserDTO = (user: PopulatedUser & { currentUser?: boolean })
     },
     inventory: {
       keys: user.inventory?.keys || 0,
-      // PopulatedUser guarantees these are InventoryDocument[]
       badges: user.inventory?.badges ? toPublicInventoryDTOs(user.inventory.badges) : [],
       ownedAvatars: user.inventory?.ownedAvatars ? toPublicInventoryDTOs(user.inventory.ownedAvatars) : [],
       ownedBanners: user.inventory?.ownedBanners ? toPublicInventoryDTOs(user.inventory.ownedBanners) : [],

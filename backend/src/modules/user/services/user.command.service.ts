@@ -57,7 +57,6 @@ export class UserCommandService
     const user = await this.userRepo.getUserById(userId);
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
-    // PopulatedUser has password? Yes, extends UserBase.
     const valid = await this.hashProv.comparePasswords(
       oldPassword,
       user.password as string

@@ -17,7 +17,7 @@ interface Props {
   isOther: boolean;
   isGroup: boolean;
   children: React.ReactNode;
-  onEdit: (id: string, content: string) => void;
+  onEdit: (message: MessageIF) => void;
   onDelete: (id: string) => void;
   onReport: (id: string) => void;
   onReply: (message: MessageIF) => void;
@@ -64,7 +64,7 @@ const BaseMessage = ({
   };
 
   const handleEditSave = (editedContent: string) => {
-    onEdit(message._id as string, editedContent);
+    onEdit({ ...message, content: editedContent });
     setShowEditModal(false);
   };
 
@@ -165,9 +165,8 @@ const BaseMessage = ({
     if (message.isDeleted) {
       return (
         <div
-          className={`p-3 rounded-lg ${
-            isSelf ? "bg-gray-700" : "bg-gray-800"
-          } text-gray-400 italic`}
+          className={`p-3 rounded-lg ${isSelf ? "bg-gray-700" : "bg-gray-800"
+            } text-gray-400 italic`}
         >
           This message was deleted
         </div>
@@ -187,9 +186,8 @@ const BaseMessage = ({
 
   return (
     <div
-      className={`flex items-start mb-4 ${
-        isSelf ? "justify-end" : "justify-start"
-      }`}
+      className={`flex items-start mb-4 ${isSelf ? "justify-end" : "justify-start"
+        }`}
     >
       {isOther && isGroup && <div className="mr-2">{<Avatar />}</div>}
 
@@ -199,11 +197,10 @@ const BaseMessage = ({
         {isOther && isGroup && message.sender && (
           <div className="flex items-center gap-2">
             <div
-              className={`text-sm font-medium ${
-                message.sender.membership?.isActive
+              className={`text-sm font-medium ${message.sender.membership?.isActive
                   ? "bg-gradient-to-r from-amber-200 to-yellow-400 text-transparent bg-clip-text"
                   : "text-gray-100"
-              }`}
+                }`}
             >
               {message.sender.username}
             </div>

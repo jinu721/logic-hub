@@ -148,7 +148,7 @@ export class GroupHandler {
           if (systemMsg) {
             this.io
               .to(finalConversationId.toString())
-              .emit("recive_message", { conversationId: systemMsg.conversationId, message: systemMsg });
+              .emit("receive_message", { conversationId: systemMsg.conversationId, message: systemMsg });
           }
 
           const updatedGroup = await this.container.groupQuerySvc.findGroupById(

@@ -6,7 +6,7 @@ import React from "react";
 interface Props {
   currentConversationData: ConversationIF;
   userRole: "admin" | "owner" | "member";
-  showAllMembers: boolean;
+  showAllMembers: boolean;z
   setShowAllMembers: (value: boolean) => void;
   toggleMenu: (userId: string) => void;
   openMenuId: string | null;

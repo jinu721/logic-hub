@@ -18,12 +18,6 @@ export default function useChat({
   currentUsersChatsList,
   currentUserId,
 }: UseChatProps) {
-  console.log("HOOKS DATA", selectedChatId);
-
-  console.log("CurrentUser CHat ARGS", currentUsersChatsList);
-
-  console.log("CURRENT USER ID", currentUserId);
-
   const [messages, setMessages] = useState<MessageIF[]>([]);
   const [currentUsersChats, setCurrentUsersChats] = useState<ConversationIF[]>(
     []
@@ -70,16 +64,15 @@ export default function useChat({
       conversationId: string;
       seenBy: UserIF;
     }) => {
+      // Corrected logic: Check if message is already seen by this user ID (string check)
       if (conversationId === selectedChatIdRef.current) {
-        setMessages((prevMsgs: any) =>
-          prevMsgs.map((msg: MessageIF) => {
-            const alreadySeen = msg.seenBy?.some(
-              (user) => user._id === seenBy._id
-            );
+        setMessages((prevMsgs) =>
+          prevMsgs.map((msg) => {
+            const alreadySeen = msg.seenBy?.includes(seenBy._id);
             if (msg.sender._id !== seenBy._id && !alreadySeen) {
               return {
                 ...msg,
-                seenBy: [...(msg.seenBy || []), seenBy],
+                seenBy: [...(msg.seenBy || []), seenBy._id],
               };
             }
             return msg;
@@ -96,21 +89,9 @@ export default function useChat({
   }, []);
 
   useEffect(() => {
-    console.log("Status Checking started for", anothorUserId);
-
-    if (conversationData?.type === "group") return;
-
-    console.log(
-      "Status Checking started for calling checkUserStatus",
-      anothorUserId
-    );
+    if (conversationData?.type === "group" || !anothorUserId) return;
 
     socket.emit("check-user-status", anothorUserId);
-
-    console.log(
-      "Status Checking started for emited checkUserStatus",
-      anothorUserId
-    );
 
     const handleUserOnline = ({
       userId,
@@ -119,22 +100,20 @@ export default function useChat({
       userId: string;
       status: boolean;
     }) => {
-      console.log("Current Users Chats", currentUsersChats);
-      console.log("Status Back Called", userId);
-
       if (userId === anothorUserId) {
         setOnlineStatus(status);
       }
+
       setCurrentUsersChats((prevChats) =>
         prevChats.map((chat) =>
-          chat.otherUser?.userId === userId
+          chat.otherUser?.userId === userId || chat.otherUser?._id === userId
             ? {
-                ...chat,
-                otherUser: {
-                  ...chat.otherUser,
-                  isOnline: status,
-                },
-              }
+              ...chat,
+              otherUser: {
+                ...chat.otherUser!,
+                isOnline: status,
+              },
+            }
             : chat
         )
       );
@@ -145,7 +124,7 @@ export default function useChat({
     return () => {
       socket.off("user-status", handleUserOnline);
     };
-  }, [anothorUserId]);
+  }, [anothorUserId, conversationData?.type]);
 
   useEffect(() => {
     if (!socket) return;
@@ -156,9 +135,12 @@ export default function useChat({
       unreadCounts,
     }: any) => {
 
-      console.log("Conversation Updated", conversationId, lastMessage,unreadCounts);
+      // Map sender ID in lastMessage if needed
+      if (lastMessage?.sender && !lastMessage.sender._id && lastMessage.sender.userId) {
+        lastMessage.sender._id = lastMessage.sender.userId;
+      }
 
-      setCurrentUsersChats((prevChats: any) => {
+      setCurrentUsersChats((prevChats) => {
         const updated = [...prevChats];
         const existingChatIndex = updated.findIndex(
           (chat) => chat._id === conversationId
@@ -166,34 +148,34 @@ export default function useChat({
 
         if (existingChatIndex !== -1) {
           const chat = updated[existingChatIndex];
-
           const isSelected = chat._id === selectedChatIdRef.current;
 
-          let updatedChat: any = null;
-
-          if (isSelected) {
-            updatedChat = {
-              ...chat,
-              latestMessage: lastMessage,
-            };
-          } else {
-            updatedChat = {
-              ...chat,
-              latestMessage: lastMessage,
-              unreadCounts: unreadCounts,
-            };
-          }
+          const updatedChat = {
+            ...chat,
+            latestMessage: lastMessage,
+            unreadCounts: isSelected ? chat.unreadCounts : unreadCounts,
+          };
 
           updated.splice(existingChatIndex, 1);
           return [updatedChat, ...updated];
         } else {
+          // If chat is not in list, handling it might require fetching full conversation or minimal data
+          // For now, adhere to existing logic but safe check
           const isChatOpen = conversationId === selectedChatIdRef.current;
-
           const newChat = {
             _id: conversationId,
             latestMessage: lastMessage,
-            ...(isChatOpen ? {} : { unreadCounts }),
-          };
+            unreadCounts: isChatOpen ? {} : unreadCounts,
+            // We might be missing participants/otherUser here if it's a fresh chat push
+            // But we keep the structure consistent
+            type: lastMessage.conversationId ? 'one-to-one' : 'group',
+            // Note: In a real scenario we might want to fetch the chat here
+            // but we'll stick to updating if exists logic primarily
+            participants: [],
+            typingUsers: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          } as any;
 
           return [newChat, ...updated];
         }
@@ -219,13 +201,25 @@ export default function useChat({
       conversationId: string;
       message: MessageIF;
     }) => {
+      // Map sender ID if needed
+      if (message.sender && !message.sender._id && message.sender.userId) {
+        message.sender._id = message.sender.userId;
+      }
+
       console.log("Message Received", message);
 
       if (conversationId === selectedChatId) {
         setMessages((prev) => {
+          // Prevent duplicates if needed, but append is standard
+          // Check if already exists (optional but good for strictness)
+          if (prev.some(m => m._id === message._id)) return prev;
+
           const updatedMessage = [...prev, message];
 
-          if (!message.seenBy?.some((u) => u.userId === currentUserId)) {
+          // Check if current user has already seen it (e.g. they sent it from another device)
+          // or mark as read immediately if it's incoming and we are viewing
+          const seenByList = message.seenBy || [];
+          if (!seenByList.includes(currentUserId) && message.sender._id !== currentUserId) {
             socket.emit("mark-all-conv-as-read", {
               conversationId,
               userId: currentUserId,
@@ -239,7 +233,7 @@ export default function useChat({
       setCurrentUsersChats((prevChats) =>
         prevChats.map((chat) =>
           chat._id === message.conversationId
-            ? { ...chat, lastMessage: message }
+            ? { ...chat, lastMessage: message } // Updates preview
             : chat
         )
       );
@@ -262,23 +256,25 @@ export default function useChat({
     };
 
     const handleReaction = (updatedMsg: MessageIF) => {
+      // updatedMsg will have reactions array with string userIds now
       setMessages((prev) =>
         prev.map((msg) => (msg._id === updatedMsg._id ? updatedMsg : msg))
       );
     };
 
-    socket.on("recive_message", handleMessage);
+    // Changed event name to 'receive_message'
+    socket.on("receive_message", handleMessage);
     socket.on("message_deleted", handleDelete);
     socket.on("message_edited", handleEdit);
     socket.on("reaction_updated", handleReaction);
 
     return () => {
-      socket.off("recive_message", handleMessage);
+      socket.off("receive_message", handleMessage);
       socket.off("message_deleted", handleDelete);
       socket.off("message_edited", handleEdit);
       socket.off("reaction_updated", handleReaction);
     };
-  }, [selectedChatId]);
+  }, [selectedChatId, currentUserId]);
 
   useEffect(() => {
     if (!currentConversationDataState?._id) return;
@@ -290,14 +286,19 @@ export default function useChat({
       type,
       removeMember,
     }: any) => {
-      console.log("Group Updated:", conversationId, updatedMembers, groupInfo);
+
+      // Map members to have _id
+      const mappedMembers = updatedMembers?.map((m: any) => ({
+        ...m,
+        _id: m.userId || m._id
+      }));
 
       if (currentConversationDataState._id === conversationId) {
         setCurrentConversationData((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
-            participants: updatedMembers || prev.participants || [],
+            participants: mappedMembers || prev.participants || [],
             group: {
               ...prev.group,
               ...groupInfo,
@@ -312,7 +313,7 @@ export default function useChat({
             if (chat._id === conversationId) {
               return {
                 ...chat,
-                participants: updatedMembers || chat.participants || [],
+                participants: mappedMembers || chat.participants || [],
                 group: {
                   ...chat.group,
                   ...groupInfo,
@@ -328,7 +329,6 @@ export default function useChat({
         if (type === "delete_group") {
           setIsDeleted(true);
         }
-        console.log("Remove Member", removeMember, currentUserId);
         if (type === "remove_member" && removeMember === currentUserId) {
           setIsRemoved(true);
         }
@@ -340,7 +340,7 @@ export default function useChat({
     return () => {
       socket.off("group_updated", handleGroupUpdate);
     };
-  }, [currentConversationDataState?._id]);
+  }, [currentConversationDataState?._id, currentUserId]);
 
   useEffect(() => {
     if (!socket) return;
@@ -352,15 +352,25 @@ export default function useChat({
       conversationId: string;
       typingUsers: UserIF[];
     }) => {
-      console.log("Typing Users", typingUsers);
+      // If the event corresponds to      console.log("Typing Users", typingUsers);
       if (conversationId === selectedChatIdRef.current) {
-        setTypingUsers(typingUsers);
+        // Map backend DTO (userId) to Frontend shape (_id) if needed
+        const mappedUsers = typingUsers.map(u => ({
+          ...u,
+          _id: u.userId || u._id
+        }));
+
+        // Filter out current user to be safe (UI shouldn't show "You are typing")
+        const othersTyping = mappedUsers.filter(u => u._id !== currentUserId);
+        setTypingUsers(othersTyping);
+
+        // Also update the chat list preview
         setCurrentUsersChats((prevChats) => {
           return prevChats.map((chat) => {
             if (chat._id === conversationId) {
               return {
                 ...chat,
-                typingUsers,
+                typingUsers: mappedUsers,
               };
             }
             return chat;
@@ -374,7 +384,7 @@ export default function useChat({
     return () => {
       socket.off("typing_users", handleTypingUsers);
     };
-  }, []);
+  }, [currentUserId]);
 
   const sendMessage = useCallback(
     (
@@ -465,7 +475,7 @@ export default function useChat({
         duration: 3000,
       });
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     return () => {

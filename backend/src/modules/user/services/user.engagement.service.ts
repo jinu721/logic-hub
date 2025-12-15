@@ -121,32 +121,6 @@ export class UserEngagementService
     const path = valid[type as keyof typeof valid];
     if (!path) throw new AppError(HttpStatus.BAD_REQUEST, "Invalid gift type");
 
-    // We can use $push logic via strict update if repo allowed, but repo takes Partial<UserDocument>
-    // However, Mongoose findByIdAndUpdate allows operators if we cast or if repo is flexible. 
-    // Assuming repo implementation: `this.model.findByIdAndUpdate(userId, updateData, ...)`
-    // If updateData is `{ "inventory.ownedAvatars": ... }` it replaces.
-    // If it is `{ $push: ... }` it pushes.
-    // Repo signature `data: Partial<UserDocument>` discourages operators.
-    // I made `UserDocument` strict.
-    // So I should fetch, modify, save? OR use update with full list.
-    // I'll use full list update for correctness with strict types, or $push with ANY cast.
-    // Let's use $push with any cast to be efficient, but correct TS way is Partial.
-    // Since I can't easily change Repo signature right now, I'll use the "Modify List and Update" approach (which assumes we have the list).
-    // But `giftItem` doesn't fetch user first?
-    // Wait, the original code used `{ [path]: toObjectId(itemId) }`.
-    // If `path` is `inventory.ownedAvatars`, effectively that REPLACES the list with one item?
-    // NO! `{ "inventory.ownedAvatars": x }` in Mongoose, if it is an array field, might append? No, it sets.
-    // UNLESS the original code relied on a Mongo quirk or was BUGGY.
-    // Actually, `findByIdAndUpdate` with dot notation on array usually REPLACES or SETS.
-    // If the original code meant to PUSH, it should use `$push`.
-    // If it worked before, maybe it was using `$push` implicitly? No.
-    // The original code:
-    // `const updated = await this._userRepo.updateUser(toObjectId(userId), { [path]: toObjectId(itemId) });`
-    // If path is "inventory.ownedAvatars", this sets the field to a single ID (or array of 1).
-    // This looks like a BUG in the original code or misuse.
-    // I will fix it to use `$push`.
-
-    // cast to any to use $push
     const updateQuery: any = {
       $push: { [path]: toObjectId(itemId) }
     };

@@ -11,7 +11,7 @@ import { Container } from "@di";
 import { PublicMessageDTO } from "@modules/chat";
 
 export class MessageHandler {
-  constructor(private io: Server, private container: Container) {}
+  constructor(private io: Server, private container: Container) { }
 
   public setupMessageHandlers(socket: ExtendedSocket): void {
     socket.on("send_message", this.handleSendMessage.bind(this, socket));
@@ -41,13 +41,13 @@ export class MessageHandler {
       );
 
 
-      this.io.to(data.conversationId).emit("recive_message", {
+      this.io.to(data.conversationId).emit("receive_message", {
         conversationId: data.conversationId,
         message: msg,
       });
       this.io.to(data.conversationId).emit("conversation_updated");
 
-      console.log("MESSAGE SEND :- ",msg);
+      console.log("MESSAGE SEND :- ", msg);
 
       const conversation =
         await this.container.conversationQuerySvc.getConversationById(
@@ -73,7 +73,7 @@ export class MessageHandler {
         );
 
 
-        console.log("UPDATED CONV", updatedConv);
+      console.log("UPDATED CONV", updatedConv);
 
       if (!updatedConv) {
         console.log("Conversation not found");
@@ -87,7 +87,9 @@ export class MessageHandler {
           this.io.to(socketId).emit("conversation_updated", {
             conversationId: msg.conversationId.toString(),
             lastMessage: conversation.latestMessage,
-            unreadCounts: conversation.unreadCounts,
+            unreadCounts: conversation.unreadCounts instanceof Map
+              ? Object.fromEntries(conversation.unreadCounts)
+              : conversation.unreadCounts || {},
           });
         }
       });
@@ -104,7 +106,7 @@ export class MessageHandler {
     { conversationId, userId }: { conversationId: string; userId: string }
   ): Promise<void> {
     try {
-      console.log("Marking User started",userId);
+      console.log("Marking User started", userId);
       await this.container.messageEngagementSvc.markMessagesAsSeen(
         conversationId,
         userId
@@ -116,15 +118,12 @@ export class MessageHandler {
       if (!conversations) {
         throw new Error("Conversation not found");
       }
-      
+
 
       console.log("Message Marked as Read");
 
-      console.log("UserId )))))", userId);
 
       const user = await this.container.userQuerySvc.findUserById(userId);
-
-      console.log("User Found", user);
 
       if (!user) {
         throw new Error("User not found");
@@ -132,7 +131,7 @@ export class MessageHandler {
 
       this.io.to(conversationId).emit("message_seen", {
         conversationId,
-        seenBy:user,
+        seenBy: user,
       });
       const socketId = await redisClient.get(`socket:${userId}`);
       if (socketId) {
@@ -228,32 +227,32 @@ export class MessageHandler {
 
 
   private async handleReactMessage(
-  socket: ExtendedSocket,
-  {
-    messageId,
-    userId,
-    emoji,
-  }: { messageId: string; userId: string; emoji: string }
-): Promise<void> {
-  try {
-    const updated = await this.container.messageEngagementSvc.toggleReaction(
+    socket: ExtendedSocket,
+    {
       messageId,
       userId,
-      emoji
-    );
+      emoji,
+    }: { messageId: string; userId: string; emoji: string }
+  ): Promise<void> {
+    try {
+      const updated = await this.container.messageEngagementSvc.toggleReaction(
+        messageId,
+        userId,
+        emoji
+      );
 
-    if (!updated) {
-      throw new Error("Message not found");
+      if (!updated) {
+        throw new Error("Message not found");
+      }
+
+      this.io.to(updated.conversationId.toString()).emit("reaction_updated", updated);
+    } catch (err) {
+      console.log("Error in react_message:", err);
+      socket.emit("send_error", {
+        message: err instanceof Error ? err.message : "Failed to react",
+      });
     }
-
-    this.io.to(updated.conversationId.toString()).emit("reaction_updated", updated);
-  } catch (err) {
-    console.log("Error in react_message:", err);
-    socket.emit("send_error", {
-      message: err instanceof Error ? err.message : "Failed to react",
-    });
   }
-}
 
 
   private async handleTyping(
@@ -261,14 +260,19 @@ export class MessageHandler {
     { conversationId, userId }: TypingData
   ): Promise<void> {
     try {
+
+      console.log("CONVERSATION ID", conversationId);
+      console.log("USER ID", userId);
       const conversation = await this.container.conversationTypingSvc.setTypingUser(
         conversationId,
         userId
       );
-      socket.broadcast.to(conversationId).emit("typing_users", {
+      console.log("CONVERSATION::", conversation);
+      this.io.to(conversationId).emit("typing_users", {
         conversationId,
         typingUsers: conversation?.typingUsers,
       });
+
     } catch (err) {
       console.log(`Error in Socket setup : ${err}`);
       socket.emit("send_error", {
@@ -287,10 +291,11 @@ export class MessageHandler {
           conversationId,
           userId
         );
-      socket.broadcast.to(conversationId).emit("typing_users", {
+      this.io.to(conversationId).emit("typing_users", {
         conversationId,
         typingUsers: conversation?.typingUsers,
       });
+
     } catch (err) {
       console.log(`Error in Socket setup : ${err}`);
       socket.emit("send_error", {

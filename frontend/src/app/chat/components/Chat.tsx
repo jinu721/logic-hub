@@ -130,7 +130,7 @@ export default function ChatPage() {
     selectedChatId,
     conversationData: safeConversationData,
     currentUsersChatsList: safeCurrentUsersChatsList,
-    currentUserId:currentUserId,
+    currentUserId: currentUserId || "",
   });
 
   const fetchConversationData = async (conversationId: string | null) => {
@@ -234,18 +234,21 @@ export default function ChatPage() {
   const getUserRole = (): UserRole => {
     if (!isGroupChat || !currentConversationData.group) return "member";
 
-    console.log("CURRENT USERIDD", currentUserId);
-    console.log("groups Admin", currentConversationData.group.admins);
+    // Handle case where createdBy is string or object (DTO vs populated)
+    const createdById = typeof currentConversationData.group.createdBy === 'string'
+      ? currentConversationData.group.createdBy
+      : (currentConversationData.group.createdBy?.userId || currentConversationData.group.createdBy?._id?.toString());
 
-    if (
-      currentConversationData.group.createdBy.userId.toString() === currentUserId
-    ) {
+    if (createdById === currentUserId) {
       return "owner";
     }
 
     if (
       currentConversationData.group.admins.some(
-        (usr: any) => usr.userId.toString() === currentUserId
+        (usr: any) => {
+          const adminId = typeof usr === 'string' ? usr : (usr.userId || usr._id);
+          return adminId?.toString() === currentUserId;
+        }
       )
     ) {
       return "admin";
@@ -255,8 +258,6 @@ export default function ChatPage() {
   };
 
   const userRole = getUserRole();
-
-  console.log(`User role: ${userRole}`);
 
   useEffect(() => {
     const fetchStickers = async () => {
@@ -293,13 +294,17 @@ export default function ChatPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    if (token) {
-      socket.emit("user-online", token);
-    }
+    if (!token) return;
+
+    socket.emit("register_user", token);
+
+    socket.emit("user-online", token);
+
   }, []);
 
+
   useEffect(() => {
-    const handleAudioEnd = () => {};
+    const handleAudioEnd = () => { };
 
     const currentAudio = audioRef.current;
     if (currentAudio) {
@@ -371,12 +376,12 @@ export default function ChatPage() {
       prevChats.map((chat) =>
         chat._id === chatId
           ? {
-              ...chat,
-              unreadCounts: {
-                ...chat.unreadCounts,
-                [currentUserId]: 0,
-              },
-            }
+            ...chat,
+            unreadCounts: {
+              ...chat.unreadCounts,
+              [currentUserId || ""]: 0,
+            },
+          }
           : chat
       )
     );
@@ -590,7 +595,7 @@ export default function ChatPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const message = e.target.value;
     setUserMessage(message);
-    handleTyping(currentUserId);
+    if (currentUserId) handleTyping(currentUserId);
   };
 
   const handleUploadFile = async (
@@ -784,16 +789,15 @@ export default function ChatPage() {
     <>
       <div className="flex h-screen bg-gray-900 text-gray-100">
         <div
-          className={`${
-            showSidebar ? "w-72" : "w-0"
-          } transition-all duration-300 overflow-hidden bg-gray-800 flex flex-col border-r border-gray-700`}
+          className={`${showSidebar ? "w-72" : "w-0"
+            } transition-all duration-300 overflow-hidden bg-gray-800 flex flex-col border-r border-gray-700`}
         >
           {showSidebar && (
             <ChatList
               activeTab={activeTab}
               currentUsersChats={currentUsersChats}
               selectedChatId={selectedChatId}
-              currentUserId={currentUserId}
+              currentUserId={currentUserId || ""}
               loading={isChatsLoading}
               handleTabChange={handleTabChange}
               handleChatSelection={handleChatSelection}
@@ -833,7 +837,7 @@ export default function ChatPage() {
 
               <div className="flex-1 flex overflow-hidden">
                 <div className="flex-1 flex flex-col">
-                  { (
+                  {(
                     <ChatMessages
                       messages={messages}
                       currentUserId={currentUserId}
@@ -855,8 +859,8 @@ export default function ChatPage() {
 
                   <div className="p-4 border-t border-gray-700">
                     {isDeleted ||
-                    currentConversationData?.isDeleted ||
-                    currentConversationData?.group?.isDeleted ? (
+                      currentConversationData?.isDeleted ||
+                      currentConversationData?.group?.isDeleted ? (
                       <AccessBlockedPanel
                         isGroupChat={isGroup}
                         handleDeleteChat={handleDeleteChat}
@@ -909,9 +913,8 @@ export default function ChatPage() {
                 </div>
 
                 <div
-                  className={`${
-                    showUserInfo ? "w-72" : "w-0"
-                  } transition-all duration-300 overflow-hidden bg-gray-800 border-l border-gray-700 h-full flex flex-col`}
+                  className={`${showUserInfo ? "w-72" : "w-0"
+                    } transition-all duration-300 overflow-hidden bg-gray-800 border-l border-gray-700 h-full flex flex-col`}
                 >
                   {showUserInfo && (
                     <ChatInfo
@@ -961,7 +964,7 @@ export default function ChatPage() {
             <div>
               {JSON.stringify(currentUserId)}
             </div>
-            </div>}
+          </div>}
         </div>
       </div>
 
