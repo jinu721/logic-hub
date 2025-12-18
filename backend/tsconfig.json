@@ -74,7 +74,8 @@
       ],
     },
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noEmitOnError": false
   },
   "include": [
     "src"

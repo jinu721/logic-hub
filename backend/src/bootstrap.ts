@@ -1,12 +1,11 @@
-import { createContainer } from "@di"
-import { createApp } from "./app"
-import { createServer } from "http"
-import { Server } from "socket.io"
-import { setupSocket } from "./socket/setup.socket"
-import { env } from "./config/env"
+import { createContainer } from "@di";
+import { createApp } from "./app";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import { setupSocket } from "./socket/setup.socket";
+import { env } from "./config/env";
 
 export const bootstrap = async () => {
-
   const container = createContainer();
 
   const app = createApp(container);
@@ -14,11 +13,12 @@ export const bootstrap = async () => {
   const httpServer = createServer(app);
 
   const io = new Server(httpServer, {
-    cors: { origin: env.FRONTEND_URL, credentials: true }
+    cors: { origin: env.FRONTEND_URL, credentials: true },
   });
 
   setupSocket(io, container);
 
-  httpServer.listen(env.PORT, () => console.log("Server Started"));
-
-}
+  httpServer.listen(env.PORT, "0.0.0.0", () => {
+    console.log(`Server started on port ${env.PORT}`);
+  });
+};

@@ -8,8 +8,8 @@ RUN npm install --only=production
 
 COPY . .
 
-# RUN npm install -g typescript && npm run build
+RUN npm install -g ts-node-dev typescript tsconfig-paths
 
 EXPOSE 5000
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
