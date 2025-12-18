@@ -1,5 +1,4 @@
 import { PublicUserDTO } from "@modules/user/dtos";
-import { UserDocument } from "@modules/user/models";
 
 export interface IUserQueryService {
   findByEmailOrUsername(value: string): Promise<boolean>;

@@ -60,9 +60,8 @@ const DomainWorkspace: React.FC<DomainWorkspaceProps> = ({
                     <span className="font-mono text-sm">{currentLanguage}</span>
                   </div>
                   <svg
-                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-                      isOpen ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                      }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -88,18 +87,16 @@ const DomainWorkspace: React.FC<DomainWorkspaceProps> = ({
                                 setCurrentLanguage(language);
                                 setIsOpen(false);
                               }}
-                              className={`flex items-center gap-3 w-full px-3 py-2.5 text-left rounded-lg transition-all duration-150 ${
-                                currentLanguage === language
+                              className={`flex items-center gap-3 w-full px-3 py-2.5 text-left rounded-lg transition-all duration-150 ${currentLanguage === language
                                   ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
                                   : "hover:bg-slate-700/60 text-slate-300 hover:text-slate-200"
-                              }`}
+                                }`}
                             >
                               <div
-                                className={`w-1.5 h-1.5 rounded-full ${
-                                  currentLanguage === language
+                                className={`w-1.5 h-1.5 rounded-full ${currentLanguage === language
                                     ? "bg-blue-400"
                                     : "bg-slate-500"
-                                }`}
+                                  }`}
                               ></div>
                               <span className="font-mono text-sm">
                                 {language}
@@ -181,12 +178,11 @@ const DomainWorkspace: React.FC<DomainWorkspaceProps> = ({
               )}
 
               <button
-                className={`cursor-pointer group relative flex items-center justify-center px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-xl font-medium transition-all duration-500 hover:scale-[1.02] text-xs sm:text-sm overflow-hidden shadow-2xl border ${
-                  isSubmitting
+                className={`cursor-pointer group relative flex items-center justify-center px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-xl font-medium transition-all duration-500 hover:scale-[1.02] text-xs sm:text-sm overflow-hidden shadow-2xl border ${isSubmitting
                     ? "bg-slate-900 cursor-not-allowed text-slate-500 border-slate-700/50"
                     : "bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-800 hover:from-emerald-700 hover:via-emerald-600 hover:to-teal-700 text-white hover:shadow-emerald-900/40 border-emerald-600/30 hover:border-emerald-500/50"
-                }`}
-                onClick={handleSubmitSolution}
+                  }`}
+                onClick={() => handleSubmitSolution()}
                 disabled={isRunning || isSubmitting}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/0 via-emerald-300/10 to-teal-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />

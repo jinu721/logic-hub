@@ -44,8 +44,7 @@ export class MessageCommandService
       sender = SYSTEM_USER_ID
     }
 
-    // Cast data to any to bypass strict MessageDocument structure for creation input (which allows string IDs typically)
-    const message = await this.messageRepo.createMessage({ ...data, sender } as any)
+    const message = await this.messageRepo.createMessage({ ...data, sender })
     return this.mapOne(await this.getPopulated(String(message._id)))
   }
 

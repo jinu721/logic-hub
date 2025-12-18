@@ -1,6 +1,5 @@
 import { PublicUserDTO } from "@modules/user/dtos";
-import { UserDocument } from "../models";
-import { CreateUserInput, HttpContext, SocialLoginInput, AuthContext } from "@shared/types";
+import { CreateUserInput, HttpContext, SocialLoginInput, AuthContext, UserDocument } from "@shared/types";
 import { Response } from "express";
 
 export interface IAuthService {

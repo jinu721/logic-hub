@@ -18,7 +18,7 @@ export class NotificationController implements INotificationController {
       throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._notifySvc.createNotification(dto as any);
+    const result = await this._notifySvc.createNotification(dto);
     sendSuccess(res, HttpStatus.CREATED, result, "Notification created successfully");
   });
 
@@ -49,7 +49,7 @@ export class NotificationController implements INotificationController {
       throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._notifySvc.updateNotification(dto.id, dto as any);
+    const result = await this._notifySvc.updateNotification(dto.id, dto);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Notification not found");
     }

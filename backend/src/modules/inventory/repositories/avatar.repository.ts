@@ -1,8 +1,7 @@
 import { UpdateQuery } from "mongoose"
-import { iAvatarRepository } from "@modules/inventory/interfaces/avatar.repository.interface" // wait, fix import naming and path
 import { IAvatarRepository } from "@modules/inventory"
 import { AvatarModel } from "@modules/inventory/models/avatar.model"
-import { InventoryDocument, PopulatedInventory } from "@shared/types"
+import { InventoryDocument, InventoryQueryFilter, PopulatedInventory } from "@shared/types"
 
 
 export class AvatarRepository implements IAvatarRepository {
@@ -13,7 +12,7 @@ export class AvatarRepository implements IAvatarRepository {
     return await AvatarModel.create(data);
   }
 
-  async getAll(query: any, skip: number, limit: number): Promise<PopulatedInventory[]> {
+  async getAll(query: InventoryQueryFilter, skip: number, limit: number): Promise<PopulatedInventory[]> {
     return await AvatarModel.find(query)
       .skip(skip)
       .limit(limit)

@@ -8,7 +8,7 @@ export const toPublicMarketItemDTO = (item: MarketItemDocument): PublicMarketIte
     name: item.name,
     description: item.description,
     costXP: item.costXP,
-    itemId: toPublicInventoryDTO(item.itemId as any) as any,
+    itemId: toPublicInventoryDTO(item.itemId) ,
     category: item.category,
     available: item.available,
     limitedTime: item.limitedTime,

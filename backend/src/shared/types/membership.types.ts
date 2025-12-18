@@ -16,3 +16,5 @@ export interface DiscountIF {
     features: string[];
     discount: DiscountIF;
   }
+
+  export interface MembershipDocument extends MembershipAttrs, Document {}

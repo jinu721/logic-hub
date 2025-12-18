@@ -3,11 +3,11 @@ import { Play, Pause, X, Send, PlayCircle } from "lucide-react"
 import { formatTime } from "@/utils/date.format"
 
 type Props = {
-    handleUploadFile: (file: File | Blob, type: "audio") => void
-    onClose:()=>void
+  handleUploadFile: (file: File | Blob, type: "audio") => void
+  onClose: () => void
 }
 
-const AudioRecorder = ({handleUploadFile,onClose}:Props) => {
+const AudioRecorder = ({ handleUploadFile, onClose }: Props) => {
   const [isRecording, setIsRecording] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -22,9 +22,9 @@ const AudioRecorder = ({handleUploadFile,onClose}:Props) => {
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
 
-  useEffect(()=>{
+  useEffect(() => {
     handleStartRecording();
-  },[])
+  }, [])
 
   const handleStartRecording = async () => {
     try {
@@ -41,6 +41,8 @@ const AudioRecorder = ({handleUploadFile,onClose}:Props) => {
         }
       }
 
+      // We don't rely on onstop here for global state anymore, 
+      // but we can still keep it for the non-sending stop case if needed.
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" })
         const audioUrl = URL.createObjectURL(audioBlob)
@@ -52,7 +54,7 @@ const AudioRecorder = ({handleUploadFile,onClose}:Props) => {
         setRecordingTime((prev) => prev + 1)
       }, 1000)
 
-      mediaRecorder.start(200)
+      mediaRecorder.start(100) // Smaller timeslice for smoother chunks
       setIsRecording(true)
       setIsPaused(false)
     } catch (error) {
@@ -65,7 +67,7 @@ const AudioRecorder = ({handleUploadFile,onClose}:Props) => {
     if (mediaRecorderRef.current && isRecording && !isPaused) {
       if (mediaRecorderRef.current.state === "recording") {
         mediaRecorderRef.current.pause()
-        clearInterval(timerRef.current!)
+        if (timerRef.current) clearInterval(timerRef.current)
         setIsPaused(true)
 
         const currentBlob = new Blob(audioChunksRef.current, { type: "audio/wav" })
@@ -83,29 +85,50 @@ const AudioRecorder = ({handleUploadFile,onClose}:Props) => {
           setRecordingTime((prev) => prev + 1)
         }, 1000)
         setIsPaused(false)
-
-        if (audioRef.current) {
-          audioRef.current.pause()
-          setIsPlaying(false)
-        }
       }
     }
   }
 
-  const handleStopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      if (mediaRecorderRef.current.state !== "inactive") {
-        mediaRecorderRef.current.stop()
-        clearInterval(timerRef.current!)
-
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => track.stop())
-        }
-
-        setIsRecording(false)
-        setIsPaused(false)
+  const stopRecordingInternal = (): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const recorder = mediaRecorderRef.current;
+      if (!recorder) {
+        resolve(new Blob([], { type: "audio/wav" })); // Should not happen
+        return;
       }
+
+      recorder.onstop = () => {
+        const finalBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
+        resolve(finalBlob);
+      };
+
+      if (recorder.state !== "inactive") {
+        recorder.stop();
+      } else {
+        // Already stopped
+        const finalBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
+        resolve(finalBlob);
+      }
+
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+
+      setIsRecording(false)
+      setIsPaused(false)
+    });
+  }
+
+  const handleStopRecording = () => {
+    // Normal stop (cancel/close) without sending
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
     }
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+    setIsRecording(false);
+    setIsPaused(false);
   }
 
   const handleCancelRecording = () => {
@@ -118,23 +141,19 @@ const AudioRecorder = ({handleUploadFile,onClose}:Props) => {
   }
 
   const handleSendAudio = async () => {
-    handleStopRecording()
-      onClose()
+    // Use the Promise-based stop to ensure we get the full blob
+    const finalBlob = await stopRecordingInternal();
 
-    if (audioBlob) {
-      console.log("Audio blob ready to send 1:", audioBlob)
-      await handleUploadFile(audioBlob, "audio")
-    } else if (audioChunksRef.current.length > 0) {
-      const finalBlob = new Blob(audioChunksRef.current, { type: "audio/wav" })
-      console.log("Audio blob ready to send 2:", finalBlob)
-      await handleUploadFile(finalBlob, "audio")
+    // Safety check size
+    if (finalBlob.size > 0) {
+      await handleUploadFile(finalBlob, "audio");
     }
-
 
     setAudioBlob(null)
     setAudioUrl(null)
     setRecordingTime(0)
     audioChunksRef.current = []
+    onClose()
   }
 
   const togglePlayback = () => {
@@ -156,9 +175,8 @@ const AudioRecorder = ({handleUploadFile,onClose}:Props) => {
         <div className="flex items-center bg-gray-700 rounded-lg p-3 justify-between">
           <div className="flex items-center">
             <div
-              className={`w-3 h-3 rounded-full mr-3 ${
-                isPaused ? "bg-yellow-500" : isRecording ? "bg-red-500 animate-pulse" : "bg-gray-400"
-              }`}
+              className={`w-3 h-3 rounded-full mr-3 ${isPaused ? "bg-yellow-500" : isRecording ? "bg-red-500 animate-pulse" : "bg-gray-400"
+                }`}
             ></div>
             <span className="text-gray-300">
               {isRecording

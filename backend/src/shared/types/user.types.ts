@@ -14,7 +14,6 @@ export enum LoginType {
   GITHUB = "github",
 }
 
-// 1. Base interface (Primitives only) - No _id here to avoid Mongoose Document conflict
 export interface UserBase {
   email: string;
   username: string;
@@ -36,7 +35,6 @@ export interface UserBase {
   };
   inventory: {
     keys: number;
-    // Arrays of IDs or Docs controlled by Raw/Populated separation
   };
   isBanned: boolean;
   isVerified: boolean;
@@ -49,8 +47,6 @@ export interface UserBase {
   timestamp: Date;
 }
 
-// 2. RAW Interface (Database State - ObjectIds) - Used for persistence/updates
-// Does NOT strictly enforce _id unless intersected with Document or Types
 export interface UserRaw extends UserBase {
   avatar: Types.ObjectId | null;
   banner: Types.ObjectId | null;
@@ -65,8 +61,6 @@ export interface UserRaw extends UserBase {
   }
 }
 
-// 3. POPULATED Interface (Application State - Full Objects) - Used for Services/DTOs
-// Must have _id as it won't be intersection with Document usually
 export interface PopulatedUser extends UserBase {
   _id: Types.ObjectId;
   avatar: InventoryDocument | null;
@@ -78,14 +72,11 @@ export interface PopulatedUser extends UserBase {
   };
   blockedUsers: Types.ObjectId[];
   membership?: MembershipAttrs & {
-    planId: any; // Ideally PlanDocument or similar
+    planId: Types.ObjectId | null | string; 
   }
 }
 
-// 4. Mongoose Document (Extends RAW)
-export interface UserDocument extends UserRaw, Document {
-  // Mongoose methods
-}
+export interface UserDocument extends UserRaw, Document {}
 
 export interface CreateUserInput {
   email: string;

@@ -1,22 +1,22 @@
 import { Types } from 'mongoose';
-import { GroupIF, GroupQueryFilter } from '@shared/types';
+import { GroupDocument, GroupQueryFilter } from '@shared/types';
 
 export interface IGroupRepository {
-  createGroup(data: Partial<GroupIF>): Promise<GroupIF>;
-  findByUser(userId: string): Promise<GroupIF[]>;
-  getAllGroups(query: GroupQueryFilter, skip: number, limit: number): Promise<GroupIF[] | null>;
-  updateGroup(groupId: string, data: Partial<GroupIF>): Promise<GroupIF | null>;
-  deleteGroup(groupId: string): Promise<GroupIF | null>;
-  addMembers(groupId: string, memberIds: string[]): Promise<GroupIF | null>;
-  removeMember(groupId: string, userId: string): Promise<GroupIF | null>;
-  addAdmin(groupId: string, userId: string): Promise<GroupIF | null>;
-  removeAdmin(groupId: string, userId: string): Promise<GroupIF | null>;
-  acceptJoinRequest(groupId: string, userId: string): Promise<GroupIF | null>;
-  updateGroupDetails(groupId: string, updatedData: Partial<GroupIF>): Promise<GroupIF | null>;
+  createGroup(data: Partial<GroupDocument>): Promise<GroupDocument>;
+  findByUser(userId: string): Promise<GroupDocument[]>;
+  getAllGroups(query: GroupQueryFilter, skip: number, limit: number): Promise<GroupDocument[] | null>;
+  updateGroup(groupId: string, data: Partial<GroupDocument>): Promise<GroupDocument | null>;
+  deleteGroup(groupId: string): Promise<GroupDocument | null>;
+  addMembers(groupId: string, memberIds: string[]): Promise<GroupDocument | null>;
+  removeMember(groupId: string, userId: string): Promise<GroupDocument | null>;
+  addAdmin(groupId: string, userId: string): Promise<GroupDocument | null>;
+  removeAdmin(groupId: string, userId: string): Promise<GroupDocument | null>;
+  acceptJoinRequest(groupId: string, userId: string): Promise<GroupDocument | null>;
+  updateGroupDetails(groupId: string, updatedData: Partial<GroupDocument>): Promise<GroupDocument | null>;
   getMembers(groupId: string): Promise<Types.ObjectId[] | null>;
-  saveGroup(group: GroupIF): Promise<GroupIF | null>;
-  sendJoinRequest(groupId: string, userId: string): Promise<GroupIF | null>;
-  leaveGroup(groupId: string, userId: string): Promise<GroupIF | null>;
-  findGroupById(groupId: string): Promise<GroupIF | null>;
+  saveGroup(group: GroupDocument): Promise<GroupDocument | null>;
+  sendJoinRequest(groupId: string, userId: string): Promise<GroupDocument | null>;
+  leaveGroup(groupId: string, userId: string): Promise<GroupDocument | null>;
+  findGroupById(groupId: string): Promise<GroupDocument | null>;
   countAllGroups(query: GroupQueryFilter): Promise<number>;
 }

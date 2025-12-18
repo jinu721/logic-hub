@@ -1,8 +1,8 @@
-import { NotificationIF } from "@shared/types";
+import { NotificationDocument } from "@shared/types";
 import { PublicNotificationDTO } from "@modules/notification/dtos";
 
 export const toPublicNotificationDTO = (
-  notification: NotificationIF
+  notification: NotificationDocument
 ): PublicNotificationDTO => {
   return {
     _id: notification._id ? notification._id.toString() : '',
@@ -17,7 +17,7 @@ export const toPublicNotificationDTO = (
 };
 
 export const toPublicNotificationDTOs = (
-  notifications: NotificationIF[]
+  notifications: NotificationDocument[]
 ): PublicNotificationDTO[] => {
   return notifications.map(toPublicNotificationDTO);
 };

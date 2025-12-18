@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { PaginationInput } from './core.types';
 import { PublicGroupDTO } from '@modules/chat';
 import { ReportDocument } from '@modules/report';
@@ -17,6 +17,8 @@ export interface ReportAttrs {
   status: ReportStatus;
   createdAt: Date;
 }
+
+export interface ReportDocument extends ReportAttrs, Document{}
 
 export interface CreateReportInput{
   reporter: Types.ObjectId;

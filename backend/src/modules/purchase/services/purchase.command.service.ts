@@ -13,12 +13,12 @@ import {
 import {
     IUserRepository
 } from "@modules/user"
-import { PurchaseIF } from "@shared/types"
+import { PurchaseDocument } from "@shared/types"
 import { AppError, toObjectId } from "@utils/application"
 import { BaseService } from "@core"
 
 
-export class PurchaseCommandService extends BaseService<PurchaseIF, PublicPurchaseDTO> implements IPurchaseCommandService {
+export class PurchaseCommandService extends BaseService<PurchaseDocument, PublicPurchaseDTO> implements IPurchaseCommandService {
   constructor(
     private purchaseRepo: IPurchaseRepository,
     private membershipRepo: IMembershipRepository,
@@ -27,15 +27,15 @@ export class PurchaseCommandService extends BaseService<PurchaseIF, PublicPurcha
     super();
   }
 
-  protected toDTO(purchase: PurchaseIF): PublicPurchaseDTO {
+  protected toDTO(purchase: PurchaseDocument): PublicPurchaseDTO {
     return toPublicPurchaseDTO(purchase);
   }
 
-  protected toDTOs(purchases: PurchaseIF[]): PublicPurchaseDTO[] {
+  protected toDTOs(purchases: PurchaseDocument[]): PublicPurchaseDTO[] {
     return toPublicPurchaseDTOs(purchases);
   }
 
-  async createPlanPurchase(data: Partial<PurchaseIF>): Promise<PublicPurchaseDTO> {
+  async createPlanPurchase(data: Partial<PurchaseDocument>): Promise<PublicPurchaseDTO> {
     const now = new Date();
 
     const plan = await this.membershipRepo.findById(String(data.planId));
@@ -50,7 +50,7 @@ export class PurchaseCommandService extends BaseService<PurchaseIF, PublicPurcha
       ...data,
       startedAt: now,
       expiresAt,
-    } as PurchaseIF);
+    } as PurchaseDocument);
 
     await this.userRepo.updateUser(toObjectId(data.userId), {
       membership: {

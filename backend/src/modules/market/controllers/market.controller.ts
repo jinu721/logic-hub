@@ -15,7 +15,7 @@ export class MarketController implements IMarketController {
       throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._marketSvc.createItem(dto as any);
+    const result = await this._marketSvc.createItem(dto);
     sendSuccess(res, HttpStatus.CREATED, result, "Item created successfully");
   });
 
@@ -25,7 +25,7 @@ export class MarketController implements IMarketController {
     if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
 
     const filter = {
-      category: dto.category as any,
+      category: dto.category,
       searchQuery: dto.searchQuery,
       sortOption: dto.sortOption,
     };
@@ -58,7 +58,7 @@ export class MarketController implements IMarketController {
       throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._marketSvc.updateItem(dto.id, dto as any);
+    const result = await this._marketSvc.updateItem(dto.id, dto);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
     }

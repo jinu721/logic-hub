@@ -66,8 +66,8 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
     await this.pendingRepo.deletePendingUser(dto.email);
 
     const pub = this.mapOne(user);
-    const accessToken = this.tokenProv.generateAccessToken(pub as any);
-    const refreshToken = this.tokenProv.generateRefreshToken(pub as any);
+    const accessToken = this.tokenProv.generateAccessToken(pub);
+    const refreshToken = this.tokenProv.generateRefreshToken(pub);
 
     await this.tokenSvc.createToken({
       userId: String(user._id),
@@ -94,8 +94,8 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
     if (!valid) throw new AppError(HttpStatus.UNAUTHORIZED, "Invalid credentials");
 
     const pub = this.mapOne(user);
-    const accessToken = this.tokenProv.generateAccessToken(pub as any);
-    const refreshToken = this.tokenProv.generateRefreshToken(pub as any);
+    const accessToken = this.tokenProv.generateAccessToken(pub);
+    const refreshToken = this.tokenProv.generateRefreshToken(pub);
 
     await this.tokenSvc.createToken({
       userId: String(user._id),
@@ -118,8 +118,8 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
     const pub = this.mapOne(user);
-    const accessToken = this.tokenProv.generateAccessToken(pub as any);
-    const refreshToken = this.tokenProv.generateRefreshToken(pub as any);
+    const accessToken = this.tokenProv.generateAccessToken(pub);
+    const refreshToken = this.tokenProv.generateRefreshToken(pub);
 
     await this.tokenSvc.createToken({
       userId: String(user._id),
@@ -150,7 +150,7 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
     const pub = this.mapOne(user);
-    const newAccessToken = this.tokenProv.generateAccessToken(pub as any);
+    const newAccessToken = this.tokenProv.generateAccessToken(pub);
 
     if (ctx.res) setAccessToken(ctx.res, newAccessToken);
     return { accessToken: newAccessToken };
@@ -195,8 +195,8 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
 
     const pub: PublicUserDTO = this.mapOne(user);
 
-    const accessToken = this.tokenProv.generateAccessToken(pub as any);
-    const refreshToken = this.tokenProv.generateRefreshToken(pub as any);
+    const accessToken = this.tokenProv.generateAccessToken(pub);
+    const refreshToken = this.tokenProv.generateRefreshToken(pub);
 
     await this.tokenSvc.createToken({
       userId,
@@ -217,7 +217,7 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
     const user = await this.userRepo.getByEmailOrUsername(email);
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "Email not found");
 
-    const token = this.tokenProv.generateResetToken(this.mapOne(user) as any);
+    const token = this.tokenProv.generateResetToken(this.mapOne(user));
     const link = `${env.FRONTEND_URL}/auth/reset?token=${token}`;
     await this.emailProv.sendLink(email, link);
 

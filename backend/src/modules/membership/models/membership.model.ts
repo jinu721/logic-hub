@@ -1,9 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
-import { MembershipIF } from "@shared/types";
+import { MembershipDocument } from "@shared/types";
 
 
-
-export interface PremiumPlanDocument extends MembershipIF, Document {}
 
 const DiscountSchema: Schema = new Schema(
   {
@@ -15,7 +13,7 @@ const DiscountSchema: Schema = new Schema(
   { _id: false } 
 );
 
-const PremiumPlanSchema: Schema<PremiumPlanDocument> = new Schema(
+const PremiumPlanSchema: Schema<MembershipDocument> = new Schema(
   {
     name: { type: String, required: true },
     price: { type: String, required: true },
@@ -29,4 +27,4 @@ const PremiumPlanSchema: Schema<PremiumPlanDocument> = new Schema(
   { timestamps: true }
 );
 
-export const MembershipModel: Model<PremiumPlanDocument> = mongoose.model<PremiumPlanDocument>("PremiumPlan",PremiumPlanSchema);
+export const MembershipModel: Model<MembershipDocument> = mongoose.model<MembershipDocument>("PremiumPlan",PremiumPlanSchema);

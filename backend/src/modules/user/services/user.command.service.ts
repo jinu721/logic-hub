@@ -3,7 +3,7 @@ import { AppError, toObjectId } from "@utils/application"
 import { HttpStatus } from "@constants"
 import { IUserCommandService, IUserRepository, PublicUserDTO, toPublicUserDTO, toPublicUserDTOs } from "@modules/user"
 import { IHashProvider } from "@providers/hashing"
-import { UpdateUserInput, UserDocument, PopulatedUser } from "@shared/types"
+import { UpdateUserInput, PopulatedUser, UserDocument } from "@shared/types"
 
 
 export class UserCommandService
@@ -42,7 +42,7 @@ export class UserCommandService
       ...data,
       avatar: data.avatar ? toObjectId(data.avatar) : undefined,
       banner: data.banner ? toObjectId(data.banner) : undefined,
-    } as any; 
+    } ; 
 
     const updated = await this.userRepo.updateUser(toObjectId(userId), updateData);
     if (!updated) throw new AppError(HttpStatus.NOT_FOUND, "User not found");

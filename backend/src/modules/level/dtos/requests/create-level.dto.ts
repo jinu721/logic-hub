@@ -4,7 +4,7 @@ export class CreateLevelDto extends BaseDto {
     levelNumber!: number;
     requiredXP!: number;
     description!: string;
-    rewards?: any[];
+    rewards?: unknown[];
 
     validate() {
         const errors: string[] = [];

@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Document, Types } from "mongoose";
 
 export interface PurchaseAttrs {
   userId: Types.ObjectId;
@@ -11,3 +11,5 @@ export interface PurchaseAttrs {
   startedAt: Date;
   expiresAt: Date;  
 }
+
+export interface PurchaseDocument extends PurchaseAttrs, Document{}

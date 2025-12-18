@@ -13,3 +13,12 @@ export interface PopulatedInventory extends InventoryBase {
 }
 
 export interface InventoryDocument extends InventoryBase, Document { }
+
+
+export interface InventoryQueryFilter {
+    name?: string;
+    description?: string;
+    image?: string;
+    isActive?: boolean;
+    rarity?: "common" | "uncommon" | "rare" | "epic" | "legendary";
+}

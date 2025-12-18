@@ -6,29 +6,29 @@ import {
   IPurchaseRepository,
   IPurchaseQueryService
 } from "@modules/purchase"
-import { PurchaseIF } from "@shared/types"
+import { NotificationDocument } from "@shared/types"
 import { AppError } from "@utils/application"
 import { BaseService } from "@core"
 
 
 export class PurchaseQueryService
-  extends BaseService<PurchaseIF, PublicPurchaseDTO> implements IPurchaseQueryService
+  extends BaseService<NotificationDocument, PublicPurchaseDTO> implements IPurchaseQueryService
 {
   constructor(private readonly purchaseRepo: IPurchaseRepository) {
     super()
   }
 
-  protected toDTO(purchase: PurchaseIF): PublicPurchaseDTO {
+  protected toDTO(purchase: NotificationDocument): PublicPurchaseDTO {
     return toPublicPurchaseDTO(purchase)
   }
 
-  protected toDTOs(purchases: PurchaseIF[]): PublicPurchaseDTO[] {
+  protected toDTOs(purchases: NotificationDocument[]): PublicPurchaseDTO[] {
     return toPublicPurchaseDTOs(purchases)
   }
 
   async getUserPurchases(userId: string) {
     const purchases = await this.purchaseRepo.getUserPlanPurchases(userId)
-    return this.mapMany(purchases as PurchaseIF[])
+    return this.mapMany(purchases as NotificationDocument[])
   }
 
   async getPlanHistoryById(id: string) {
@@ -46,7 +46,7 @@ export class PurchaseQueryService
     const totalItems = await this.purchaseRepo.countPlanHistory()
 
     return {
-      items: this.mapMany(purchases as PurchaseIF[]),
+      items: this.mapMany(purchases as NotificationDocument[]),
       totalItems
     }
   }

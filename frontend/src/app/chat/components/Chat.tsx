@@ -604,14 +604,14 @@ export default function ChatPage() {
   ): Promise<string | undefined> => {
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      if (file instanceof Blob && !(file instanceof File)) {
+        formData.append("file", file, "audio.wav");
+      } else {
+        formData.append("file", file);
+      }
       formData.append("type", type);
 
-      const response = await axiosInstance.post("/messages/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axiosInstance.post("/messages/upload", formData);
 
       const fileUrl = response.data.url;
       handleSendMessage(

@@ -5,7 +5,7 @@ export class CreateNotificationDto extends BaseDto {
     title!: string;
     message!: string;
     type!: string;
-    itemData?: any;
+    itemData?: unknown;
     isRead?: boolean;
 
     validate() {

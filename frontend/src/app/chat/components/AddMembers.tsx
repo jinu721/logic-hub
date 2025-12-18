@@ -68,7 +68,7 @@ const AddMembers: React.FC<AddMembersProps> = ({
                 {user.username}
               </span>
               <button
-                onClick={() => handleRemoveUser(user.userId)}
+                onClick={() => handleRemoveUser(user.userId || user._id)}
                 className="text-gray-400 hover:text-white"
               >
                 <X size={12} />
@@ -84,18 +84,17 @@ const AddMembers: React.FC<AddMembersProps> = ({
         .filter((user) => user.type === "one-to-one")
         .map((chat) => {
           const isAlreadyMember = currentConversationData.participants.some(
-            (member) => member.userId === chat.otherUser.userId
+            (member) => (member.userId || member._id) === (chat.otherUser.userId || chat.otherUser._id)
           );
           const isSelected = selectedUsersAdd.some(
-            (selected) => selected.userId === <chat className="otherUser use"></chat>
+            (selected) => (selected.userId || selected._id) === (chat.otherUser.userId || chat.otherUser._id)
           );
 
           return (
             <div
-              key={chat.otherUser.userId}
-              className={`flex items-center justify-between p-2 hover:bg-gray-600 rounded-md ${
-                isAlreadyMember ? "opacity-60" : "cursor-pointer"
-              }`}
+              key={chat.otherUser.userId || chat.otherUser._id}
+              className={`flex items-center justify-between p-2 hover:bg-gray-600 rounded-md ${isAlreadyMember ? "opacity-60" : "cursor-pointer"
+                }`}
             >
               <div className="flex items-center">
                 <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-sm font-semibold">
@@ -110,7 +109,7 @@ const AddMembers: React.FC<AddMembersProps> = ({
                 </span>
               ) : isSelected ? (
                 <button
-                  onClick={() => handleRemoveUser(chat.otherUser.userId)}
+                  onClick={() => handleRemoveUser(chat.otherUser.userId || chat.otherUser._id)}
                   className="text-red-400 hover:text-red-300"
                 >
                   <Minus size={16} />
@@ -137,11 +136,10 @@ const AddMembers: React.FC<AddMembersProps> = ({
     <button
       onClick={handleAddSelectedMembers}
       disabled={selectedUsersAdd.length === 0}
-      className={`w-full py-2 rounded-md text-sm font-medium ${
-        selectedUsersAdd.length > 0
-          ? "bg-purple-600 hover:bg-purple-700 text-white"
-          : "bg-gray-600 text-gray-400 cursor-not-allowed"
-      }`}
+      className={`w-full py-2 rounded-md text-sm font-medium ${selectedUsersAdd.length > 0
+        ? "bg-purple-600 hover:bg-purple-700 text-white"
+        : "bg-gray-600 text-gray-400 cursor-not-allowed"
+        }`}
     >
       Add Selected Users
     </button>

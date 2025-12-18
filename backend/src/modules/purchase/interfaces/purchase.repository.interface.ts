@@ -1,11 +1,11 @@
-import { PurchaseIF } from "@shared/types";
+import { PurchaseDocument } from "@shared/types";
 
 
 
 export interface IPurchaseRepository {
-    createPlanPurchase(data:PurchaseIF):Promise<PurchaseIF>
-    getUserPlanPurchases(userId:string):Promise<PurchaseIF[] | null>
-    getPlanHistoryById(id:string):Promise<PurchaseIF | null>
-    getPlanHistory(skip:number,limit:number):Promise<PurchaseIF[] | null>
+    createPlanPurchase(data:PurchaseDocument):Promise<PurchaseDocument>
+    getUserPlanPurchases(userId:string):Promise<PurchaseDocument[] | null>
+    getPlanHistoryById(id:string):Promise<PurchaseDocument | null>
+    getPlanHistory(skip:number,limit:number):Promise<PurchaseDocument[] | null>
     countPlanHistory():Promise<number>
 }

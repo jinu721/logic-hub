@@ -1,6 +1,6 @@
-import { InventoryAttrs } from "./inventory.types";
+import { InventoryBase } from "./inventory.types";
 
-export type NotificationItemData = InventoryAttrs | string | { [key: string]: unknown };
+export type NotificationItemData = InventoryBase | string | { [key: string]: unknown };
 
 export interface NotificationAttrs {
   userId: string;
@@ -11,3 +11,6 @@ export interface NotificationAttrs {
   isRead: boolean;
   createdAt: Date;
 }
+
+
+export interface NotificationDocument extends NotificationAttrs, Document {}

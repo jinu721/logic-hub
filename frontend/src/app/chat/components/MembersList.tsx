@@ -6,7 +6,7 @@ import React from "react";
 interface Props {
   currentConversationData: ConversationIF;
   userRole: "admin" | "owner" | "member";
-  showAllMembers: boolean;z
+  showAllMembers: boolean; z
   setShowAllMembers: (value: boolean) => void;
   toggleMenu: (userId: string) => void;
   openMenuId: string | null;
@@ -50,15 +50,25 @@ const MembersList: React.FC<Props> = ({
 
       <div className="space-y-3">
         {(showAllMembers ? participants : participants.slice(0, 5)).map((member) => {
+          const createdBy = currentConversationData.group?.createdBy as any;
+          const ownerId = createdBy?.userId || createdBy?._id || createdBy;
+
+          // Use userId if available (from DTO), otherwise _id
+          const memberId = member.userId || member._id;
+
           const isOwner =
-            currentConversationData.group?.createdBy?._id === member._id;
+            ownerId?.toString() === memberId?.toString();
+
           const isAdmin = currentConversationData.group?.admins.some(
-            (admin) => admin._id === member._id
+            (admin: any) => {
+              const adminId = admin.userId || admin._id || admin;
+              return adminId?.toString() === memberId?.toString();
+            }
           );
 
           return (
             <div
-              key={member._id}
+              key={memberId}
               className="flex items-center justify-between py-2 px-1 hover:bg-gray-800 rounded-md transition-colors"
             >
               <div className="flex items-center">
@@ -71,21 +81,19 @@ const MembersList: React.FC<Props> = ({
                     />
                   ) : (
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                        isOwner
-                          ? "bg-yellow-600"
-                          : isAdmin
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isOwner
+                        ? "bg-yellow-600"
+                        : isAdmin
                           ? "bg-blue-600"
                           : "bg-green-600"
-                      }`}
+                        }`}
                     >
                       {member.username?.[0]?.toUpperCase() || "M"}
                     </div>
                   )}
                   <div
-                    className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 ${
-                      member.isOnline ? "bg-green-500" : "bg-gray-500"
-                    } rounded-full border-2 border-gray-800`}
+                    className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 ${member.isOnline ? "bg-green-500" : "bg-gray-500"
+                      } rounded-full border-2 border-gray-800`}
                   ></div>
                 </div>
 
@@ -110,19 +118,22 @@ const MembersList: React.FC<Props> = ({
                 <div className="relative">
                   <button
                     className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
-                    onClick={() => toggleMenu(member._id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleMenu(memberId!);
+                    }}
                   >
                     <MoreVertical size={16} />
                   </button>
 
-                  {openMenuId === member._id && (
-                    <div className="absolute right-0 mt-1 w-48 bg-gray-700 rounded-md shadow-lg z-10">
+                  {openMenuId === memberId && (
+                    <div className="absolute right-0 mt-1 w-48 bg-gray-700 rounded-md shadow-lg z-50 border border-gray-600">
                       <div className="py-1">
                         {userRole === "owner" && !isOwner && (
                           <>
                             {isAdmin ? (
                               <button
-                                onClick={() => handleRemoveAdmin(member._id)}
+                                onClick={() => handleRemoveAdmin(memberId!)}
                                 className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md"
                               >
                                 <Shield size={14} className="mr-2 text-red-400" />
@@ -130,7 +141,7 @@ const MembersList: React.FC<Props> = ({
                               </button>
                             ) : (
                               <button
-                                onClick={() => handleMakeAdmin(member._id)}
+                                onClick={() => handleMakeAdmin(memberId!)}
                                 className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md"
                               >
                                 <Shield size={14} className="mr-2 text-blue-400" />
@@ -141,7 +152,7 @@ const MembersList: React.FC<Props> = ({
                         )}
                         {!isOwner && (
                           <button
-                            onClick={() => handleRemoveMember(member._id)}
+                            onClick={() => handleRemoveMember(memberId!)}
                             className="flex items-center w-full px-4 py-2 text-sm text-red-400 hover:bg-gray-600 rounded-md"
                           >
                             <UserMinus size={14} className="mr-2" />

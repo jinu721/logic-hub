@@ -1,108 +1,107 @@
 import { Types } from "mongoose";
 import { GroupModel, IGroupRepository } from "@modules/chat";
-import { GroupIF } from "@shared/types";
+import { GroupDocument, GroupQueryFilter } from "@shared/types";
 import { BaseRepository } from "@core";
 
 
 export class GroupRepository
-  extends BaseRepository<GroupIF>
-  implements IGroupRepository
-{
+  extends BaseRepository<GroupDocument>
+  implements IGroupRepository {
   constructor() {
     super(GroupModel);
   }
-  async createGroup(data: Partial<GroupIF>): Promise<GroupIF> {
+  async createGroup(data: Partial<GroupDocument>): Promise<GroupDocument> {
     return this.model.create(data);
   }
 
-  async findByUser(userId: string): Promise<GroupIF[]> {
+  async findByUser(userId: string): Promise<GroupDocument[]> {
     return this.model.find({
       $or: [{ createdBy: userId }, { admins: userId }],
     });
   }
 
-async findGroupById(groupId: string): Promise<GroupIF | null> {
-  return this.model
-    .findById(groupId)
-    .populate({
-      path: "members",
-      populate: [{ path: "avatar" }, { path: "banner" }],
-    })
-    .populate({
-      path: "admins",
-      populate: [{ path: "avatar" }, { path: "banner" }],
-    })
-    .populate({
-      path: "createdBy",
-      populate: [{ path: "avatar" }, { path: "banner" }],
-    })
-    .populate({
-      path: "userRequests",
-      populate: [{ path: "avatar" }, { path: "banner" }],
-    })
-    .populate({
-      path: "voiceRoom.host",
-      populate: [{ path: "avatar" }, { path: "banner" }],
-    })
-    .populate({
-      path: "voiceRoom.participants",
-      populate: [{ path: "avatar" }, { path: "banner" }],
-    })
-    .populate({
-      path: "voiceRoom.mutedUsers",
-      populate: [{ path: "avatar" }, { path: "banner" }],
-    });
-}
-
-
-  async getAllGroups(query: any,skip:number,limit:number): Promise<GroupIF[] | null> {
-    return this.model.find(query)
-    .skip(skip)
-    .limit(limit)
-    .populate({
-      path: "members",
-      populate: [{ path: "avatar" }, { path: "banner" }],
-    })
-    .populate({
-      path: "admins",
-      populate: [{ path: "avatar" }, { path: "banner" }],
-    })
-    .populate({
-      path: "createdBy",
-      populate: [{ path: "avatar" }, { path: "banner" }],
-    });
+  async findGroupById(groupId: string): Promise<GroupDocument | null> {
+    return this.model
+      .findById(groupId)
+      .populate({
+        path: "members",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      })
+      .populate({
+        path: "admins",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      })
+      .populate({
+        path: "createdBy",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      })
+      .populate({
+        path: "userRequests",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      })
+      .populate({
+        path: "voiceRoom.host",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      })
+      .populate({
+        path: "voiceRoom.participants",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      })
+      .populate({
+        path: "voiceRoom.mutedUsers",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      });
   }
 
-   async countAllGroups(filter:any):Promise<number> {
+
+  async getAllGroups(query: GroupQueryFilter, skip: number, limit: number): Promise<GroupDocument[] | null> {
+    return this.model.find(query)
+      .skip(skip)
+      .limit(limit)
+      .populate({
+        path: "members",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      })
+      .populate({
+        path: "admins",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      })
+      .populate({
+        path: "createdBy",
+        populate: [{ path: "avatar" }, { path: "banner" }],
+      });
+  }
+
+  async countAllGroups(filter: GroupQueryFilter): Promise<number> {
     return this.model.countDocuments(filter);
-   }
+  }
 
   async updateGroup(
     groupId: string,
-    data: Partial<GroupIF>
-  ): Promise<GroupIF | null> {
+    data: Partial<GroupDocument>
+  ): Promise<GroupDocument | null> {
     return this.model.findByIdAndUpdate(groupId, data, { new: true });
   }
 
-  async deleteGroup(groupId: string): Promise<GroupIF | null> {
+  async deleteGroup(groupId: string): Promise<GroupDocument | null> {
     return await this.model.findByIdAndUpdate(
       groupId,
-      { isDeleted: true},
+      { isDeleted: true },
       { new: true }
     );
   }
-  
 
-  async addMembers(groupId: string, memberIds: string[]): Promise<GroupIF | null> {
+
+  async addMembers(groupId: string, memberIds: string[]): Promise<GroupDocument | null> {
     return this.model.findByIdAndUpdate(
       groupId,
       { $addToSet: { members: { $each: memberIds } } },
       { new: true }
     );
   }
-  
 
-  async removeMember(groupId: string, userId: string): Promise<GroupIF | null> {
+
+  async removeMember(groupId: string, userId: string): Promise<GroupDocument | null> {
     return await this.model.findByIdAndUpdate(
       groupId,
       {
@@ -114,8 +113,8 @@ async findGroupById(groupId: string): Promise<GroupIF | null> {
       { new: true }
     );
   }
-  
-  async addAdmin(groupId: string, userId: string): Promise<GroupIF | null> {
+
+  async addAdmin(groupId: string, userId: string): Promise<GroupDocument | null> {
     return await this.model.findByIdAndUpdate(
       groupId,
       { $push: { admins: userId } },
@@ -123,7 +122,7 @@ async findGroupById(groupId: string): Promise<GroupIF | null> {
     );
   }
 
-  async removeAdmin(groupId: string, userId: string): Promise<GroupIF | null> {
+  async removeAdmin(groupId: string, userId: string): Promise<GroupDocument | null> {
     return await this.model.findByIdAndUpdate(groupId, {
       $pull: { admins: userId },
     });
@@ -131,8 +130,8 @@ async findGroupById(groupId: string): Promise<GroupIF | null> {
 
   async updateGroupDetails(
     groupId: string,
-    updatedData: Partial<GroupIF>
-  ): Promise<GroupIF | null> {
+    updatedData: Partial<GroupDocument>
+  ): Promise<GroupDocument | null> {
     return await this.model.findByIdAndUpdate(groupId, updatedData, {
       new: true,
     });
@@ -143,14 +142,14 @@ async findGroupById(groupId: string): Promise<GroupIF | null> {
     return group ? group.members : null;
   }
 
-  async saveGroup(group: GroupIF): Promise<GroupIF | null> {
+  async saveGroup(group: GroupDocument): Promise<GroupDocument | null> {
     return await this.model.findByIdAndUpdate(group._id, group, { new: true });
   }
 
   async sendJoinRequest(
     groupId: string,
     userId: string
-  ): Promise<GroupIF | null> {
+  ): Promise<GroupDocument | null> {
     return await this.model.findByIdAndUpdate(
       groupId,
       { $push: { userRequests: userId } },
@@ -161,7 +160,7 @@ async findGroupById(groupId: string): Promise<GroupIF | null> {
   async acceptJoinRequest(
     groupId: string,
     userId: string
-  ): Promise<GroupIF | null> {
+  ): Promise<GroupDocument | null> {
     return await this.model.findByIdAndUpdate(
       groupId,
       {
@@ -172,7 +171,7 @@ async findGroupById(groupId: string): Promise<GroupIF | null> {
     );
   }
 
-  async leaveGroup(groupId: string, userId: string): Promise<GroupIF | null> {
+  async leaveGroup(groupId: string, userId: string): Promise<GroupDocument | null> {
     return await this.model.findByIdAndUpdate(
       groupId,
       { $pull: { members: userId } },

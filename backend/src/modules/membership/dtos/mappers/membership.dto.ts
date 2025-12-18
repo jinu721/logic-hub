@@ -1,7 +1,7 @@
-import { MembershipIF } from "@shared/types";
+import { MembershipDocument } from "@shared/types";
 import { PublicMembershipDTO } from "@modules/membership/dtos";
 
-export const toPublicMembershipDTO = (plan: MembershipIF): PublicMembershipDTO => {
+export const toPublicMembershipDTO = (plan: MembershipDocument): PublicMembershipDTO => {
   return {
     _id: plan._id ? plan._id.toString() : "",
     name: plan.name,
@@ -10,7 +10,7 @@ export const toPublicMembershipDTO = (plan: MembershipIF): PublicMembershipDTO =
     type: plan.type,
     isActive: plan.isActive,
     isFeatured: plan.isFeatured,
-    features: plan.features,
+    features: plan.features,  
     discount: {
       active: plan.discount.active,
       amount: plan.discount.amount,
@@ -20,6 +20,6 @@ export const toPublicMembershipDTO = (plan: MembershipIF): PublicMembershipDTO =
   };
 };
 
-export const toPublicMembershipDTOs = (plans: MembershipIF[]): PublicMembershipDTO[] => {
+export const toPublicMembershipDTOs = (plans: MembershipDocument[]): PublicMembershipDTO[] => {
   return plans.map(toPublicMembershipDTO);
 };

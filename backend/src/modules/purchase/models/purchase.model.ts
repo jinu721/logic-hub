@@ -1,9 +1,9 @@
 import mongoose, { Model, Schema } from 'mongoose';
-import { PurchaseIF } from '@shared/types';
+import { PurchaseDocument } from '@shared/types';
 
 
 
-const MembershipPurchaseSchema: Schema<PurchaseIF> = new Schema(
+const MembershipPurchaseSchema: Schema<PurchaseDocument> = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     planId: { type: Schema.Types.ObjectId, ref: 'PremiumPlan', required: true },

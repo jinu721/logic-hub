@@ -1,6 +1,6 @@
 import { UpdateQuery } from "mongoose"
 import { BadgesModel, IBadgeRepository } from "@modules/inventory"
-import { InventoryDocument, PopulatedInventory } from "@shared/types"
+import { InventoryDocument, InventoryQueryFilter, PopulatedInventory } from "@shared/types"
 
 
 export class BadgeRepository implements IBadgeRepository {
@@ -11,7 +11,7 @@ export class BadgeRepository implements IBadgeRepository {
     return await BadgesModel.create(data);
   }
 
-  async getAll(query: any, skip: number, limit: number): Promise<PopulatedInventory[]> {
+  async getAll(query: InventoryQueryFilter, skip: number, limit: number): Promise<PopulatedInventory[]> {
     return await BadgesModel.find(query)
       .skip(skip)
       .limit(limit)

@@ -1,8 +1,8 @@
 import { PublicMembershipDTO } from "@modules/membership/dtos";
-import { MembershipIF } from "@shared/types";
+import { MembershipDocument } from "@shared/types";
 
 export interface IMembershipService {
-  createPlan(data: Partial<MembershipIF>): Promise<PublicMembershipDTO>;
+  createPlan(data: Partial<MembershipDocument>): Promise<PublicMembershipDTO>;
   getAllPlans(search: string,page:number,limit:number): Promise<{items: PublicMembershipDTO[],totalItems:number}>;
   getTwoActivePlans(): Promise<PublicMembershipDTO[]>;
   getPlanById(id: string): Promise<PublicMembershipDTO | null>;

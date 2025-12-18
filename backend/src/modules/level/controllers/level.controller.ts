@@ -30,7 +30,7 @@ export class LevelController implements ILevelController {
       throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const level = await this._levelSvc.createLevel(dto as any);
+    const level = await this._levelSvc.createLevel(dto);
     sendSuccess(res, HttpStatus.CREATED, level, "Level created successfully");
   });
 

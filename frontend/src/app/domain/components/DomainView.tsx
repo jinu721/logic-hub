@@ -286,12 +286,12 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
             rewards: data.rewards || [],
           });
         }
-        redirectHome = true;
+        // redirectHome = true; // Removed redirection
       }
 
-      if (redirectHome) {
-        router.push("/home");
-      }
+      // if (redirectHome) {
+      //   router.push("/home");
+      // }
     } catch (err) {
       console.error("Submission error:", err);
       showToast({ type: "error", message: "Error Submitting Solution" });

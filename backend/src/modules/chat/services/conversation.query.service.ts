@@ -23,11 +23,11 @@ import {
   IUserRepository,
 } from "@modules/user";
 
-import { ConversationIF, ConversationSearchFilter } from "@shared/types";
+import { ConversationDocument, ConversationSearchFilter } from "@shared/types";
 
 
 export class ConversationQueryService
-  extends BaseService<ConversationIF, PublicConversationDTO>
+  extends BaseService<ConversationDocument, PublicConversationDTO>
   implements IConversationQueryService {
   constructor(
     private readonly conversationRepo: IConversationRepository,
@@ -37,19 +37,19 @@ export class ConversationQueryService
     super();
   }
 
-  protected toDTO(conv: ConversationIF): PublicConversationDTO {
+  protected toDTO(conv: ConversationDocument): PublicConversationDTO {
     const base = toPublicConversationDTO(conv);
 
     const participants = Array.isArray(conv.participants)
-      ? toPublicUserDTOs(conv.participants as any)
+      ? toPublicUserDTOs(conv.participants)
       : [];
 
     const typingUsers = Array.isArray(conv.typingUsers)
-      ? toPublicUserDTOs(conv.typingUsers as any)
+      ? toPublicUserDTOs(conv.typingUsers)
       : [];
 
     const latestMessage = conv.latestMessage
-      ? (toPublicMessageDTO(conv.latestMessage as any) as PublicMessageDTO)
+      ? (toPublicMessageDTO(conv.latestMessage) as PublicMessageDTO)
       : undefined;
 
     return {
@@ -60,7 +60,7 @@ export class ConversationQueryService
     };
   }
 
-  protected toDTOs(convs: ConversationIF[]): PublicConversationDTO[] {
+  protected toDTOs(convs: ConversationDocument[]): PublicConversationDTO[] {
     return convs.map((c) => this.toDTO(c));
   }
 
@@ -92,7 +92,7 @@ export class ConversationQueryService
     }
 
     if (conv.type === "one-to-one" && Array.isArray(conv.participants)) {
-      const other = (conv.participants as any[]).find(
+      const other = (conv.participants).find(
         (u) => u._id?.toString() !== currentUserId.toString()
       );
       if (other) {

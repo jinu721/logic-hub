@@ -1,6 +1,6 @@
 import { BaseService } from "@core"
 import { IGroupQueryService, IGroupRepository } from "@modules/chat"
-import { GroupIF } from "@shared/types"
+import { GroupIF, GroupQueryFilter } from "@shared/types"
 import { PublicGroupDTO, toPublicGroupDTO, toPublicGroupDTOs } from "@modules/chat/dtos"
 
 export class GroupQueryService
@@ -19,8 +19,9 @@ export class GroupQueryService
   }
 
   async findByUser(userId: string): Promise<PublicGroupDTO[]> {
-    const groups = await this.groupRepo.findByUser(userId)
-    return this.mapMany(groups)
+    const query = { $or: [{ createdBy: userId }, { admins: userId }] }
+    const groups = await this.groupRepo.getAllGroups(query, 0, 0)
+    return this.mapMany(groups || [])
   }
 
   async findGroupById(groupId: string): Promise<PublicGroupDTO | null> {

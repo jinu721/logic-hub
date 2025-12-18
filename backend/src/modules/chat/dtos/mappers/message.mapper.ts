@@ -6,13 +6,11 @@ import { PublicMessageDTO } from "@modules/chat/dtos";
 export const toPublicMessageDTO = (message: PopulatedMessage): PublicMessageDTO => {
   const SYSTEM_USER_ID = "000000000000000000000000";
 
-  // Safe sender check
   const senderId = message.sender?._id?.toString() || message.sender?.toString();
   const isSystemSender = senderId === SYSTEM_USER_ID;
   const isSystemMessage = message.type === "system" || isSystemSender;
 
-  // Helper to safely get ID from potentially populated or unpopulated field
-  const getSafeId = (user: any) => (user?._id ? user._id.toString() : user?.toString());
+  const getSafeId = (user) => (user?._id ? user._id.toString() : user?.toString());
 
   return {
     _id: message._id.toString(),
@@ -27,7 +25,7 @@ export const toPublicMessageDTO = (message: PopulatedMessage): PublicMessageDTO 
       }
       : (message.sender && typeof message.sender === 'object' && 'username' in message.sender
         ? toPublicUserDTO(message.sender)
-        : { _id: senderId, username: "Unknown", email: "", avatar: null, bio: "" } as any), // Fallback for unpopulated sender
+        : { _id: senderId, username: "Unknown", email: "", avatar: null, bio: "" }), 
     content: message.content,
     type: message.type,
     mentionedUsers: message.mentionedUsers?.map(getSafeId) || [],

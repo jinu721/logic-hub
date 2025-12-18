@@ -77,6 +77,7 @@ export class GroupHandler {
           );
           break;
         case "edit_group_info":
+          finalNewGroupData = newGroupData; // Assign this so it's passed to system message
           let editedGroupDocument: UpdateGroupInfoInput = {
             name: newGroupData?.name,
             description: newGroupData?.description,

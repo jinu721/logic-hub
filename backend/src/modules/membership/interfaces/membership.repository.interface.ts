@@ -1,12 +1,12 @@
 import { UpdateQuery } from "mongoose";
-import { MembershipIF } from "@shared/types";
+import { MembershipDocument } from "@shared/types";
 
 export interface IMembershipRepository {
-  createPlan(data: Partial<MembershipIF>): Promise<MembershipIF>;
-  getAllPlans(search:string,skip:number,limit:number): Promise<MembershipIF[]>;
-  getTwoActivePlans(): Promise<MembershipIF[]>;
+  createPlan(data: Partial<MembershipDocument>): Promise<MembershipDocument>;
+  getAllPlans(search:string,skip:number,limit:number): Promise<MembershipDocument[]>;
+  getTwoActivePlans(): Promise<MembershipDocument[]>;
   countAllPlans(search:string): Promise<number>;
-  getPlanById(id: string): Promise<MembershipIF | null>;
-  updatePlan(id: string, update: UpdateQuery<MembershipIF>): Promise<MembershipIF | null>;
+  getPlanById(id: string): Promise<MembershipDocument | null>;
+  updatePlan(id: string, update: UpdateQuery<MembershipDocument>): Promise<MembershipDocument | null>;
   deletePlan(id: string): Promise<boolean>;
 }

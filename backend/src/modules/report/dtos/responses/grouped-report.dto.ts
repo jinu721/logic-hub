@@ -19,3 +19,14 @@ export interface GroupedReportDTO {
 
   reports: GroupedReportItemDomain[];
 }
+
+export interface GroupedReportDTOs {
+  items: GroupedReportDTO[];
+  totalItems: number;
+}
+
+export interface GetReportsFilterDto{
+    page:number,
+    limit:number,
+    reportedType?:ReportedType
+}

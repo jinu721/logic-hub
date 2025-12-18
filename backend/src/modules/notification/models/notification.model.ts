@@ -1,8 +1,8 @@
 import { model, Schema } from 'mongoose';
-import { NotificationIF } from '@shared/types';
+import { NotificationDocument } from '@shared/types';
 
 
-const notificationSchema = new Schema<NotificationIF>({
+const notificationSchema = new Schema<NotificationDocument>({
   userId: { type: String, required: true },
   title: { type: String, required: true },
   message: { type: String, required: true },
@@ -16,4 +16,4 @@ const notificationSchema = new Schema<NotificationIF>({
   createdAt: { type: Date, default: Date.now }
 });
 
-export const NotificationModel = model<NotificationIF>('Notification', notificationSchema);
+export const NotificationModel = model<NotificationDocument>('Notification', notificationSchema);

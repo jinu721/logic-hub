@@ -34,17 +34,12 @@ export const toPublicUserDTO = (user: PopulatedUser & { currentUser?: boolean })
     membership: user.membership
       ? {
         planId: user.membership.planId?._id?.toString() || user.membership.planId?.toString(),
-        type: user.membership.type, // 'silver' | 'gold' | null -> DTO expects specific enum. 
-        // UserBase says string (enum keys?). 
-        // let's assume valid. TS might complain if UserBase.type is wider than "silver"|"gold". 
-        // UserBase membership.type was not in my replacement content?
-        // Ah, UserBase type had `membership?: MembershipAttrs`.
-        // I need to check MembershipAttrs. Assuming it matches.
+        type: user.membership.type, 
         isActive: user.membership.isActive,
       }
       : undefined,
     dailyRewardDay: user.dailyRewardDay,
-    lastRewardClaimDate: user.lastRewardClaimDate || new Date(), // DTO says Date (not null/undefined), Base says Optional. Provide default or fix DTO. DTO has 'lastRewardClaimDate: Date'.
+    lastRewardClaimDate: user.lastRewardClaimDate || new Date(), 
     twoFactorEnabled: user.twoFactorEnabled,
     lastSeen: user.lastSeen || null,
     currentUser: user.currentUser ? user.currentUser : false,

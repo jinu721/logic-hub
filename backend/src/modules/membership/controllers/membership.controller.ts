@@ -15,7 +15,7 @@ export class MembershipController implements IMembershipController {
       throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._membershipSvc.createPlan(dto as any);
+    const result = await this._membershipSvc.createPlan(dto);
     sendSuccess(res, HttpStatus.CREATED, result, "Membership created successfully");
   });
 
@@ -59,7 +59,7 @@ export class MembershipController implements IMembershipController {
       throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._membershipSvc.updatePlan(dto.id, dto as any);
+    const result = await this._membershipSvc.updatePlan(dto.id, dto);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Membership not found");
     }

@@ -10,27 +10,27 @@ import {
   INotificationRepository
 } from "@modules/notification";
 
-import { NotificationIF } from "@shared/types";
+import { NotificationDocument } from "@shared/types";
 import { toObjectId } from "@utils/application";
 
 
 export class NotificationService
-  extends BaseService<NotificationIF, PublicNotificationDTO>
+  extends BaseService<NotificationDocument, PublicNotificationDTO>
   implements INotificationService
 {
   constructor(private readonly notifyRepo: INotificationRepository) {
     super()
   }
 
-  protected toDTO(entity: NotificationIF): PublicNotificationDTO {
+  protected toDTO(entity: NotificationDocument): PublicNotificationDTO {
     return toPublicNotificationDTO(entity)
   }
 
-  protected toDTOs(entities: NotificationIF[]): PublicNotificationDTO[] {
+  protected toDTOs(entities: NotificationDocument[]): PublicNotificationDTO[] {
     return toPublicNotificationDTOs(entities)
   }
 
-  async createNotification(data: Partial<NotificationIF>): Promise<PublicNotificationDTO> {
+  async createNotification(data: Partial<NotificationDocument>): Promise<PublicNotificationDTO> {
     const notification = await this.notifyRepo.createNotification(data)
     return this.mapOne(notification)
   }
@@ -48,7 +48,7 @@ export class NotificationService
     return this.mapOne(notification)
   }
 
-  async updateNotification(id: string, data: Partial<NotificationIF>): Promise<PublicNotificationDTO> {
+  async updateNotification(id: string, data: Partial<NotificationDocument>): Promise<PublicNotificationDTO> {
     const updated = await this.notifyRepo.updateNotification(toObjectId(id), data)
     if (!updated) {
       throw new AppError(HttpStatus.NOT_FOUND, "Notification not found")

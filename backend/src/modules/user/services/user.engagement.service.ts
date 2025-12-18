@@ -121,7 +121,7 @@ export class UserEngagementService
     const path = valid[type as keyof typeof valid];
     if (!path) throw new AppError(HttpStatus.BAD_REQUEST, "Invalid gift type");
 
-    const updateQuery: any = {
+    const updateQuery = {
       $push: { [path]: toObjectId(itemId) }
     };
 

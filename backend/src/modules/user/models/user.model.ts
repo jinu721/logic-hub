@@ -45,7 +45,7 @@ const UserSchema = new Schema<UserDocument>({
   notifications: { type: Boolean, default: true },
   blockedUsers: [{ type: Schema.Types.ObjectId, ref: "User" }],
   timestamp: { type: Date, default: Date.now },
-} as any);
+});
 
 
 export const UserModel = model<UserDocument>('User', UserSchema);

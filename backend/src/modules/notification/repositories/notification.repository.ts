@@ -1,45 +1,45 @@
 
 import { Types, UpdateQuery } from "mongoose";
 import { INotificationRepository, NotificationModel } from "@modules/notification";
-import { NotificationIF } from "@shared/types";
+import { NotificationDocument } from "@shared/types";
 import { BaseRepository } from "@core";
 import { toLean, toLeanMany } from "@utils/database";
 
 
 export class NotificationRepository
-  extends BaseRepository<NotificationIF>
+  extends BaseRepository<NotificationDocument>
   implements INotificationRepository
 {
   constructor() {
     super(NotificationModel);
   }
 
-  async createNotification(data: Partial<NotificationIF>): Promise<NotificationIF> {
+  async createNotification(data: Partial<NotificationDocument>): Promise<NotificationDocument> {
     const notification = new this.model(data);
-    return toLean<NotificationIF>(notification.save());
+    return toLean<NotificationDocument>(notification.save());
   }
 
-  async getAllNotifications(): Promise<NotificationIF[]> {
-    return toLeanMany<NotificationIF>(
+  async getAllNotifications(): Promise<NotificationDocument[]> {
+    return toLeanMany<NotificationDocument>(
       this.model.find().sort({ createdAt: -1 })
     );
   }
 
-  async getNotificationById(id: Types.ObjectId): Promise<NotificationIF | null> {
-    return toLean<NotificationIF>(this.model.findById(id));
+  async getNotificationById(id: Types.ObjectId): Promise<NotificationDocument | null> {
+    return toLean<NotificationDocument>(this.model.findById(id));
   }
 
-  async getNotificationByUser(userId: Types.ObjectId): Promise<NotificationIF[]> {
-    return toLeanMany<NotificationIF>(
+  async getNotificationByUser(userId: Types.ObjectId): Promise<NotificationDocument[]> {
+    return toLeanMany<NotificationDocument>(
       this.model.find({ userId }).sort({ createdAt: -1 })
     );
   }
 
   async updateNotification(
     id: Types.ObjectId,
-    update: UpdateQuery<NotificationIF>
-  ): Promise<NotificationIF | null> {
-    return toLean<NotificationIF>(
+    update: UpdateQuery<NotificationDocument>
+  ): Promise<NotificationDocument | null> {
+    return toLean<NotificationDocument>(
       this.model.findByIdAndUpdate(id, update, { new: true })
     );
   }

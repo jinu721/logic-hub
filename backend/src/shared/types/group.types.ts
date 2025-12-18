@@ -1,36 +1,36 @@
 import { Document, Types } from 'mongoose';
 
 export interface GroupAttrs {
-  name: string;
-  description?: string;
-  image?: string;
-  createdBy: Types.ObjectId;
-  admins: Types.ObjectId[];
-  members: Types.ObjectId[];
-  groupType: 'public-open' | 'public-approval';
-  userRequests: Types.ObjectId[];
-  voiceRoom?: {
-    topic?: string;
-    scheduledFor?: Date;
-    durationMinutes?: number;
-    isActive: boolean;
-    host: Types.ObjectId;
-    participants: Types.ObjectId[];
-    startAt: Date;
-    endAt: Date;
-    mutedUsers: Types.ObjectId[];
-  };
-  isDeleted:boolean;
-  createdAt: Date;
-  updatedAt: Date;
+    name: string;
+    description?: string;
+    image?: string;
+    createdBy: Types.ObjectId;
+    admins: Types.ObjectId[];
+    members: Types.ObjectId[];
+    groupType: 'public-open' | 'public-approval';
+    userRequests: Types.ObjectId[];
+    voiceRoom?: {
+        topic?: string;
+        scheduledFor?: Date;
+        durationMinutes?: number;
+        isActive: boolean;
+        host: Types.ObjectId;
+        participants: Types.ObjectId[];
+        startAt: Date;
+        endAt: Date;
+        mutedUsers: Types.ObjectId[];
+    };
+    isDeleted: boolean;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
-export interface GroupDocument extends GroupAttrs, Document {}
+export interface GroupDocument extends GroupAttrs, Document { }
 
 export interface GroupAllInput {
-    name?: string 
+    name?: string
     isActive?: boolean;
-    members?: string 
+    members?: string
     createdBy?: string;
 }
 
@@ -62,4 +62,13 @@ export interface UpdateGroupInfoInput {
     groupType?: string;
     userRequests?: Types.ObjectId[] | string[];
     [key: string]: unknown;
+}
+
+
+export interface GroupQueryFilter {
+    name?: string;
+    groupType?: string;
+    search?: string;
+    page?: string;
+    limit?: string;
 }

@@ -7,7 +7,7 @@ export interface IConversationRepository {
   createOneToOne(userA: string, userB: string): Promise<ConversationDocument | null>;
   setTypingUser(conversationId: string, userId: string): Promise<ConversationDocument | null>;
   removeTypingUser(conversationId: string, userId: string): Promise<ConversationDocument | null>;
-  getTypingUsers(conversationId: string): Promise<any[]>;
+  getTypingUsers(conversationId: string): Promise<ConversationDocument[]>;
   softDeleteByGroupId(groupId: string): Promise<ConversationDocument | null>;
   createGroup(participants: string[], groupId: string): Promise<ConversationDocument | null>;
   findConversationsByUser(userId: string): Promise<PopulatedConversation[] | null>;

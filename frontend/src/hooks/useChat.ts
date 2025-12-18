@@ -101,27 +101,68 @@ export default function useChat({
     const handleUserOnline = ({
       userId,
       status,
+      lastSeen,
     }: {
       userId: string;
       status: boolean;
+      lastSeen?: string;
     }) => {
+      // Update the main online status if this is the user we are chatting with
       if (userId === anothorUserId) {
         setOnlineStatus(status);
       }
 
+      // Update the list of chats to show the dot
       setCurrentUsersChats((prevChats) =>
-        prevChats.map((chat) =>
-          chat.otherUser?.userId === userId || chat.otherUser?._id === userId
-            ? {
+        prevChats.map((chat) => {
+          // Check One-to-One otherUser
+          if (chat.type === 'one-to-one' && (chat.otherUser?.userId === userId || chat.otherUser?._id === userId)) {
+            return {
               ...chat,
               otherUser: {
                 ...chat.otherUser!,
                 isOnline: status,
-              },
-            }
-            : chat
-        )
+                lastSeen: (lastSeen ? new Date(lastSeen) : chat.otherUser?.lastSeen) as Date,
+              }
+            };
+          }
+          // Check Group participants
+          if (chat.type === 'group' && chat.participants) {
+            const updatedParticipants: any[] = chat.participants.map((p: any) =>
+              (p.userId === userId || p._id === userId) ? { ...p, isOnline: status, lastSeen: (lastSeen ? new Date(lastSeen) : p.lastSeen) as Date } : p
+            );
+            return { ...chat, participants: updatedParticipants };
+          }
+          return chat;
+        })
       );
+
+      // Also update current conversation data if it's a group
+      if (currentConversationDataState?.type === 'group' && currentConversationDataState.participants) {
+        setCurrentConversationData((prev) => {
+          if (!prev) return prev;
+          const updatedParts = prev.participants.map((p: any) =>
+            (p.userId === userId || p._id === userId) ? { ...p, isOnline: status, lastSeen: (lastSeen ? new Date(lastSeen) : p.lastSeen) as Date } : p
+          );
+          return { ...prev, participants: updatedParts };
+        });
+      }
+
+      // Also update current conversation data if it's 1-to-1 (to update header last seen)
+      if (currentConversationDataState?.type === 'one-to-one' &&
+        (currentConversationDataState.otherUser?.userId === userId || currentConversationDataState.otherUser?._id === userId)) {
+        setCurrentConversationData((prev) => {
+          if (!prev || !prev.otherUser) return prev;
+          return {
+            ...prev,
+            otherUser: {
+              ...prev.otherUser,
+              isOnline: status,
+              lastSeen: (lastSeen ? new Date(lastSeen) : prev.otherUser.lastSeen) as Date
+            }
+          };
+        });
+      }
     };
 
     socket.on("user-status", handleUserOnline);
@@ -129,7 +170,7 @@ export default function useChat({
     return () => {
       socket.off("user-status", handleUserOnline);
     };
-  }, [anothorUserId, conversationData?.type]);
+  }, [anothorUserId, conversationData?.type, currentConversationDataState?._id]);
 
   useEffect(() => {
     if (!socket) return;

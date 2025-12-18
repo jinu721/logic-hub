@@ -22,8 +22,15 @@ export class UserHandler {
   ): Promise<void> {
     const user = verifyAccessToken(accessToken);
     try {
-      await redisClient.sAdd(`sockets:${user?.userId}`, socket.id);
-      socket.userId = user?.userId;
+      if (!user?.userId) return;
+
+      await redisClient.sAdd(`sockets:${user.userId}`, socket.id);
+      socket.userId = user.userId;
+
+      await this.container.userCommandSvc.updateUser(user.userId, { isOnline: true });
+      await redisClient.set(`user:online:${String(user.userId)}`, "true");
+
+      this.io.emit("user-status", { userId: user.userId, status: true });
     } catch (err) {
       console.log(err);
     }
@@ -35,12 +42,11 @@ export class UserHandler {
   ): Promise<void> {
     try {
       const user = verifyAccessToken(accessToken);
-      await this.container.userCommandSvc.updateUser(user?.userId as string, { isOnline: true } as any);
+      await this.container.userCommandSvc.updateUser(user?.userId as string, { isOnline: true });
       await redisClient.set(`user:online:${String(user?.userId)}`, "true");
       this.io.emit("user-status", { userId: user?.userId, status: true });
 
       await redisClient.sAdd(`sockets:${user?.userId}`, socket.id);
-      // Map socket to user for quick lookup if needed, though socket.userId covers it for disconnect
       await redisClient.set(`socket:user:${socket.id}`, String(user?.userId));
     } catch (err) {
       console.log(err);
@@ -123,17 +129,17 @@ export class UserHandler {
 
       if (remainingSockets <= 0) {
         console.log(`User ${userId} marked offline (no remaining sockets)`);
+        const now = new Date();
         await this.container.userCommandSvc.updateUser(userId, {
           isOnline: false,
-          lastSeen: new Date(),
-        } as any);
+          lastSeen: now,
+        });
         await redisClient.set(`user:online:${userId}`, "false");
-        this.io.emit("user-status", { userId, status: false });
+        this.io.emit("user-status", { userId, status: false, lastSeen: now.toISOString() });
       } else {
         console.log(`User ${userId} still online on ${remainingSockets} other sockets`);
       }
 
-      // Clean up socket mapping
       await redisClient.del(`socket:user:${socket.id}`);
 
     } catch (err) {

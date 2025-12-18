@@ -8,7 +8,7 @@ export class CreateMembershipDto extends BaseDto {
     isActive!: boolean;
     isFeatured!: boolean;
     features!: string[];
-    discount?: any;
+    discount?: unknown;
 
     validate() {
         const errors: string[] = [];

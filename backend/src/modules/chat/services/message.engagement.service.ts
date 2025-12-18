@@ -13,21 +13,21 @@ import {
   IMessageRepository,
 } from "@modules/chat";
 
-import { MessageIF } from "@shared/types";
+import { MessageDocument } from "@shared/types";
 import { Types } from "mongoose";
 
 export class MessageEngagementService
-  extends BaseService<MessageIF, PublicMessageDTO>
+  extends BaseService<MessageDocument, PublicMessageDTO>
   implements IMessageEngagementService {
   constructor(private readonly messageRepo: IMessageRepository) {
     super();
   }
 
-  protected toDTO(entity: MessageIF): PublicMessageDTO {
+  protected toDTO(entity: MessageDocument): PublicMessageDTO {
     return toPublicMessageDTO(entity);
   }
 
-  protected toDTOs(_: MessageIF[]): PublicMessageDTO[] {
+  protected toDTOs(_: MessageDocument[]): PublicMessageDTO[] {
     return [];
   }
 
@@ -61,7 +61,7 @@ export class MessageEngagementService
     if (!message) throw new AppError(HttpStatus.NOT_FOUND, "Message not found");
 
     if (!Array.isArray(message.reactions)) {
-      (message as any).reactions = [];
+      (message).reactions = [];
     }
 
     const idx = message.reactions.findIndex(
@@ -76,13 +76,13 @@ export class MessageEngagementService
         message.reactions[idx].emoji = emoji;
       }
     } else {
-      (message.reactions as any).push({
+      (message.reactions).push({
         userId: new Types.ObjectId(userId),
         emoji,
       });
     }
 
-    const saved = await this.messageRepo.save(message as any);
+    const saved = await this.messageRepo.save(message);
     return this.mapOne(saved);
   }
 

@@ -6,7 +6,7 @@ export class GroupQueryDto extends BaseDto {
   members?: string;
   createdBy?: string;
 
-  static fromQuery(query: any): GroupQueryDto {
+  static fromQuery(query): GroupQueryDto {
     const dto = new GroupQueryDto();
     if (query.name) dto.name = query.name;
     if (query.isActive !== undefined) dto.isActive = query.isActive === "true" || query.isActive === true;

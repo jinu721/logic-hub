@@ -23,7 +23,7 @@ export class ReportController implements IReportController {
     if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
 
 
-    const report = await this._reportSvc.createReport(dto as any);
+    const report = await this._reportSvc.createReport(dto);
     sendSuccess(res, HttpStatus.CREATED, report, "Report created successfully");
   });
 
@@ -34,7 +34,7 @@ export class ReportController implements IReportController {
     if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
 
 
-    const reports = await this._reportSvc.getAllReports(dto as any);
+    const reports = await this._reportSvc.getAllReports(dto);
     sendSuccess(res, HttpStatus.OK, reports, "Reports fetched successfully");
   });
 

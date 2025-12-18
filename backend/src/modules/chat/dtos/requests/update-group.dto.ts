@@ -2,7 +2,7 @@ import { BaseDto } from "@shared/dtos/base.dto";
 
 export class UpdateGroupDto extends BaseDto {
   groupId!: string;
-  payload!: Record<string, any>;
+  payload!: Record<string, unknown>;
 
   validate() {
     const errors: string[] = [];
