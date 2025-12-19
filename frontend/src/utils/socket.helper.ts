@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 
-const URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const URL = "https://logichubapi.envriocart.shop/";
 
 const socket = io(URL, {
     withCredentials: true,

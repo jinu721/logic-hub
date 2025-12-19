@@ -2,7 +2,7 @@ import axios from "axios";
 import { store } from "@/redux/store";
 import { logout } from "@/redux/slices/authSlice";
 
-const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const baseURL = "https://logichubapi.envriocart.shop/";
 
 export const axiosInstance = axios.create({
   baseURL,
