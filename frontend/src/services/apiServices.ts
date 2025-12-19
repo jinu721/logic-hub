@@ -3,6 +3,7 @@ import { store } from "@/redux/store";
 import { logout } from "@/redux/slices/authSlice";
 
 const baseURL = "https://logichubapi.envriocart.shop/";
+// const baseURL = "http://localhost:5000/";
 
 export const axiosInstance = axios.create({
   baseURL,

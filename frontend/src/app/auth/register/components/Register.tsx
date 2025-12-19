@@ -72,7 +72,7 @@ const Register: React.FC = () => {
       console.log("responsemmmmmmm", response);
       setAvailability((prev) => ({
         ...prev,
-        [type]: response.status,
+        [type]: response.available,
       }));
       if (!response.available) {
         setErrors((prev) => ({
