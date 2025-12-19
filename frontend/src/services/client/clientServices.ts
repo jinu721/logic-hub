@@ -36,7 +36,7 @@ export const login = async (userData: LoginIF) => {
 export const checkUser = async (userData: CheckUserIF) => {
   const response = await axiosInstance.post(ROUTES.USERS.CHECK, userData);
   console.log(`Check User Response: ${JSON.stringify(response.data)}`);
-  return response.data.result;
+  return response.data;
 };
 
 export const verifyOtp = async (email: string, otp: string) => {
