@@ -226,7 +226,7 @@ const Register: React.FC = () => {
 
         <div className="grid grid-cols-2 gap-3 mb-4">
           <Link
-            href="https://api.jinu.site/auth/github"
+            href="https://logichubapi.envriocart.shop/auth/github"
             className="flex items-center justify-center text-[var(--logichub-primary-text)] py-2.5 bg-[var(--logichub-secondary-bg)] border border-[var(--logichub-border)] rounded-lg hover:bg-[var(--logichub-card-bg)] transition-colors duration-200"
           >
             <Github className="w-4 h-4 text-[var(--logichub-primary-text)] mr-2" />
@@ -234,7 +234,7 @@ const Register: React.FC = () => {
           </Link>
 
           <Link
-            href="https://api.jinu.site/auth/google"
+            href="https://logichubapi.envriocart.shop/auth/google"
             className="flex items-center justify-center text-[var(--logichub-primary-text)] py-2.5 bg-[var(--logichub-secondary-bg)] border border-[var(--logichub-border)] rounded-lg hover:bg-[var(--logichub-card-bg)] transition-colors duration-200"
           >
             <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">

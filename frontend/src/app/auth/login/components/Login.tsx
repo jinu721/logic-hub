@@ -182,7 +182,7 @@ const Login: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3 mb-5">
               <Link
-                href={`https://api.jinu.site/auth/github`}
+                href={`https://logichubapi.envriocart.shop/auth/github`}
                 className="flex items-center justify-center text-[var(--logichub-primary-text)] py-2.5 bg-[var(--logichub-secondary-bg)] 
             border border-[var(--logichub-border)] rounded-lg hover:bg-[var(--logichub-card-bg)] transition-colors duration-200
             focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] focus:ring-opacity-50"
@@ -192,7 +192,7 @@ const Login: React.FC = () => {
               </Link>
 
               <Link
-                href={`https://api.jinu.site/auth/google`}
+                href={`https://logichubapi.envriocart.shop/auth/google`}
                 className="flex items-center justify-center text-[var(--logichub-primary-text)] py-2.5 bg-[var(--logichub-secondary-bg)] 
             border border-[var(--logichub-border)] rounded-lg hover:bg-[var(--logichub-card-bg)] transition-colors duration-200
             focus:outline-none focus:ring-2 focus:ring-[var(--logichub-accent)] focus:ring-opacity-50"
