@@ -104,7 +104,7 @@ const MessageReactions: FC<MessageReactionsProps> = ({ reactions, isGroup }) => 
 
           <div className="space-y-2">
             {groupedReactions[showReactors]?.map((user) => (
-              <UserReactionItem key={user._id} user={user} />
+              <UserReactionItem key={user.userId || user._id} user={user} />
             ))}
           </div>
         </div>

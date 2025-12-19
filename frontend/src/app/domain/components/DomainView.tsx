@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import socket from "@/utils/socket.helper";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useToast } from "@/context/Toast";
 import { useLevelUp } from "@/context/LevelUp";
 import {
@@ -21,16 +21,14 @@ import { Language } from "./CodeEditor";
 import DomainCompletePopup from "./DomainCompletePopup";
 import Spinner from "@/components/shared/CustomLoader";
 
-interface DomainViewProps {
-  challengeId: string;
-}
-
 interface ConsoleOutput {
   type: "success" | "error" | "warning" | "info";
   message: string;
 }
 
-const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
+const DomainView: React.FC<DomainViewProps> = () => {
+  const params = useParams();
+  const challengeId = params.id;
   const [challenge, setChallenge] = useState<ChallengeDomainIF | null>(null);
   const [user, setUser] = useState<UserIF | null>(null);
   const [activeTab, setActiveTab] = useState<string>("instructions");
@@ -286,12 +284,8 @@ const DomainView: React.FC<DomainViewProps> = ({ challengeId }) => {
             rewards: data.rewards || [],
           });
         }
-        // redirectHome = true; // Removed redirection
       }
 
-      // if (redirectHome) {
-      //   router.push("/home");
-      // }
     } catch (err) {
       console.error("Submission error:", err);
       showToast({ type: "error", message: "Error Submitting Solution" });

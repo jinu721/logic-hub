@@ -61,7 +61,7 @@ const UserModal = ({ user,setShowItemModal,  onClose,  onBanUser }:Props) => {
 
   const handleGiftItem = async(item:InventoryIF) => {
     try{
-      await giftItem(giftType,item._id as string,user._id);
+      await giftItem(giftType,item._id as string,user.userId);
       setShowGiftModal(false);
       setShowItemModal(false);
       showToast({
@@ -69,7 +69,7 @@ const UserModal = ({ user,setShowItemModal,  onClose,  onBanUser }:Props) => {
         message: "Item gifted successfully",
         duration: 3000,
       })
-      socket.emit("admin_gift_user", {item,userId:user._id});
+      socket.emit("admin_gift_user", {item,userId:user.userId,type:giftType});
     }catch(err){
       console.log(`Error gift item: ${err}`);
       showToast({
@@ -131,7 +131,7 @@ const UserModal = ({ user,setShowItemModal,  onClose,  onBanUser }:Props) => {
               )}
             </div>
             <div className="text-gray-400 text-sm flex items-center">
-              <span>ID: {user._id.slice(0, 8)}...</span>
+              <span>ID: {user.userId.slice(0, 8)}...</span>
               <span className="mx-2">•</span>
               <span>{formatDate(user.timestamp)}</span>
             </div>
@@ -186,7 +186,7 @@ const UserModal = ({ user,setShowItemModal,  onClose,  onBanUser }:Props) => {
         
         <div className="p-4 bg-gray-900 flex flex-wrap gap-2 justify-end">
           <button
-            onClick={() => onBanUser(user._id, !user.isBanned)}
+            onClick={() => onBanUser(user.userId, !user.isBanned)}
             className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center ${
               user.isBanned
                 ? "bg-green-600 hover:bg-green-700 text-white"

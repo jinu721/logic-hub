@@ -82,13 +82,17 @@ const AdminAnalyticsDashboard: React.FC = () => {
           getLeaderboardAnalytics("txp", "all", "week", "desc", 1, 20),
         ]);
 
-        const userPayload = userRes?.data?.data || userRes?.data || userRes;
-        const leaderboardPayload = leaderboardRes?.data?.data || leaderboardRes?.data || leaderboardRes;
+        // Backend sendSuccess returns { success: true, message, result }
+        // clientServices returns response.data.result
+        // result is now the actual data object (no more { success: true, data: ... } wrap)
 
-        setUserData(userPayload as UsersData);
-        setLeaderboardData(leaderboardPayload as LeaderboardData);
+        const userDataExtracted = userRes as UsersData;
+        const leaderboardDataExtracted = leaderboardRes as LeaderboardData;
+
+        setUserData(userDataExtracted);
+        setLeaderboardData(leaderboardDataExtracted);
       } catch (error) {
-        console.error("Error fetching analytics:", error);
+        console.error("❌ Error fetching analytics:", error);
         setUserData(null);
         setLeaderboardData(null);
       } finally {
@@ -137,9 +141,9 @@ const AdminAnalyticsDashboard: React.FC = () => {
 
     // take top 8 users for chart
     return leaderboardData.users.slice(0, 8).map((row) => ({
-      name: row.user.username,
-      currentXP: row.totalXp || 0,
-      totalXP: row.totalScore || row.totalXp || 0,
+      name: row?.user?.username || "Unknown",
+      currentXP: row?.totalXp || 0,
+      totalXP: row?.totalScore || row?.totalXp || 0,
     }));
   }, [leaderboardData]);
 
@@ -149,12 +153,12 @@ const AdminAnalyticsDashboard: React.FC = () => {
       return [];
     }
     const topChallenges = leaderboardData.statistics.topCompletedChallenges;
-    const total = topChallenges.reduce((sum, c) => sum + c.completions, 0) || 1;
+    const total = topChallenges.reduce((sum, c) => sum + (c?.completions || 0), 0) || 1;
 
     return topChallenges.map((c) => ({
-      name: c.name,
-      count: c.completions,
-      percentage: Math.round((c.completions / total) * 100),
+      name: c?.name || "Other",
+      count: c?.completions || 0,
+      percentage: Math.round(((c?.completions || 0) / total) * 100),
     }));
   }, [leaderboardData]);
 
@@ -188,15 +192,15 @@ const AdminAnalyticsDashboard: React.FC = () => {
     if (!leaderboardData?.users?.length) return [];
 
     return leaderboardData.users.slice(0, 10).map((row) => ({
-      id: row.user._id,
-      rank: row.rank,
-      username: row.user.username,
-      solvedCount: row.submissionsCount || 0,
+      id: row?.user?._id || Math.random(),
+      rank: row?.rank || 0,
+      username: row?.user?.username || "Anonymous",
+      solvedCount: row?.submissionsCount || 0,
       stats: {
-        xpPoints: row.totalXp || 0,
-        level: row.user.stats?.level || 1,
-        currentStreak: row.user.stats?.currentStreak || 0,
-        longestStreak: row.user.stats?.longestStreak,
+        xpPoints: row?.totalXp || 0,
+        level: row?.user?.stats?.level || 1,
+        currentStreak: row?.user?.stats?.currentStreak || 0,
+        longestStreak: row?.user?.stats?.longestStreak,
       },
     }));
   }, [leaderboardData]);

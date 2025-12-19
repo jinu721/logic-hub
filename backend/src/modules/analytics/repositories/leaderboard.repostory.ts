@@ -10,63 +10,75 @@ export class LeaderboardRepository implements ILeaderboardRepository {
     page: number,
     limit: number
   ): Promise<LeaderboardUserDomain[]> {
-    const leaderboard = await SubmissionModel.aggregate([
-      { $match: matchConditions },
-      {
-        $group: {
-          _id: "$userId",
-          avgTimeTaken: { $avg: "$timeTaken" },
-          totalXp: { $sum: "$xpGained" },
-          totalScore: { $sum: "$score" },
-          submissionsCount: { $sum: 1 },
-          avgMemoryUsed: { $avg: "$execution.memoryUsed" },
-          avgCpuTime: { $avg: "$execution.cpuTime" },
+    try {
+      const leaderboard = await SubmissionModel.aggregate([
+        { $match: matchConditions },
+        {
+          $group: {
+            _id: "$userId",
+            avgTimeTaken: { $avg: "$timeTaken" },
+            totalXp: { $sum: "$xpGained" },
+            totalScore: { $sum: "$score" },
+            submissionsCount: { $sum: 1 },
+            avgMemoryUsed: { $avg: "$execution.memoryUsed" },
+            avgCpuTime: { $avg: "$execution.cpuTime" },
+          },
         },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "_id",
-          foreignField: "_id",
-          as: "user",
+        {
+          $lookup: {
+            from: "users",
+            localField: "_id",
+            foreignField: "_id",
+            as: "user",
+          },
         },
-      },
-      { $unwind: "$user" },
-      {
-        $lookup: {
-          from: "avatars",
-          localField: "user.avatar",
-          foreignField: "_id",
-          as: "user.avatar",
+        { $unwind: "$user" },
+        {
+          $lookup: {
+            from: "avatars",
+            localField: "user.avatar",
+            foreignField: "_id",
+            as: "user.avatar",
+          },
         },
-      },
-      {
-        $unwind: {
-          path: "$user.avatar",
-          preserveNullAndEmptyArrays: true,
+        {
+          $unwind: {
+            path: "$user.avatar",
+            preserveNullAndEmptyArrays: true,
+          },
         },
-      },
-      {
-        $project: {
-          user: 1,
-          avgTimeTaken: 1,
-          totalXp: 1,
-          totalScore: 1,
-          submissionsCount: 1,
-          avgMemoryUsed: 1,
-          avgCpuTime: 1,
+        {
+          $project: {
+            user: 1,
+            avgTimeTaken: 1,
+            totalXp: 1,
+            totalScore: 1,
+            submissionsCount: 1,
+            avgMemoryUsed: 1,
+            avgCpuTime: 1,
+          },
         },
-      },
-      { $sort: { [sortField]: sortOrder, _id: 1 } },
-      { $skip: (page - 1) * limit },
-      { $limit: limit },
-    ]);
+        { $sort: Object.assign({}, { [sortField]: sortOrder }, { _id: 1 }) },
+        { $skip: (page - 1) * limit },
+        { $limit: limit },
+      ]);
 
-    return leaderboard;
+      return leaderboard;
+    } catch (error) {
+      console.error("❌ Leaderboard Aggregation Error:", error);
+      console.error("Match Conditions:", matchConditions);
+      console.error("Sort Field:", sortField, "Sort Order:", sortOrder);
+      throw error;
+    }
   }
 
   async coutAllLeaderboardData(matchConditions: LeaderboardFilters): Promise<number> {
-    return await SubmissionModel.countDocuments(matchConditions);
+    const result = await SubmissionModel.aggregate([
+      { $match: matchConditions },
+      { $group: { _id: "$userId" } },
+      { $count: "total" }
+    ]);
+    return result.length > 0 ? result[0].total : 0;
   }
 
   async getStatistics(): Promise<LeaderboardStatisticsDomain> {

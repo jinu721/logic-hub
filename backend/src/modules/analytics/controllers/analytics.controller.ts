@@ -9,12 +9,12 @@ export class AnalyticsController implements IAnalyticsController {
 
   getUserAnalytics = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const data = await this._analyticsSvc.fetchUserAnalytics();
-    sendSuccess(res, HttpStatus.OK, { success: true, data }, "User analytics fetched successfully");
+    sendSuccess(res, HttpStatus.OK, data, "User analytics fetched successfully");
   });
 
   getChallengeStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const data = await this._analyticsSvc.fetchChallengeStats();
-    sendSuccess(res, HttpStatus.OK, { success: true, data }, "Challenge stats fetched successfully");
+    sendSuccess(res, HttpStatus.OK, data, "Challenge stats fetched successfully");
   });
 
   getLeaderboardData = asyncHandler(async (req, res) => {
@@ -33,6 +33,6 @@ export class AnalyticsController implements IAnalyticsController {
       dto.limit
     );
 
-    sendSuccess(res, HttpStatus.OK, { success: true, data }, "Leaderboard trends fetched successfully");
+    sendSuccess(res, HttpStatus.OK, data, "Leaderboard trends fetched successfully");
   });
 }

@@ -148,7 +148,7 @@ const SolutionsSection: React.FC<SolutionsSectionProps> = ({
     return (
       <SolutionDetail
         solution={selectedSolution}
-        currentUserId={user._id}
+        currentUserId={user.userId || user._id}
         user={user}
         challenge={challenge}
         onBack={() => setSelectedSolution(null)}

@@ -220,7 +220,7 @@ export const getConversationData = async (conversationId: string) => {
 };
 
 export const getInitialMessages = async (conversationId: string, limit: number) => {
-  const response = await axiosInstance.get(ROUTES.MESSAGES.GET_INITIAL_MESSAGES(conversationId,limit));
+  const response = await axiosInstance.get(ROUTES.MESSAGES.GET_INITIAL_MESSAGES(conversationId, limit));
   return response.data.result;
 };
 
@@ -515,8 +515,16 @@ export const getLeaderboardAnalytics = async (
   page?: number,
   limit?: number
 ) => {
+  const params = new URLSearchParams();
+  if (based) params.append('based', based);
+  if (category) params.append('category', category);
+  if (period) params.append('period', period);
+  if (order) params.append('order', order);
+  if (page !== undefined) params.append('page', page.toString());
+  if (limit !== undefined) params.append('limit', limit.toString());
+
   const response = await axiosInstance.get(
-    `${ROUTES.ANALYTICS.LEADERBOARD}?based=${based}&category=${category}&period=${period}&order=${order}&page=${page}&limit=${limit}`
+    `${ROUTES.ANALYTICS.LEADERBOARD}?${params.toString()}`
   );
   return response.data.result;
 };

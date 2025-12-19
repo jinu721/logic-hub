@@ -37,7 +37,7 @@ const MarketManagement: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [availableItems, setAvailableItems] = useState<InventoryIF[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedItemType, setSelectedItemType] = useState("avatars");
+  const [selectedItemType, setSelectedItemType] = useState("avatar"); // Use singular form
   const [selectedCategory, setSelectedCategory] = useState("");
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedItemId, setSelectedItemID] = useState<string | null>(null);
@@ -54,7 +54,7 @@ const MarketManagement: React.FC = () => {
   ) => {
     try {
       setIsLoading(true);
-      const response = await getMarketItems({searchQuery:searchTerm,category:selectedCategory}, page, limit);
+      const response = await getMarketItems({ searchQuery: searchTerm, category: selectedCategory }, page, limit);
       console.log("Market Items", response);
       const data = response.marketItems;
       setTotalItems(response.totalItems);
@@ -67,11 +67,11 @@ const MarketManagement: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchMarketItems(searchTerm,selectedCategory, currentPage, limit);
-  }, [searchTerm,selectedCategory, currentPage]);
+    fetchMarketItems(searchTerm, selectedCategory, currentPage, limit);
+  }, [searchTerm, selectedCategory, currentPage]);
 
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchAvailableItems = async () => {
       try {
         const response = await getItems(selectedItemType, "", 1, 100);
@@ -82,7 +82,7 @@ const MarketManagement: React.FC = () => {
       }
     };
     fetchAvailableItems();
-  },[selectedItemType])
+  }, [selectedItemType])
 
 
 

@@ -18,7 +18,7 @@ const getEnv = (key: string, defaultValue?: string): string => {
 
 export const env = {
   MONGO_URL: getEnv("MONGO_URL", "mongodb://localhost:27017/CodeMaze"),
-  PORT: parseInt(getEnv("PORT", "5000"), 10),
+  PORT: parseInt(getEnv("PORT", "8000"), 10),
   EMAIL_USER: getEnv("EMAIL_USER"),
   EMAIL_PASS: getEnv("EMAIL_PASS"),
   NODE_ENV: getEnv("NODE_ENV", "development"),

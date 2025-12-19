@@ -16,6 +16,7 @@ import {
   deleteLevel,
   getLevels,
   updateLevel,
+  getItems,
 } from "@/services/client/clientServices";
 import DeleteConfirmationModal from "@/components/shared/Delete";
 import { useToast } from "@/context/Toast";
@@ -26,6 +27,7 @@ import LevelsList from "./LevelList";
 import { LevelIF } from "@/types/level.types";
 import Pagination from "@/components/shared/Pagination";
 import Spinner from "@/components/shared/CustomLoader";
+import { InventoryIF } from "@/types/inventory.types";
 
 const LevelManagement: React.FC = () => {
   const [activeTab] = useState("levels");
@@ -40,6 +42,11 @@ const LevelManagement: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
 
+  // Inventory items for gift selection
+  const [avatars, setAvatars] = useState<InventoryIF[]>([]);
+  const [banners, setBanners] = useState<InventoryIF[]>([]);
+  const [badges, setBadges] = useState<InventoryIF[]>([]);
+
   const { showToast } = useToast() as any;
 
   const fetchLevels = async (
@@ -48,7 +55,7 @@ const LevelManagement: React.FC = () => {
   ) => {
     try {
       setIsLoading(true);
-      const response = await getLevels( page, limit);
+      const response = await getLevels(page, limit);
       console.log("Levels", response);
       const data = response.levels;
       setTotalItems(response.totalItems);
@@ -60,8 +67,25 @@ const LevelManagement: React.FC = () => {
     }
   };
 
+  // Fetch inventory items for gift selection
+  const fetchInventoryItems = async () => {
+    try {
+      const [avatarsRes, bannersRes, badgesRes] = await Promise.all([
+        getItems("avatar", "", 1, 100),
+        getItems("banner", "", 1, 100),
+        getItems("badge", "", 1, 100),
+      ]);
+      setAvatars(avatarsRes.data || []);
+      setBanners(bannersRes.data || []);
+      setBadges(badgesRes.data || []);
+    } catch (error) {
+      console.error("Error fetching inventory items:", error);
+    }
+  };
+
   useEffect(() => {
     fetchLevels(currentPage, limit);
+    fetchInventoryItems();
   }, [currentPage]);
 
   const handleEditLevel = (level: LevelIF) => {
@@ -225,6 +249,9 @@ const LevelManagement: React.FC = () => {
           level={levelToEdit as any}
           onSave={handleLevelSaved}
           onClose={handleCloseModal}
+          avatars={avatars}
+          banners={banners}
+          badges={badges}
         />
       )}
 

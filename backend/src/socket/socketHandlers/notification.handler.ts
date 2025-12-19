@@ -6,7 +6,7 @@ import { Container } from "@di";
 import { ChallengeAttrs, MarketItemAttrs } from "@shared/types";
 
 export class NotificationHandler {
-  constructor(private io: Server, private container: Container) {}
+  constructor(private io: Server, private container: Container) { }
 
   public setupNotificationHandlers(socket: ExtendedSocket): void {
     socket.on("admin_add_domain", this.handleAdminAddDomain.bind(this, socket));
@@ -51,24 +51,26 @@ export class NotificationHandler {
     try {
       console.log("Hitting handleAdminGiftUser");
       console.log("userId", userId);
-      const socketId = await redisClient.get(`socket:${userId}`);
-      if (socketId) {
-        this.io.to(socketId).emit("gift_notification", {
-          userId: userId,
-          itemData:item,
-          title: "You've received a gift!",
-          message: "An admin has sent you a special gift. Check it now!",
-          type: "gift",
-          isRead: false
-        });
-        await this.container.notificationSvc.createNotification({
-          userId: userId,
-          title: "You've received a gift!",
-          itemData:item,
-          message: "An admin has sent you a special gift. Check it now!",
-          type: "gift",
-        });
+      const sockets = await redisClient.sMembers(`sockets:${userId}`);
+      if (sockets && sockets.length > 0) {
+        for (const socketId of sockets) {
+          this.io.to(socketId).emit("gift_notification", {
+            userId: userId,
+            itemData: item,
+            title: "You've received a gift!",
+            message: "An admin has sent you a special gift. Check it now!",
+            type: "gift",
+            isRead: false
+          });
+        }
       }
+      await this.container.notificationSvc.createNotification({
+        userId: userId,
+        title: "You've received a gift!",
+        itemData: item,
+        message: "An admin has sent you a special gift. Check it now!",
+        type: "gift",
+      });
     } catch (err) {
       console.error("Error sending gift notification", err);
     }

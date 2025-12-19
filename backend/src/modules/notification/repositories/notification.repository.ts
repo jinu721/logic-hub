@@ -8,15 +8,14 @@ import { toLean, toLeanMany } from "@utils/database";
 
 export class NotificationRepository
   extends BaseRepository<NotificationDocument>
-  implements INotificationRepository
-{
+  implements INotificationRepository {
   constructor() {
     super(NotificationModel);
   }
 
   async createNotification(data: Partial<NotificationDocument>): Promise<NotificationDocument> {
     const notification = new this.model(data);
-    return toLean<NotificationDocument>(notification.save());
+    return await notification.save();
   }
 
   async getAllNotifications(): Promise<NotificationDocument[]> {

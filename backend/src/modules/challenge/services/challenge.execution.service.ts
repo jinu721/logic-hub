@@ -88,8 +88,28 @@ export class ChallengeExecutionService
     );
     if (!challenge)
       throw new AppError(HttpStatus.NOT_FOUND, "Challenge not found");
-    if (challenge.type !== "code")
-      throw new AppError(HttpStatus.BAD_REQUEST, "Challenge is not code type");
+
+    if (challenge.type === "cipher") {
+      const results = (challenge.testCases || []).slice(0, 3).map((t) => {
+        const passed = String(userCode || "").trim().toLowerCase() === String(t.output || "").trim().toLowerCase();
+        return {
+          input: t.input,
+          expected: t.output,
+          actual: userCode,
+          passed,
+          error: null
+        };
+      });
+      return {
+        userId,
+        challengeId,
+        language,
+        results,
+        allPassed: results.some(r => r.passed),
+        rawExec: { info: "Cipher evaluation" }
+      };
+    }
+
     if (!challenge.functionName)
       throw new AppError(HttpStatus.BAD_REQUEST, "Function signature missing");
 
@@ -137,38 +157,65 @@ export class ChallengeExecutionService
     );
     if (!challenge)
       throw new AppError(HttpStatus.NOT_FOUND, "Challenge not found");
-    if (!challenge.functionName)
-      throw new AppError(HttpStatus.BAD_REQUEST, "Function signature missing");
 
-    const funcName = challenge.functionName;
-    const wrapperFiles = generateExecutableFiles(language, userCode, funcName);
-    const sourceCode = wrapperFiles[0].content;
+    let results: ChallengeExecutionResultItem[] = [];
+    let allPassed = false;
+    let execDetails = {};
+    let runTime = 0;
+    let memoryUsed = 0;
+    let cpuTime = 0;
+    let compileError = null;
+    let judgeStatus = "completed";
 
-    const testCases = challenge.testCases || [];
-    const stdinPayload = JSON.stringify({
-      funcName,
-      testcases: testCases.map((t: TestCaseIF) => ({
-        input: t.input ?? [],
-        expected: t.output,
-      })),
-    });
+    if (challenge.type === "cipher") {
+      results = (challenge.testCases || []).map((t) => {
+        const passed = String(userCode || "").trim().toLowerCase() === String(t.output || "").trim().toLowerCase();
+        return {
+          input: t.input,
+          expected: t.output,
+          actual: userCode,
+          passed,
+          error: null
+        };
+      });
+      allPassed = results.some((r) => r.passed);
+      runTime = 0;
+    } else {
+      if (!challenge.functionName)
+        throw new AppError(HttpStatus.BAD_REQUEST, "Function signature missing");
 
-    const langId = judge0Languages[(language || "").toLowerCase()];
-    if (!langId)
-      throw new AppError(HttpStatus.BAD_REQUEST, "Unsupported language");
+      const funcName = challenge.functionName;
+      const wrapperFiles = generateExecutableFiles(language, userCode, funcName);
+      const sourceCode = wrapperFiles[0].content;
 
-    const exec = await runCodeWithJudge0(langId, sourceCode, stdinPayload);
+      const testCases = challenge.testCases || [];
+      const stdinPayload = JSON.stringify({
+        funcName,
+        testcases: testCases.map((t: TestCaseIF) => ({
+          input: t.input ?? [],
+          expected: t.output,
+        })),
+      });
 
-    const parsed = this.parseOutput(exec.run?.stdout);
-    const { results, allPassed } = this.buildResults(parsed, testCases);
+      const langId = judge0Languages[(language || "").toLowerCase()];
+      if (!langId)
+        throw new AppError(HttpStatus.BAD_REQUEST, "Unsupported language");
 
-    const runTime = exec.run?.time ?? 0;
-    const memoryUsed = exec.run?.memory ?? 0;
-    const cpuTime = exec.run?.cpuTime ?? 0;
-    const compileError = exec.run?.compileOutput ?? null;
-    const judgeStatus = exec.run?.resultStatus ?? "pending";
+      const exec = await runCodeWithJudge0(langId, sourceCode, stdinPayload);
+      const parsed = this.parseOutput(exec.run?.stdout);
+      const built = this.buildResults(parsed, testCases);
 
-    const passRatio = results.filter((r) => r.passed).length / results.length;
+      results = built.results;
+      allPassed = built.allPassed;
+      execDetails = exec.raw ?? exec;
+      runTime = exec.run?.time ?? 0;
+      memoryUsed = exec.run?.memory ?? 0;
+      cpuTime = exec.run?.cpuTime ?? 0;
+      compileError = exec.run?.compileOutput ?? null;
+      judgeStatus = exec.run?.resultStatus ?? "completed";
+    }
+
+    const passRatio = results.length > 0 ? results.filter((r) => r.passed).length / results.length : 0;
     const levelWeight =
       challenge.level === "master" ? 3 : challenge.level === "adept" ? 2 : 1;
 
@@ -197,7 +244,7 @@ export class ChallengeExecutionService
       execution: {
         language,
         codeSubmitted: userCode,
-        resultOutput: parsed,
+        resultOutput: results,
         testCasesPassed: results.filter((r) => r.passed).length,
         totalTestCases: results.length,
         runTime,
@@ -215,7 +262,7 @@ export class ChallengeExecutionService
       score,
       timeTaken: runTime,
       results,
-      rawExec: exec.raw ?? exec,
+      rawExec: execDetails,
     };
   }
 }

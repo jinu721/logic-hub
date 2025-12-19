@@ -249,7 +249,7 @@ const PurchasePremium: React.FC<IPremiumPlanProps> = ({ type }) => {
     const planId = activePlans[selectedPlan]._id;
     const amount = activePlans[selectedPlan].discount.amount
       ? activePlans[selectedPlan].price -
-        activePlans[selectedPlan].discount.amount
+      activePlans[selectedPlan].discount.amount
       : activePlans[selectedPlan].price;
 
     try {
@@ -263,15 +263,35 @@ const PurchasePremium: React.FC<IPremiumPlanProps> = ({ type }) => {
         description: "Explore You Wisdome",
         order_id: orderRespose.orderId,
         handler: async (data) => {
-          const planData = {
-            planId: planId,
-            amount: amount,
-            razorpayOrderId: data.razorpay_order_id,
-            razorpayPaymentId: data.razorpay_payment_id,
-            razorpaySignature: data.razorpay_signature,
-          };
-          const membershipResponse = await purchasePlan(planData);
-          router.push(`/premiumplans/success/${membershipResponse.data.result._id}`);
+          try {
+            const planData = {
+              planId: planId,
+              amount: amount,
+              razorpayOrderId: data.razorpay_order_id,
+              razorpayPaymentId: data.razorpay_payment_id,
+              razorpaySignature: data.razorpay_signature,
+            };
+            const membershipResponse = await purchasePlan(planData);
+            showToast({
+              type: "success",
+              message: "Payment successful. Please Wait for the confirmation.",
+            });
+            router.push(`/premiumplans/success/${membershipResponse._id}`);
+          } catch (error) {
+            console.error("Payment verification failed:", error);
+            showToast({
+              type: "error",
+              message: "Payment verification failed. Please contact support."
+            });
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            showToast({
+              type: "warning",
+              message: "Payment cancelled. You can try again anytime.",
+            });
+          },
         },
       };
 
@@ -366,8 +386,8 @@ const PurchasePremium: React.FC<IPremiumPlanProps> = ({ type }) => {
                 >
                   <p className="text-sm font-medium">Selected plan</p>
                   {selectedPlan &&
-                  activePlans[selectedPlan] &&
-                  discountedPrices[selectedPlan] ? (
+                    activePlans[selectedPlan] &&
+                    discountedPrices[selectedPlan] ? (
                     <>
                       <p
                         className="text-2xl font-bold"
@@ -429,11 +449,10 @@ const PurchasePremium: React.FC<IPremiumPlanProps> = ({ type }) => {
                     <button
                       key={type}
                       onClick={() => setSelectedPlan(type)}
-                      className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${
-                        selectedPlan === type
-                          ? "text-white"
-                          : "hover:bg-gray-800"
-                      }`}
+                      className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${selectedPlan === type
+                        ? "text-white"
+                        : "hover:bg-gray-800"
+                        }`}
                       style={{
                         backgroundColor:
                           selectedPlan === type
@@ -454,8 +473,8 @@ const PurchasePremium: React.FC<IPremiumPlanProps> = ({ type }) => {
                 style={{ backgroundColor: themeColors.inputBackground }}
               >
                 {selectedPlan &&
-                activePlans[selectedPlan] &&
-                discountedPrices[selectedPlan] ? (
+                  activePlans[selectedPlan] &&
+                  discountedPrices[selectedPlan] ? (
                   <>
                     <h3
                       className="text-3xl font-bold mb-1"

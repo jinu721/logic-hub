@@ -84,7 +84,7 @@ export default function SearchUsers() {
                         <div className="max-h-64 overflow-y-auto">
                           {searchResults.map((user) => (
                             <div
-                              key={user._id}
+                              key={user.userId || user._id}
                               className="flex items-center justify-between px-3 py-2 hover:bg-gray-700 rounded-md cursor-pointer"
                               onMouseDown={(e) => {
                                 e.preventDefault();
@@ -113,7 +113,7 @@ export default function SearchUsers() {
                                   </div>
                                 </div>
                               </div>
-                              <button onClick={(e) =>{     e.stopPropagation(); handleViewProfile(user._id)}}  className="text-blue-400 hover:text-blue-300 p-1">
+                              <button onClick={(e) =>{     e.stopPropagation(); handleViewProfile(user.username)}}  className="text-blue-400 hover:text-blue-300 p-1">
                                 
                                 <Eye size={16} />
                               </button>

@@ -14,8 +14,9 @@ export function inventoryRoutes(container: Container) {
   };
 
   const getController = (type: string) => {
-    const controller = controllerMap[type];
-    if (!controller) throw new Error("Invalid controller type");
+    const normalizedType = type.endsWith('s') ? type : `${type}s`;
+    const controller = controllerMap[normalizedType];
+    if (!controller) throw new Error(`Invalid controller type: ${type}`);
     return controller;
   };
 

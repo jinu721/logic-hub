@@ -18,7 +18,7 @@ export const bootstrap = async () => {
 
   setupSocket(io, container);
 
-  httpServer.listen(env.PORT, "0.0.0.0", () => {
+  httpServer.listen(env.PORT, () => {
     console.log(`Server started on port ${env.PORT}`);
   });
 };

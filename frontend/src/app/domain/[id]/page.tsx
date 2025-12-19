@@ -4,16 +4,11 @@ import { Metadata } from "next";
 import DomainView from "../components/DomainView";
 
 export const metadata: Metadata = {
-  title: "Home | CodeMaze",
+  title: "Domain | LogicHub",
   description: "Explore the domains",
 };
 
-type Props = {
-  params: {
-    id: string;
-  };
-};
 
-export default async function CodeDomainsPage({ params: { id } }: Props) {
-  return <DomainView challengeId={id}  />;
+export default async function CodeDomainsPage() {
+  return <DomainView />;
 }

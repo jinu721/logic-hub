@@ -72,7 +72,7 @@ export interface PopulatedUser extends UserBase {
   };
   blockedUsers: Types.ObjectId[];
   membership?: MembershipAttrs & {
-    planId: Types.ObjectId | null | string; 
+    planId: any; 
   }
 }
 

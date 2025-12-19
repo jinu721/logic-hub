@@ -52,7 +52,7 @@ const SettingsPremium: FC<SettingsPremiumProps> = ({ user, handleCancelMembershi
           </div>
 
           <div className="grid grid-cols-2 gap-2 mb-4">
-            {user.membership.planId.features.map((feature) => (
+            {user.membership.planId && user.membership.planId && user.membership.planId.features && user.membership.planId.features.map((feature) => (
               <div
                 key={feature}
                 className="flex items-center space-x-2 p-2 bg-yellow-900/20 border border-yellow-700/30 rounded-xl"

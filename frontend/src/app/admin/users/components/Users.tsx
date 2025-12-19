@@ -65,7 +65,7 @@ const UsersPage: React.FC = () => {
       await banUser(selcetedUserId);
       setUsers((prev) =>
         prev.map((user) =>
-          user._id === selcetedUserId
+          user.userId === selcetedUserId
             ? { ...user, isBanned: !user.isBanned }
             : user
         )
@@ -112,7 +112,7 @@ const UsersPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {users.map((user) => (
                 <UserGrid
-                  key={user._id}
+                  key={user.userId}
                   user={user}
                   handleViewUser={handleViewUser}
                   handleBanUser={handleBanUser}
@@ -123,7 +123,7 @@ const UsersPage: React.FC = () => {
             <div className="space-y-4">
               {users.map((user) => (
                 <UserList
-                  key={user._id}
+                  key={user.userId}
                   user={user}
                   handleViewUser={handleViewUser}
                   handleBanUser={handleBanUser}

@@ -4,6 +4,7 @@ import { Crown, Sparkles, Briefcase, RefreshCw, PlusCircle, Key, Shield, Award, 
 import { Button } from '@/components/ui/button';
 import { UserIF } from '@/types/user.types';
 import { LevelIF } from '@/types/level.types';
+import { useRouter } from 'next/navigation';
 
 
 
@@ -24,6 +25,7 @@ export default function UserStats({
   xpLeft,
   nextLevel
 }: Props) {
+  const router = useRouter();
   return (
     <div className="lg:col-span-4 space-y-6">
       <div className="relative overflow-hidden rounded-2xl border border-indigo-500/30 shadow-xl bg-gradient-to-br from-gray-900 to-gray-800">
@@ -116,7 +118,7 @@ export default function UserStats({
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
-            {currentUser && (
+            {/* {currentUser && (
               <div className="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-yellow-500/20 group hover:border-yellow-500/40 transition-all duration-300">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-gray-400 text-sm">Keys</span>
@@ -132,7 +134,7 @@ export default function UserStats({
                   </span>
                 </div>
               </div>
-            )}
+            )} */}
 
             <div className="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-indigo-500/20 group hover:border-indigo-500/40 transition-all duration-300">
               <div className="flex justify-between items-center mb-2">
@@ -189,7 +191,7 @@ export default function UserStats({
           </div>
 
           {currentUser && (
-            <button className="w-full bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 py-3 rounded-lg transition-all duration-300 font-semibold group shadow-lg shadow-amber-900/20 flex items-center justify-center gap-2">
+            <button onClick={() => router.push('/market')} className="w-full bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 py-3 rounded-lg transition-all duration-300 font-semibold group shadow-lg shadow-amber-900/20 flex items-center justify-center gap-2">
               <ShoppingCart
                 size={16}
                 className="group-hover:scale-110 transition-transform"

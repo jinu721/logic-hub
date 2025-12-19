@@ -43,19 +43,20 @@ const Groups: React.FC = () => {
   const fetchGroupData = async () => {
     setIsLoading(true);
     try {
-      const data = await getAllGroups({
+      const result = await getAllGroups({
         search: searchTerm,
+        page: currentPage,
+        limit: limit,
       });
-      console.log("Group Data", data.data);
-      setGroups(data.data.groups);
-      setTotalItems(data.data.totalItems);
+      setGroups(result.groups || []);
+      setTotalItems(result.totalItems || 0);
     } catch (error) {
       showToast({
         title: "Error",
         message: "Failed to load groups. Please try again later.",
         type: "error",
       });
-      console.error("Error fetching domains:", error);
+      console.error("Error fetching groups:", error);
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +64,7 @@ const Groups: React.FC = () => {
 
   useEffect(() => {
     fetchGroupData();
-  }, [searchTerm]);
+  }, [searchTerm, currentPage]);
 
   useEffect(() => {
     const getConversationData = async () => {

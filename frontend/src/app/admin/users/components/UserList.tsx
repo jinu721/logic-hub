@@ -11,7 +11,7 @@ interface Props {
 const UserList: React.FC<Props> = ({ user, handleViewUser, handleBanUser }) => {
   return (
     <div
-      key={user._id}
+      key={user.userId}
       className="group bg-gray-900/70 backdrop-blur-sm rounded-xl p-4 flex items-center hover:shadow-lg hover:shadow-indigo-600/10 transition-all duration-300 border border-indigo-900/30 hover:border-indigo-500/70"
     >
       <div className="relative h-16 w-16 rounded-full overflow-hidden mr-4 border-2 border-indigo-500/50">
@@ -73,7 +73,7 @@ const UserList: React.FC<Props> = ({ user, handleViewUser, handleBanUser }) => {
             <Eye size={16} className="text-white" />
           </button>
           <button
-            onClick={() => handleBanUser(user._id)}
+            onClick={() => handleBanUser(user.userId)}
             className="bg-gray-800 hover:bg-red-600 p-2 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-red-600/30"
           >
             <Ban size={16} className="text-white" />

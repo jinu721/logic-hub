@@ -31,7 +31,7 @@ const MarketItemModal: React.FC<MarketItemModalProps> = ({
     description: "",
     costXP: 0,
     itemType: "",
-    itemId:"" ,
+    itemId: "",
     category: "avatar",
     available: true,
     limitedTime: false,
@@ -69,7 +69,7 @@ const MarketItemModal: React.FC<MarketItemModalProps> = ({
       updatedValue = e.target.checked;
     }
 
-    setFormData((prev:any) => ({ ...prev, [name]: updatedValue }));
+    setFormData((prev: any) => ({ ...prev, [name]: updatedValue }));
     validateForm();
   };
 
@@ -82,11 +82,11 @@ const MarketItemModal: React.FC<MarketItemModalProps> = ({
         category === "avatar"
           ? "Avatar"
           : category === "banner"
-          ? "Banner"
-          : "Badges",
+            ? "Banner"
+            : "Badges",
       itemId: "",
     });
-    setSelectedItemType(`${category}s`);
+    setSelectedItemType(category); // Use singular form: avatar, banner, badge
     setSelectedItem(null);
   };
 
@@ -151,8 +151,8 @@ const MarketItemModal: React.FC<MarketItemModalProps> = ({
             {isViewOnly
               ? `${marketItem?.name || "Market Item"} Details`
               : marketItem?._id
-              ? `Edit ${marketItem.name}`
-              : "Add New Market Item"}
+                ? `Edit ${marketItem.name}`
+                : "Add New Market Item"}
           </h2>
           <button
             onClick={onClose}
@@ -167,18 +167,17 @@ const MarketItemModal: React.FC<MarketItemModalProps> = ({
             {["details", "selection", "settings"].map((tab) => (
               <button
                 key={tab}
-                className={`px-6 py-3 font-medium ${
-                  activeTab === tab
+                className={`px-6 py-3 font-medium ${activeTab === tab
                     ? "border-b-2 border-indigo-500 text-indigo-400"
                     : "text-gray-400 hover:text-indigo-300"
-                }`}
+                  }`}
                 onClick={() => setActiveTab(tab)}
               >
                 {tab === "details"
                   ? "Basic Details"
                   : tab === "selection"
-                  ? "Item Selection"
-                  : "Availability Settings"}
+                    ? "Item Selection"
+                    : "Availability Settings"}
               </button>
             ))}
           </div>
@@ -232,11 +231,10 @@ const MarketItemModal: React.FC<MarketItemModalProps> = ({
                           </div>
                           <div className="text-white">
                             <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                formData.available
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${formData.available
                                   ? "bg-green-100 text-green-800"
                                   : "bg-red-100 text-red-800"
-                              }`}
+                                }`}
                             >
                               {formData.available
                                 ? "Available"
@@ -250,11 +248,10 @@ const MarketItemModal: React.FC<MarketItemModalProps> = ({
                           </div>
                           <div className="text-white">
                             <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                formData.isExclusive
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${formData.isExclusive
                                   ? "bg-yellow-100 text-yellow-800"
                                   : "bg-gray-100 text-gray-800"
-                              }`}
+                                }`}
                             >
                               {formData.isExclusive
                                 ? "Exclusive Item"
@@ -367,8 +364,8 @@ const MarketItemModal: React.FC<MarketItemModalProps> = ({
                       ? "Updating..."
                       : "Creating..."
                     : marketItem?._id
-                    ? "Update Item"
-                    : "Add to Market"}
+                      ? "Update Item"
+                      : "Add to Market"}
                 </button>
               )}
             </div>
