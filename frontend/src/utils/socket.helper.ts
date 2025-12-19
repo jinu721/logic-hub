@@ -1,8 +1,7 @@
 import { io } from "socket.io-client";
 
 
-const URL = "http://localhost:5000/";
-// const URL = "https://api.jinu.site/"
+const URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const socket = io(URL, {
     withCredentials: true,
