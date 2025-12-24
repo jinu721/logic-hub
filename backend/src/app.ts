@@ -24,56 +24,58 @@ import { analyticsRoutes } from '@modules/analytics';
 
 import { errorHandler } from './shared/middlewares/err.middleware';
 import { env } from './config/env';
+import { setupPassport } from './config/passport.config';
 
 
 export const createApp = (container: Container) => {
-     const app = express();
+    const app = express();
 
-     Database.getInstance();
-     
-     redisConnect();
-     
+    Database.getInstance();
 
-     
-     app.use(helmet());
-     app.use(cookieParser());
-     app.use(cors({
-         origin:env.FRONTEND_URL,
-         credentials:true
-     }));
-     
-     
-     
-     app.use(express.json());
-     app.use(express.urlencoded());
-     
-     app.use(morgan('dev'));
-     
-     app.use(passport.initialize())
-     
-     
-     app.use('/auth', authRoutes(container));
-     app.use('/users', userRoutes(container));
-     app.use('/inventory', inventoryRoutes(container));
-     app.use('/levels', levelsRoutes(container));
-     app.use('/market', marketRoutes(container));
-     app.use('/reports', reportRoutes(container));
-     app.use('/conversations', conversationRoutes(container));
-     app.use('/messages', messageRoutes(container));
-     app.use('/groups', groupRoutes(container));
-     app.use('/notifications', notificationRoutes(container));
-     app.use('/challenges', challengeRoutes(container));
-     app.use('/submissions', submissionRoutes(container));
-     app.use('/solutions', solutionRoutes(container));
-     app.use('/purchases', purchaseRoutes(container));
-     app.use('/memberships', membershipRoutes(container));
-     app.use('/analytics', analyticsRoutes(container));
-     
-     
-     app.use(errorHandler);    
+    redisConnect();
 
-     return app;
- }
+
+
+    app.use(helmet());
+    app.use(cookieParser());
+    app.use(cors({
+        origin: env.FRONTEND_URL,
+        credentials: true
+    }));
+
+
+
+    app.use(express.json());
+    app.use(express.urlencoded());
+
+    app.use(morgan('dev'));
+
+    app.use(passport.initialize())
+    setupPassport(container);
+
+
+    app.use('/auth', authRoutes(container));
+    app.use('/users', userRoutes(container));
+    app.use('/inventory', inventoryRoutes(container));
+    app.use('/levels', levelsRoutes(container));
+    app.use('/market', marketRoutes(container));
+    app.use('/reports', reportRoutes(container));
+    app.use('/conversations', conversationRoutes(container));
+    app.use('/messages', messageRoutes(container));
+    app.use('/groups', groupRoutes(container));
+    app.use('/notifications', notificationRoutes(container));
+    app.use('/challenges', challengeRoutes(container));
+    app.use('/submissions', submissionRoutes(container));
+    app.use('/solutions', solutionRoutes(container));
+    app.use('/purchases', purchaseRoutes(container));
+    app.use('/memberships', membershipRoutes(container));
+    app.use('/analytics', analyticsRoutes(container));
+
+
+    app.use(errorHandler);
+
+    return app;
+}
 
 
 

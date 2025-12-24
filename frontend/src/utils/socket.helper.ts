@@ -1,14 +1,15 @@
 import { io } from "socket.io-client";
 
 
-const URL = "https://logichubapi.envriocart.shop/";
-// const URL = "http://localhost:8000/";
+import { API_BASE_URL } from "@/config";
 
-const socket = io(URL, {
+
+const socket = io(API_BASE_URL, {
     withCredentials: true,
     auth: {
         token: typeof window !== "undefined" ? localStorage.getItem("accessToken") : "",
     }
 });
+
 
 export default socket;

@@ -12,6 +12,7 @@ import { Github } from "lucide-react";
 import RegisterForm from "./RegisterForm";
 import { RegisterIF } from "@/types/auth.types";
 import Link from "next/link";
+import { API_BASE_URL } from "@/config";
 import GeometricBackground from "@/components/common/GeometricBackground";
 
 export interface ErrorData {
@@ -197,7 +198,7 @@ const Register: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--logichub-primary-bg)] p-4">
-      <GeometricBackground/>
+      <GeometricBackground />
       <div className="w-4/5 max-w-md max-h-[90vh] bg-[var(--logichub-card-bg)] backdrop-blur-lg rounded-2xl shadow-2xl border border-[var(--logichub-border)] p-6 relative">
         <div className="text-center ">
           <h1 className="text-xl font-bold text-[var(--logichub-primary-text)] mb-1 mt-3">
@@ -226,7 +227,7 @@ const Register: React.FC = () => {
 
         <div className="grid grid-cols-2 gap-3 mb-4">
           <Link
-            href="https://logichubapi.envriocart.shop/auth/github"
+            href={`${API_BASE_URL}/auth/github`}
             className="flex items-center justify-center text-[var(--logichub-primary-text)] py-2.5 bg-[var(--logichub-secondary-bg)] border border-[var(--logichub-border)] rounded-lg hover:bg-[var(--logichub-card-bg)] transition-colors duration-200"
           >
             <Github className="w-4 h-4 text-[var(--logichub-primary-text)] mr-2" />
@@ -234,9 +235,10 @@ const Register: React.FC = () => {
           </Link>
 
           <Link
-            href="https://logichubapi.envriocart.shop/auth/google"
+            href={`${API_BASE_URL}/auth/google`}
             className="flex items-center justify-center text-[var(--logichub-primary-text)] py-2.5 bg-[var(--logichub-secondary-bg)] border border-[var(--logichub-border)] rounded-lg hover:bg-[var(--logichub-card-bg)] transition-colors duration-200"
           >
+
             <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"

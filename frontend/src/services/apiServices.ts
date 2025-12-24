@@ -2,18 +2,18 @@ import axios from "axios";
 import { store } from "@/redux/store";
 import { logout } from "@/redux/slices/authSlice";
 
-const baseURL = "https://logichubapi.envriocart.shop/";
-// const baseURL = "http://localhost:8000/";
+import { API_BASE_URL } from "@/config";
 
 export const axiosInstance = axios.create({
-  baseURL,
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
 const refreshAxios = axios.create({
-  baseURL,
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
+
 
 axiosInstance.interceptors.request.use(
   (config) => {

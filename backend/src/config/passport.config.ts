@@ -5,6 +5,9 @@ import { Request } from 'express';
 import { env } from './env';
 import { Container } from '@di';
 import { LoginType } from '@shared/types';
+import { AppError } from '@utils/application';
+import { HttpStatus } from '@constants';
+import logger from '@utils/application/logger';
 
 
 export const setupPassport = (container: Container) => {
@@ -29,7 +32,10 @@ export const setupPassport = (container: Container) => {
             ) => {
                 try {
                     const email = profile.emails?.[0]?.value;
-                    if (!email) return done(new Error("Google did not provide an email."));
+                    if (!email) {
+                        logger.error(`Google Login Failed: No email provided for profile ${profile.id}`);
+                        return done(new AppError(HttpStatus.BAD_REQUEST, "Google did not provide an email."));
+                    }
 
                     const user = await authService.socialLogin({
                         email,
@@ -65,7 +71,10 @@ export const setupPassport = (container: Container) => {
             ) => {
                 try {
                     const email = profile.emails?.[0]?.value;
-                    if (!email) return done(new Error("GitHub did not provide an email."));
+                    if (!email) {
+                        logger.error(`GitHub Login Failed: No email provided for profile ${profile.id}`);
+                        return done(new AppError(HttpStatus.BAD_REQUEST, "GitHub did not provide an email."));
+                    }
 
                     const user = await authService.socialLogin({
                         email,
