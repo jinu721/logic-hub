@@ -11,14 +11,10 @@ const marketItemSchema = new Schema<MarketItemDocument>({
     type: Number,
     required: true,
   },
-  itemType: {
-    type: String,
-    enum: ['Avatar', 'Banner','Badges'], 
-  },
   itemId: {
-    type: Types.ObjectId,
+    type: Schema.Types.ObjectId,
     required: true,
-    refPath: 'itemType', 
+    ref: 'Inventory',
   },
   category: {
     type: String,

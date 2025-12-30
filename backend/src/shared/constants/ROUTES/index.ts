@@ -13,4 +13,4 @@ export * from "./submission.constants";
 export * from "./conversation.constants";
 export * from "./challenge.constants";
 export * from "./membership.constants";
-export * from "./inventory.constants.ts";
+export * from "./inventory.constants";

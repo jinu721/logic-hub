@@ -40,5 +40,6 @@ export interface PublicUserDTO {
   currentUser: boolean;
   notifications: boolean;
   timestamp: Date;
+  [key: string]: unknown;
 }
 

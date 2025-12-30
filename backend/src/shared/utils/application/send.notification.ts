@@ -2,6 +2,7 @@
 import redisClient from "@config/redis.config";
 import { Container } from "@di";
 import { Server } from "socket.io";
+import { CreateNotificationDto } from "@modules/notification";
 
 
 interface SendNotificationParams<T> {
@@ -24,12 +25,12 @@ export const sendNotificationToAllUsers = async <T>({ io, container, type, title
         for (const socketId of sockets) {
           io.to(socketId).emit(socketEvent, { type, title, message, data });
         }
-        await container.notificationSvc.createNotification({
-          userId: user.userId as any,
-          title,
-          message,
-          type: type as any,
-        } as any);
+        const notificationDto = new CreateNotificationDto();
+        notificationDto.userId = user.userId;
+        notificationDto.title = title;
+        notificationDto.message = message;
+        notificationDto.type = type;
+        await container.notificationSvc.createNotification(notificationDto);
       }
     }
   } catch (error) {

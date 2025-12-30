@@ -44,7 +44,7 @@ export const setupPassport = (container: Container) => {
                         loginType: LoginType.GOOGLE
                     });
 
-                    return done(null, user);
+                    return done(null, user as any);
                 } catch (e) {
                     return done(e as Error);
                 }
@@ -83,7 +83,7 @@ export const setupPassport = (container: Container) => {
                         loginType: LoginType.GITHUB
                     });
 
-                    return done(null, user);
+                    return done(null, user as any);
                 } catch (e) {
                     return done(e as Error);
                 }

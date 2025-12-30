@@ -1,7 +1,6 @@
 import { Document, Types } from 'mongoose';
 import { PaginationInput } from './core.types';
 import { PublicGroupDTO } from '@modules/chat';
-import { ReportDocument } from '@modules/report';
 
 export type ReportedType =  'User' | 'Room' | 'Group';
 export type ReportFilterType = "All" | "User" | "Room" | "Group";

@@ -27,6 +27,9 @@ export interface GroupAttrs {
 
 export interface GroupDocument extends GroupAttrs, Document { }
 
+// Legacy interface name for backward compatibility
+export interface GroupIF extends GroupDocument { }
+
 export interface GroupAllInput {
     name?: string
     isActive?: boolean;
@@ -66,9 +69,10 @@ export interface UpdateGroupInfoInput {
 
 
 export interface GroupQueryFilter {
-    name?: string;
+    name?: string | { $regex: string; $options: string };
     groupType?: string;
     search?: string;
     page?: string;
     limit?: string;
+    type?: string;
 }

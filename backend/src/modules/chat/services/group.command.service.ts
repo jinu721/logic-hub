@@ -10,7 +10,7 @@ import {
   PublicGroupDTO,
   toPublicGroupDTO
 } from "@modules/chat/dtos";
-import { GroupIF } from "@shared/types";
+import { GroupIF, CreateGroupInput } from "@shared/types";
 import { Types } from "mongoose";
 import cloudinary from "@config/cloudinary.config";
 
@@ -33,7 +33,7 @@ export class GroupCommandService
     return [];
   }
 
-  async createGroup(data: Partial<GroupIF>, imageBuffer?: Buffer, userId?: string) {
+  async createGroup(data: CreateGroupInput, imageBuffer?: Buffer, userId?: string) {
     if (!userId) throw new AppError(HttpStatus.BAD_REQUEST, "userId is required");
 
     const createdBy = new Types.ObjectId(userId);
@@ -48,8 +48,9 @@ export class GroupCommandService
       ...data,
       createdBy,
       admins: [createdBy],
-      members: [],
+      members: data.members ? data.members.map(id => new Types.ObjectId(id)) : [],
       userRequests: [],
+      groupType: (data.groupType as 'public-open' | 'public-approval') || 'public-open',
     });
 
     if (!group) throw new AppError(HttpStatus.INTERNAL_SERVER_ERROR, "Group not created");

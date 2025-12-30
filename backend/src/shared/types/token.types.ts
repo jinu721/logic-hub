@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
 
 export interface TokenAttrs {
   userId: Types.ObjectId;
@@ -10,6 +10,8 @@ export interface TokenAttrs {
   updatedAt?: Date;
 }
 
+export interface TokenDocument extends TokenAttrs, Document {}
+
 export type TokenPayloadIF = {
   userId: string;
   accessToken: string;
@@ -17,3 +19,6 @@ export type TokenPayloadIF = {
   ip?: string;
   device?: string;
 }
+
+// Legacy interface name for backward compatibility
+export interface TokenIF extends TokenDocument { }

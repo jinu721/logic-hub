@@ -1,7 +1,7 @@
-import { ILevelService, PublicLevelDTO, toPublicLevelDTO, toPublicLevelDTOs } from "@modules/level";
+import { ILevelService, PublicLevelDTO, toPublicLevelDTO, toPublicLevelDTOs, CreateLevelDto, UpdateLevelDto } from "@modules/level";
 import { ILevelRepository } from "@modules/level";
 import { IUserRepository } from "@modules/user";
-import { LevelDocument, PopulatedUser, UserDocument } from "@shared/types";
+import { LevelDocument, PopulatedUser, UserDocument, LevelReward } from "@shared/types";
 
 export class LevelService implements ILevelService {
   constructor(
@@ -9,12 +9,21 @@ export class LevelService implements ILevelService {
     private _userRepo: IUserRepository
   ) { }
 
-  async createLevel(data: LevelDocument): Promise<PublicLevelDTO> {
+  async createLevel(data: CreateLevelDto): Promise<PublicLevelDTO> {
     const isExist = await this._levelRepo.getLevelByLevel(data.levelNumber);
     if (isExist) {
       throw new Error("Level already exists with this level number");
     }
-    const level = await this._levelRepo.createLevel(data);
+    
+    // Convert DTO to document data
+    const levelData = {
+      levelNumber: data.levelNumber,
+      requiredXP: data.requiredXP,
+      description: data.description,
+      rewards: data.rewards || []
+    } as Partial<LevelDocument>;
+    
+    const level = await this._levelRepo.createLevel(levelData);
     return toPublicLevelDTO(level);
   }
 
@@ -36,7 +45,7 @@ export class LevelService implements ILevelService {
 
   async updateLevel(
     id: string,
-    data: Partial<LevelDocument>
+    data: UpdateLevelDto
   ): Promise<PublicLevelDTO | null> {
     if (data.levelNumber !== undefined) {
       const isExist = await this._levelRepo.getLevelByLevel(data.levelNumber);
@@ -45,7 +54,15 @@ export class LevelService implements ILevelService {
       }
     }
 
-    const updated = await this._levelRepo.updateLevel(id, data);
+    // Convert DTO to document data
+    const updateData: Partial<LevelDocument> = {
+      ...(data.levelNumber !== undefined && { levelNumber: data.levelNumber }),
+      ...(data.requiredXP !== undefined && { requiredXP: data.requiredXP }),
+      ...(data.description !== undefined && { description: data.description }),
+      ...(data.rewards !== undefined && { rewards: data.rewards as LevelReward[] })
+    };
+
+    const updated = await this._levelRepo.updateLevel(id, updateData);
     if (!updated) return null;
     return toPublicLevelDTO(updated);
   }

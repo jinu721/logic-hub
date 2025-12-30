@@ -38,7 +38,7 @@ export class PurchaseCommandService extends BaseService<PurchaseDocument, Public
   async createPlanPurchase(data: Partial<PurchaseDocument>): Promise<PublicPurchaseDTO> {
     const now = new Date();
 
-    const plan = await this.membershipRepo.findById(String(data.planId));
+    const plan = await this.membershipRepo.getPlanById(String(data.planId));
     if (!plan) {
       throw new AppError(HttpStatus.NOT_FOUND, "Membership plan not found");
     }
@@ -52,7 +52,12 @@ export class PurchaseCommandService extends BaseService<PurchaseDocument, Public
       expiresAt,
     } as PurchaseDocument);
 
-    await this.userRepo.updateUser(toObjectId(data.userId), {
+    if (!data.userId) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "User ID is required");
+    }
+
+    const userObjectId = toObjectId(String(data.userId!));
+    await this.userRepo.updateUser(userObjectId, {
       membership: {
         planId: String(data.planId),
         startedAt: now,

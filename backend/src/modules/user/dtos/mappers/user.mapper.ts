@@ -1,6 +1,25 @@
-import { PopulatedUser } from "@shared/types";
+import { PopulatedUser, InventoryDocument, PopulatedInventory } from "@shared/types";
 import { PublicUserDTO } from "../responses/public-user.dto";
-import { toPublicInventoryDTO, toPublicInventoryDTOs } from "@modules/inventory";
+import { toPublicInventoryDTO, toPublicInventoryDTOs, IPublicInventoryDTO } from "@modules/inventory";
+import { generateSignedImageUrl } from "@utils/application";
+
+// Helper function to convert InventoryDocument to IPublicInventoryDTO
+const inventoryDocumentToDTO = (item: unknown): IPublicInventoryDTO => {
+  const doc = item as InventoryDocument;
+  return {
+    _id: doc._id?.toString() || "",
+    name: doc.name || "",
+    description: doc.description || "",
+    image: generateSignedImageUrl(doc.image || ""),
+    isActive: doc.isActive || false,
+    rarity: doc.rarity || "common",
+  };
+};
+
+// Helper function to check if inventory item is populated
+const isPopulatedInventory = (item: unknown): item is InventoryDocument => {
+  return item !== null && typeof item === 'object' && 'name' in item;
+};
 
 export const toPublicUserDTO = (user: PopulatedUser & { currentUser?: boolean }): PublicUserDTO => {
   return {
@@ -8,8 +27,8 @@ export const toPublicUserDTO = (user: PopulatedUser & { currentUser?: boolean })
     email: user.email,
     username: user.username,
     bio: user.bio,
-    avatar: user.avatar ? toPublicInventoryDTO(user.avatar) : null,
-    banner: user.banner ? toPublicInventoryDTO(user.banner) : null,
+    avatar: user.avatar ? (isPopulatedInventory(user.avatar) ? toPublicInventoryDTO(user.avatar as PopulatedInventory) : inventoryDocumentToDTO(user.avatar)) : null,
+    banner: user.banner ? (isPopulatedInventory(user.banner) ? toPublicInventoryDTO(user.banner as PopulatedInventory) : inventoryDocumentToDTO(user.banner)) : null,
     role: user.role,
     loginType: user.loginType,
     googleId: user.googleId || null,
@@ -24,16 +43,22 @@ export const toPublicUserDTO = (user: PopulatedUser & { currentUser?: boolean })
     },
     inventory: {
       keys: user.inventory?.keys || 0,
-      badges: user.inventory?.badges ? toPublicInventoryDTOs(user.inventory.badges) : [],
-      ownedAvatars: user.inventory?.ownedAvatars ? toPublicInventoryDTOs(user.inventory.ownedAvatars) : [],
-      ownedBanners: user.inventory?.ownedBanners ? toPublicInventoryDTOs(user.inventory.ownedBanners) : [],
+      badges: user.inventory?.badges ? user.inventory.badges.map(item => 
+        isPopulatedInventory(item) ? toPublicInventoryDTO(item as PopulatedInventory)! : inventoryDocumentToDTO(item)
+      ).filter(Boolean) : [],
+      ownedAvatars: user.inventory?.ownedAvatars ? user.inventory.ownedAvatars.map(item => 
+        isPopulatedInventory(item) ? toPublicInventoryDTO(item as PopulatedInventory)! : inventoryDocumentToDTO(item)
+      ).filter(Boolean) : [],
+      ownedBanners: user.inventory?.ownedBanners ? user.inventory.ownedBanners.map(item => 
+        isPopulatedInventory(item) ? toPublicInventoryDTO(item as PopulatedInventory)! : inventoryDocumentToDTO(item)
+      ).filter(Boolean) : [],
     },
     isBanned: user.isBanned,
     isVerified: user.isVerified,
     isOnline: user.isOnline,
     membership: user.membership
       ? {
-        planId: user.membership.planId?._id?.toString() || user.membership.planId?.toString(),
+        planId: user.membership.planId?._id?.toString() || user.membership.planId?.toString() || "",
         type: user.membership.type, 
         isActive: user.membership.isActive,
       }

@@ -39,7 +39,7 @@ export class MarketService
   }
 
   async getAllItems(filter: MarketItemFilter = {}, page: number = 1, limit: number = 10) {
-    const query: MarketItemFilter = {};
+    const query: Record<string, unknown> = {};
     const sort: MongoSortOptions = {};
 
     if (filter.category) query.category = filter.category;
@@ -47,8 +47,8 @@ export class MarketService
 
     if (filter.sortOption === "limited") query.limitedTime = true;
     else if (filter.sortOption === "exclusive") query.isExclusive = true;
-    else if (filter.sortOption === "price-asc") sort.price = 1;
-    else if (filter.sortOption === "price-desc") sort.price = -1;
+    else if (filter.sortOption === "price-asc") sort.costXP = 1;
+    else if (filter.sortOption === "price-desc") sort.costXP = -1;
 
     const skip = (page - 1) * limit;
 

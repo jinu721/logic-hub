@@ -23,7 +23,7 @@ import {
   IUserRepository,
 } from "@modules/user";
 
-import { ConversationDocument, ConversationSearchFilter } from "@shared/types";
+import { ConversationDocument, ConversationSearchFilter, PopulatedConversation } from "@shared/types";
 
 
 export class ConversationQueryService
@@ -37,43 +37,49 @@ export class ConversationQueryService
     super();
   }
 
-  protected toDTO(conv: ConversationDocument): PublicConversationDTO {
-    const base = toPublicConversationDTO(conv);
+  protected toDTO(conv: ConversationDocument | PopulatedConversation): PublicConversationDTO {
+    // If it's already populated, use the existing mapper
+    if (this.isPopulatedConversation(conv)) {
+      return toPublicConversationDTO(conv);
+    }
 
-    const participants = Array.isArray(conv.participants)
-      ? toPublicUserDTOs(conv.participants)
-      : [];
-
-    const typingUsers = Array.isArray(conv.typingUsers)
-      ? toPublicUserDTOs(conv.typingUsers)
-      : [];
-
-    const latestMessage = conv.latestMessage
-      ? (toPublicMessageDTO(conv.latestMessage) as PublicMessageDTO)
-      : undefined;
-
-    return {
-      ...base,
-      participants,
-      typingUsers,
-      latestMessage,
+    // Handle non-populated conversation
+    const base = {
+      _id: conv._id?.toString() || "",
+      type: conv.type as 'group' | 'one-to-one',
+      participants: [],
+      latestMessage: null,
+      isDeleted: conv.isDeleted,
+      typingUsers: [],
+      unreadCounts: conv.unreadCounts instanceof Map
+        ? Object.fromEntries(conv.unreadCounts)
+        : conv.unreadCounts || {},
+      createdAt: conv.createdAt,
+      updatedAt: conv.updatedAt,
     };
+
+    return base;
   }
 
-  protected toDTOs(convs: ConversationDocument[]): PublicConversationDTO[] {
+  private isPopulatedConversation(conv: ConversationDocument | PopulatedConversation): conv is PopulatedConversation {
+    return conv.participants && conv.participants.length > 0 && 
+           typeof conv.participants[0] === 'object' && 'username' in conv.participants[0];
+  }
+
+  protected toDTOs(convs: (ConversationDocument | PopulatedConversation)[]): PublicConversationDTO[] {
     return convs.map((c) => this.toDTO(c));
   }
 
   async findOneToOne(userA: string, userB: string) {
     const conv = await this.conversationRepo.findOneToOne(userA, userB);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
-    return this.mapOne(conv);
+    return this.toDTO(conv);
   }
 
   async getConversationById(conversationId: string) {
     const conv = await this.conversationRepo.findConversationById(conversationId);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
-    return this.mapOne(conv);
+    return this.toDTO(conv);
   }
 
   async findConversation(conversationId: string, currentUserId: string) {
@@ -102,7 +108,7 @@ export class ConversationQueryService
       }
     }
 
-    const dto = this.mapOne(conv);
+    const dto = this.toDTO(conv);
     return {
       ...dto,
       group,
@@ -119,7 +125,7 @@ export class ConversationQueryService
 
 
     const result = await Promise.all(
-      convs.map(async (conv: ConversationIF) => {
+      convs.map(async (conv: PopulatedConversation) => {
         let group: PublicGroupDTO | undefined;
         let otherUser: PublicUserDTO | undefined;
 
@@ -128,10 +134,18 @@ export class ConversationQueryService
           if (found) group = toPublicGroupDTO(found);
         } else if (conv.type === "one-to-one" && Array.isArray(conv.participants)) {
           const other = conv.participants.find(
-            (u: { _id?: { toString: () => string } }) => u._id?.toString() !== userId.toString()
+            (u: unknown) => {
+              if (u && typeof u === 'object' && '_id' in u) {
+                return u._id?.toString() !== userId.toString();
+              }
+              return u?.toString() !== userId.toString();
+            }
           );
           if (other) {
-            const user = await this.userRepo.getUserById(other._id.toString());
+            const userId = other && typeof other === 'object' && '_id' in other 
+              ? (other as { _id: unknown })._id?.toString() 
+              : (other as string | undefined)?.toString();
+            const user = await this.userRepo.getUserById(userId || "");
             if (user) otherUser = toPublicUserDTO(user);
           }
         }
@@ -147,6 +161,6 @@ export class ConversationQueryService
   async findConversationByGroup(groupId: string) {
     const conv = await this.conversationRepo.findConversationByGroup(groupId);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
-    return this.mapOne(conv);
+    return this.toDTO(conv);
   }
 }

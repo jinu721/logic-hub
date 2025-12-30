@@ -26,8 +26,25 @@ export class SubmissionController implements ISubmissionController {
     if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
 
     const createdSubmission = await this._submissionSvc.createSubmission({
-      ...dto,
-      userId
+      challengeId: dto.challengeId,
+      userId,
+      passed: false, // Will be updated after execution
+      xpGained: 0, // Will be updated after execution
+      score: 0, // Will be updated after execution
+      timeTaken: 0, // Will be updated after execution
+      level: "novice" as const, // Default level
+      type: "practice", // Default type
+      tags: [], // Default empty tags
+      challengeVersion: 1, // Default version
+      submittedAt: new Date(),
+      status: "pending" as const,
+      execution: {
+        language: dto.language,
+        codeSubmitted: dto.userCode,
+        resultOutput: null,
+        testCasesPassed: 0,
+        totalTestCases: 0,
+      }
     });
 
     sendSuccess(res, HttpStatus.CREATED, createdSubmission, "Submission created successfully");

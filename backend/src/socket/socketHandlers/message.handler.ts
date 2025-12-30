@@ -59,7 +59,7 @@ export class MessageHandler {
         p.userId.toString()
       );
       const otherUserIds = participantIds.filter(
-        (id) => id !== msg.sender?.userId
+        (id) => id !== (msg.sender && 'userId' in msg.sender ? msg.sender.userId : msg.sender?._id)
       );
 
       // Increment Unread Counts for others

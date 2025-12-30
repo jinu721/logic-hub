@@ -3,17 +3,18 @@ import { upload } from "@utils/application";
 import { authMiddleware } from "@shared/middlewares";
 import { INVENTORY_ROUTES } from "@constants";
 import { Container } from "@di";
+import { InventoryController } from "@modules/inventory";
 
 export function inventoryRoutes(container: Container) {
   const router = Router();
 
-  const controllerMap: Record<string, unknown> = {
+  const controllerMap: Record<string, InventoryController> = {
     avatars: container.avatarCtrl,
     banners: container.bannerCtrl,
     badges: container.badgeCtrl,
   };
 
-  const getController = (type: string) => {
+  const getController = (type: string): InventoryController => {
     const normalizedType = type.endsWith('s') ? type : `${type}s`;
     const controller = controllerMap[normalizedType];
     if (!controller) throw new Error(`Invalid controller type: ${type}`);

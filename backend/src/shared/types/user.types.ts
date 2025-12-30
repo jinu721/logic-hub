@@ -72,7 +72,7 @@ export interface PopulatedUser extends UserBase {
   };
   blockedUsers: Types.ObjectId[];
   membership?: MembershipAttrs & {
-    planId: any; 
+    planId: Types.ObjectId | null;
   }
 }
 
@@ -92,6 +92,8 @@ export interface UpdateUserInput {
   banner?: string;
   twoFactorEnabled?: boolean;
   notifications?: boolean;
+  isOnline?: boolean;
+  lastSeen?: Date;
 }
 
 export interface SocialLoginInput {

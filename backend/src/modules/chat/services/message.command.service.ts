@@ -1,7 +1,7 @@
 import { BaseService } from "@core"
 import { IMessageCommandService, IMessageRepository } from "@modules/chat"
 import { PublicMessageDTO, toPublicMessageDTO } from "@modules/chat/dtos"
-import { PopulatedMessage, CreateMessageInput, JwtPayloadBase } from "@shared/types"
+import { PopulatedMessage, CreateMessageInput, JwtPayloadBase, MessageData } from "@shared/types"
 import { verifyAccessToken } from "@utils/token"
 import { Types } from "mongoose"
 import { AppError } from "@utils/application"
@@ -29,6 +29,39 @@ export class MessageCommandService
   }
 
   async createMessage(
+    data: MessageData,
+    accessToken: string | null
+  ): Promise<PublicMessageDTO> {
+    const SYSTEM_USER_ID = new Types.ObjectId("000000000000000000000000")
+
+    let sender: Types.ObjectId
+
+    if (accessToken) {
+      const user = verifyAccessToken(accessToken) as JwtPayloadBase | null
+      if (!user) throw new Error("Unauthorized")
+      sender = new Types.ObjectId(user.userId)
+    } else {
+      sender = SYSTEM_USER_ID
+    }
+
+    const messageInput: CreateMessageInput = {
+      sender,
+      conversationId: typeof data.conversationId === 'string' ? new Types.ObjectId(data.conversationId) : data.conversationId,
+      content: data.content,
+      type: (data.type as any) || 'text',
+      mentionedUsers: [],
+      seenBy: [],
+      isEdited: false,
+      isDeleted: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const message = await this.messageRepo.createMessage(messageInput as any)
+    return this.mapOne(await this.getPopulated(String(message._id)))
+  }
+
+  async createMessageWithSender(
     data: CreateMessageInput,
     accessToken: string | null
   ): Promise<PublicMessageDTO> {
@@ -44,7 +77,7 @@ export class MessageCommandService
       sender = SYSTEM_USER_ID
     }
 
-    const message = await this.messageRepo.createMessage({ ...data, sender })
+    const message = await this.messageRepo.createMessage({ ...data, sender } as any)
     return this.mapOne(await this.getPopulated(String(message._id)))
   }
 

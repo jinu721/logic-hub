@@ -9,7 +9,7 @@ import {
 
 } from "@modules/purchase";
 import { CreateMembershipPurchaseDto, CreateOrderDto, GetPlanHistoryByIdDto, GetPlanHistoryDto, GetUserMembershipHistoryDto } from "@modules/purchase/dtos";
-import { sendSuccess, asyncHandler, AppError } from "@utils/application";
+import { sendSuccess, asyncHandler, AppError, toObjectId } from "@utils/application";
 
 export class PurchaseController implements IPurchaseController {
   constructor(
@@ -40,8 +40,8 @@ export class PurchaseController implements IPurchaseController {
     this.paymentSvc.verifySignature(dto.razorpayOrderId, dto.razorpayPaymentId, dto.razorpaySignature);
 
     const purchase = await this.commandSvc.createPlanPurchase({
-      userId,
-      planId: dto.planId,
+      userId: toObjectId(userId),
+      planId: toObjectId(dto.planId),
       amount: dto.amount,
       razorpayOrderId: dto.razorpayOrderId,
       razorpayPaymentId: dto.razorpayPaymentId,

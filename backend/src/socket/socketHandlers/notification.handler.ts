@@ -4,6 +4,7 @@ import { sendNotificationToAllUsers } from "../../shared/utils/application/send.
 import redisClient from "../../config/redis.config";
 import { Container } from "@di";
 import { ChallengeAttrs, MarketItemAttrs } from "@shared/types";
+import { CreateNotificationDto } from "@modules/notification/dtos";
 
 export class NotificationHandler {
   constructor(private io: Server, private container: Container) { }
@@ -64,13 +65,15 @@ export class NotificationHandler {
           });
         }
       }
-      await this.container.notificationSvc.createNotification({
-        userId: userId,
-        title: "You've received a gift!",
-        itemData: item,
-        message: "An admin has sent you a special gift. Check it now!",
-        type: "gift",
-      });
+      await this.container.notificationSvc.createNotification(
+        CreateNotificationDto.from({
+          userId: userId,
+          title: "You've received a gift!",
+          itemData: item,
+          message: "An admin has sent you a special gift. Check it now!",
+          type: "gift",
+        })
+      );
     } catch (err) {
       console.error("Error sending gift notification", err);
     }

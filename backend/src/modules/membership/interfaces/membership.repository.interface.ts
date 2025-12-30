@@ -9,4 +9,5 @@ export interface IMembershipRepository {
   getPlanById(id: string): Promise<MembershipDocument | null>;
   updatePlan(id: string, update: UpdateQuery<MembershipDocument>): Promise<MembershipDocument | null>;
   deletePlan(id: string): Promise<boolean>;
+  findOne(filter: Record<string, unknown>): Promise<MembershipDocument | null>;
 }

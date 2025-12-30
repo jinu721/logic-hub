@@ -1,4 +1,6 @@
 
+import { Document } from "mongoose";
+
 export interface DiscountIF {
     active: boolean;
     amount: string;
@@ -18,3 +20,6 @@ export interface DiscountIF {
   }
 
   export interface MembershipDocument extends MembershipAttrs, Document {}
+
+  // Legacy interface name for backward compatibility
+  export interface MembershipIF extends MembershipDocument {}

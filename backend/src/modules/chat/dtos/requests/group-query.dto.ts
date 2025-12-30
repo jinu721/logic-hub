@@ -10,14 +10,14 @@ export class GroupQueryDto extends BaseDto {
   page: number = 1;
   limit: number = 10;
 
-  static fromQuery(query: any): GroupQueryDto {
+  static fromQuery(query: Record<string, unknown>): GroupQueryDto {
     const dto = new GroupQueryDto();
-    if (query.name) dto.name = query.name;
-    if (query.search) dto.search = query.search;
-    if (query.type) dto.type = query.type;
+    if (query.name && typeof query.name === 'string') dto.name = query.name;
+    if (query.search && typeof query.search === 'string') dto.search = query.search;
+    if (query.type && typeof query.type === 'string') dto.type = query.type;
     if (query.isActive !== undefined) dto.isActive = query.isActive === "true" || query.isActive === true;
-    if (query.members) dto.members = query.members;
-    if (query.createdBy) dto.createdBy = query.createdBy;
+    if (query.members && typeof query.members === 'string') dto.members = query.members;
+    if (query.createdBy && typeof query.createdBy === 'string') dto.createdBy = query.createdBy;
 
     if (query.page) dto.page = parseInt(query.page.toString(), 10) || 1;
     if (query.limit) dto.limit = parseInt(query.limit.toString(), 10) || 10;

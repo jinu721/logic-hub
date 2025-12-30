@@ -1,9 +1,9 @@
 import { UserDocument } from "@modules/user";
 import { Query } from "mongoose";
 
-export const populateUser = <T>(
-  query: Query<T, UserDocument>
-): Query<T, UserDocument> => {
+export const populateUser = (
+  query: Query<unknown, unknown>
+): Query<unknown, unknown> => {
   return query
     .populate("avatar")
     .populate("banner")

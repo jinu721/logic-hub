@@ -63,7 +63,7 @@ export class TokenService
       return false;
     }
 
-    const expiry = decoded.exp - Math.floor(Date.now() / 1000);
+    const expiry = (decoded.exp as number) - Math.floor(Date.now() / 1000);
 
     await RedisHelper.set(`blacklist_${token}`, "true", expiry);
 

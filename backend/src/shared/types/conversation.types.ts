@@ -28,3 +28,6 @@ export interface PopulatedConversation extends ConversationBase {
 }
 
 export interface ConversationDocument extends ConversationRaw, Document { }
+
+// Legacy interface name for backward compatibility
+export interface ConversationIF extends ConversationDocument { }

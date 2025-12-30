@@ -4,8 +4,8 @@ import { PublicPurchaseDTO } from "@modules/purchase/dtos";
 export const toPublicPurchaseDTO = (purchase: PurchaseDocument): PublicPurchaseDTO => {
   return {
     _id: purchase._id ? purchase._id.toString() : "",
-    userId: purchase.userId ,
-    planId: purchase.planId ,
+    userId: purchase.userId.toString(),
+    planId: purchase.planId.toString(),
     razorpayOrderId: purchase.razorpayOrderId,
     razorpayPaymentId: purchase.razorpayPaymentId,
     razorpaySignature: purchase.razorpaySignature,

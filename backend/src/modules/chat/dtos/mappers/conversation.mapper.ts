@@ -4,8 +4,10 @@ import { toPublicUserDTO } from "@modules/user/dtos";
 import { toPublicMessageDTO } from "./message.mapper";
 
 export const toPublicConversationDTO = (conversation: PopulatedConversation): PublicConversationDTO => {
-  const isPopulatedMatches = (doc) => doc && typeof doc === 'object' && 'sender' in doc;
-  const isPopulatedUser = (doc) => doc && typeof doc === 'object' && 'username' in doc;
+  const isPopulatedMessage = (doc: unknown): doc is PopulatedConversation['latestMessage'] => 
+    doc !== null && typeof doc === 'object' && 'sender' in doc;
+  const isPopulatedUser = (doc: unknown): doc is PopulatedConversation['participants'][0] => 
+    doc !== null && typeof doc === 'object' && 'username' in doc;
 
   return {
     _id: conversation._id.toString(),
@@ -13,7 +15,7 @@ export const toPublicConversationDTO = (conversation: PopulatedConversation): Pu
     participants: conversation.participants && conversation.participants.every(isPopulatedUser)
       ? conversation.participants.map(toPublicUserDTO)
       : [],
-    latestMessage: conversation.latestMessage && isPopulatedMatches(conversation.latestMessage)
+    latestMessage: conversation.latestMessage && isPopulatedMessage(conversation.latestMessage)
       ? toPublicMessageDTO(conversation.latestMessage)
       : null,
     isDeleted: conversation.isDeleted,

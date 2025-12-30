@@ -10,9 +10,10 @@ import {
 import {
   PublicConversationDTO,
   toPublicConversationDTO,
-  PublicGroupDTO
+  PublicGroupDTO,
+  toPublicGroupDTO
 } from "@modules/chat/dtos";
-import { ConversationDocument } from "@shared/types";
+import { ConversationDocument, PopulatedConversation } from "@shared/types";
 
 export class GroupMemberService
   extends BaseService<ConversationDocument, PublicConversationDTO>
@@ -24,8 +25,33 @@ export class GroupMemberService
     super();
   }
 
-  protected toDTO(conv: ConversationDocument): PublicConversationDTO {
-    return toPublicConversationDTO(conv);
+  protected toDTO(conv: ConversationDocument | PopulatedConversation): PublicConversationDTO {
+    if (this.isPopulatedConversation(conv)) {
+      return toPublicConversationDTO(conv);
+    }
+    
+    // Handle non-populated conversation
+    return {
+      _id: conv._id?.toString() || "",
+      type: conv.type as 'group' | 'one-to-one',
+      participants: [],
+      latestMessage: null,
+      isDeleted: conv.isDeleted,
+      typingUsers: [],
+      unreadCounts: conv.unreadCounts instanceof Map
+        ? Object.fromEntries(conv.unreadCounts)
+        : conv.unreadCounts || {},
+      createdAt: conv.createdAt,
+      updatedAt: conv.updatedAt,
+    };
+  }
+
+  private isPopulatedConversation(conv: unknown): conv is PopulatedConversation {
+    return conv !== null && typeof conv === 'object' && 'participants' in conv && 
+           Array.isArray((conv as PopulatedConversation).participants) && 
+           (conv as PopulatedConversation).participants.length > 0 && 
+           typeof (conv as PopulatedConversation).participants[0] === 'object' && 
+           'username' in (conv as PopulatedConversation).participants[0];
   }
 
   protected toDTOs(_: ConversationDocument[]): PublicConversationDTO[] {
@@ -39,7 +65,7 @@ export class GroupMemberService
     const conv = await this.conversationRepo.addParticipants(groupId, group.members);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-    return this.mapOne(conv);
+    return this.toDTO(conv);
   }
 
   async removeMember(groupId: string, userId: string) {
@@ -51,7 +77,7 @@ export class GroupMemberService
     ]);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-    return this.mapOne(conv);
+    return this.toDTO(conv);
   }
 
   async makeAdmin(conversationId: string, groupId: string, userId: string) {
@@ -74,7 +100,7 @@ export class GroupMemberService
     const conv = await this.conversationRepo.findConversationById(conversationId);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-    return this.mapOne(conv);
+    return this.toDTO(conv);
   }
 
   async removeAdmin(conversationId: string, groupId: string, userId: string) {
@@ -95,7 +121,7 @@ export class GroupMemberService
     const conv = await this.conversationRepo.findConversationById(conversationId);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-    return this.mapOne(conv);
+    return this.toDTO(conv);
   }
 
   async sendJoinRequest(groupId: string, userId: string): Promise<{
@@ -120,15 +146,35 @@ export class GroupMemberService
       const conv = await this.conversationRepo.findConversationByGroup(groupId);
       if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-      conv.participants = Array.from(new Set([...conv.participants, uid]));
-      const saved = await this.conversationRepo.saveConversation(conv);
+      // Handle participants properly - check if it's populated or not
+      if (this.isPopulatedConversation(conv)) {
+        // For populated conversation, we need to add the user ID to the participants array
+        // This is a type issue - we can't directly add ObjectId to PopulatedUser[]
+        // We need to refetch the conversation after adding the participant
+        await this.conversationRepo.addParticipants(groupId, [uid]);
+        const refreshedConv = await this.conversationRepo.findConversationById(conv._id.toString());
+        if (!refreshedConv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
+        
+        return {
+          updatedConversation: this.toDTO(refreshedConv),
+          userId,
+          conversationId: refreshedConv._id.toString(),
+          newGroupData: toPublicGroupDTO(updatedGroup),
+        };
+      } else {
+        // For non-populated conversation, handle participants as ObjectId[]
+        const nonPopulatedConv = conv as ConversationDocument;
+        const currentParticipants = nonPopulatedConv.participants as Types.ObjectId[];
+        nonPopulatedConv.participants = Array.from(new Set([...currentParticipants.map(p => p.toString()), uid.toString()])).map(id => new Types.ObjectId(id));
+        const saved = await this.conversationRepo.saveConversation(nonPopulatedConv);
 
-      return {
-        updatedConversation: this.mapOne(saved),
-        userId,
-        conversationId: saved?._id as string,
-        newGroupData: updatedGroup,
-      };
+        return {
+          updatedConversation: saved ? this.toDTO(saved) : null,
+          userId,
+          conversationId: saved?._id?.toString() || "",
+          newGroupData: toPublicGroupDTO(updatedGroup),
+        };
+      }
     }
 
     group.userRequests.push(uid);
@@ -141,7 +187,7 @@ export class GroupMemberService
       updatedConversation: null,
       userId,
       conversationId: conv._id.toString(),
-      newGroupData: updatedGroup,
+      newGroupData: toPublicGroupDTO(updatedGroup),
     };
   }
 
@@ -160,12 +206,23 @@ export class GroupMemberService
     const conv = await this.conversationRepo.findConversationById(conversationId);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-    if (!conv.participants.some((p) => (p._id || p).toString() === userId)) {
-      (conv.participants).push(uid);
+    // Handle participants properly
+    if (this.isPopulatedConversation(conv)) {
+      // For populated conversation, use the repository method to add participants
+      await this.conversationRepo.addParticipants(conversationId, [uid]);
+      const refreshedConv = await this.conversationRepo.findConversationById(conversationId);
+      if (!refreshedConv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
+      return this.toDTO(refreshedConv);
+    } else {
+      // For non-populated conversation, handle participants as ObjectId[]
+      const nonPopulatedConv = conv as ConversationDocument;
+      const currentParticipants = nonPopulatedConv.participants as Types.ObjectId[];
+      if (!currentParticipants.some((p) => p.toString() === userId)) {
+        currentParticipants.push(uid);
+      }
+      const saved = await this.conversationRepo.saveConversation(nonPopulatedConv);
+      return saved ? this.toDTO(saved) : this.toDTO(nonPopulatedConv);
     }
-
-    const saved = await this.conversationRepo.saveConversation(conv);
-    return this.mapOne(saved);
   }
 
   async leaveGroup(conversationId: string, groupId: string, userId: string) {
@@ -180,6 +237,6 @@ export class GroupMemberService
     const conv = await this.conversationRepo.removeParticipants(groupId, [uid]);
     if (!conv) throw new AppError(HttpStatus.NOT_FOUND, "Conversation not found");
 
-    return this.mapOne(conv);
+    return this.toDTO(conv);
   }
 }

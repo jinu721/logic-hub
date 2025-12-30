@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { SubmitChallengeResult } from "./challenge.types";
+import { SubmitChallengeResult } from "./submission.types";
 
 
 export interface CreateMessageInput {

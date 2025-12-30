@@ -20,7 +20,13 @@ export const toPublicSubmissionDTO = (
       ? {
           language: submission.execution.language,
           codeSubmitted: submission.execution.codeSubmitted,
-          resultOutput: submission.execution.resultOutput,
+          resultOutput: submission.execution.resultOutput 
+            ? (Array.isArray(submission.execution.resultOutput) 
+                ? submission.execution.resultOutput 
+                : submission.execution.resultOutput.error 
+                  ? { error: submission.execution.resultOutput.error, rawOutput: submission.execution.resultOutput.rawOutput }
+                  : { error: "Unknown error", rawOutput: submission.execution.resultOutput.rawOutput })
+            : null,
           testCasesPassed: submission.execution.testCasesPassed,
           totalTestCases: submission.execution.totalTestCases,
         }

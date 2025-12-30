@@ -13,7 +13,7 @@ import {
   IMessageRepository,
 } from "@modules/chat";
 
-import { MessageDocument } from "@shared/types";
+import { MessageDocument, PopulatedMessage } from "@shared/types";
 import { Types } from "mongoose";
 
 export class MessageEngagementService
@@ -24,7 +24,38 @@ export class MessageEngagementService
   }
 
   protected toDTO(entity: MessageDocument): PublicMessageDTO {
-    return toPublicMessageDTO(entity);
+    // If the entity is already populated, use it directly
+    if (this.isPopulatedMessage(entity)) {
+      return toPublicMessageDTO(entity as unknown as PopulatedMessage);
+    }
+    
+    // For non-populated messages, create a basic DTO
+    return {
+      _id: entity._id?.toString() || "",
+      sender: {
+        _id: "",
+        username: "Unknown User",
+        avatar: null
+      },
+      conversationId: entity.conversationId?.toString() || "",
+      content: entity.content || "",
+      type: entity.type,
+      media: entity.media || undefined,
+      mentionedUsers: [],
+      reactions: [],
+      seenBy: [],
+      isEdited: entity.isEdited,
+      isDeleted: entity.isDeleted,
+      replyTo: entity.replyTo?.toString() || null,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    };
+  }
+
+  private isPopulatedMessage(entity: unknown): boolean {
+    return entity !== null && typeof entity === 'object' && 'sender' in entity && 
+           typeof (entity as MessageDocument).sender === 'object' && 
+           'username' in (entity as MessageDocument).sender;
   }
 
   protected toDTOs(_: MessageDocument[]): PublicMessageDTO[] {
@@ -76,14 +107,28 @@ export class MessageEngagementService
         message.reactions[idx].emoji = emoji;
       }
     } else {
-      (message.reactions).push({
-        userId: new Types.ObjectId(userId),
-        emoji,
-      });
+      // For non-populated messages, push ObjectId
+      if (!this.isPopulatedMessage(message)) {
+        (message.reactions as any).push({
+          userId: new Types.ObjectId(userId),
+          emoji,
+        });
+      } else {
+        // For populated messages, we need to handle this differently
+        // This should ideally be done at the repository level
+        throw new AppError(HttpStatus.BAD_REQUEST, "Cannot modify populated message directly");
+      }
     }
 
-    const saved = await this.messageRepo.save(message);
-    return this.mapOne(saved);
+    // If it's a populated message, we need to get the raw document first
+    if (this.isPopulatedMessage(message)) {
+      // Use repository methods instead of direct save for populated messages
+      const updated = await this.messageRepo.addReaction(messageId, userId, emoji);
+      return updated ? this.toDTO(updated) : null;
+    }
+
+    const saved = await this.messageRepo.save(message as any);
+    return saved ? this.toDTO(saved) : null;
   }
 
 

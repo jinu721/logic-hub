@@ -7,10 +7,12 @@ import {
   toPublicNotificationDTO,
   toPublicNotificationDTOs,
   INotificationService, 
-  INotificationRepository
+  INotificationRepository,
+  CreateNotificationDto,
+  UpdateNotificationDto
 } from "@modules/notification";
 
-import { NotificationDocument } from "@shared/types";
+import { NotificationDocument, NotificationItemData } from "@shared/types";
 import { toObjectId } from "@utils/application";
 
 
@@ -30,8 +32,18 @@ export class NotificationService
     return toPublicNotificationDTOs(entities)
   }
 
-  async createNotification(data: Partial<NotificationDocument>): Promise<PublicNotificationDTO> {
-    const notification = await this.notifyRepo.createNotification(data)
+  async createNotification(data: CreateNotificationDto): Promise<PublicNotificationDTO> {
+    // Convert DTO to document data
+    const notificationData = {
+      userId: data.userId,
+      title: data.title,
+      message: data.message,
+      type: data.type as "system" | "domain" | "market" | "gift",
+      itemData: data.itemData as NotificationItemData,
+      isRead: false
+    };
+    
+    const notification = await this.notifyRepo.createNotification(notificationData)
     return this.mapOne(notification)
   }
 
@@ -48,8 +60,17 @@ export class NotificationService
     return this.mapOne(notification)
   }
 
-  async updateNotification(id: string, data: Partial<NotificationDocument>): Promise<PublicNotificationDTO> {
-    const updated = await this.notifyRepo.updateNotification(toObjectId(id), data)
+  async updateNotification(id: string, data: UpdateNotificationDto): Promise<PublicNotificationDTO> {
+    // Convert DTO to document data
+    const updateData = {
+      ...(data.title && { title: data.title }),
+      ...(data.message && { message: data.message }),
+      ...(data.type && { type: data.type as "system" | "domain" | "market" | "gift" }),
+      ...(data.itemData !== undefined && { itemData: data.itemData }),
+      ...(data.isRead !== undefined && { isRead: data.isRead })
+    };
+    
+    const updated = await this.notifyRepo.updateNotification(toObjectId(id), updateData)
     if (!updated) {
       throw new AppError(HttpStatus.NOT_FOUND, "Notification not found")
     }

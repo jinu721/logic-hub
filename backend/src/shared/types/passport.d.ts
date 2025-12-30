@@ -1,4 +1,5 @@
 import { UserDocument } from "@modules/user";
+import { Types } from "mongoose";
 
 declare global {
   namespace Express {
@@ -13,6 +14,12 @@ declare global {
       loginType: string;
       googleId?: string;
       githubId?: string;
+      inventory?: {
+        keys?: number;
+        badges?: Types.ObjectId[];
+        ownedAvatars?: Types.ObjectId[];
+        ownedBanners?: Types.ObjectId[];
+      };
       stats?: {
         totalXP?: number;
         totalScore?: number;

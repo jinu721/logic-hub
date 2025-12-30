@@ -13,3 +13,6 @@ export interface PurchaseAttrs {
 }
 
 export interface PurchaseDocument extends PurchaseAttrs, Document{}
+
+// Legacy interface name for backward compatibility
+export interface PurchaseIF extends PurchaseDocument {}

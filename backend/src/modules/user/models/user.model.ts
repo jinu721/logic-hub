@@ -1,4 +1,4 @@
-import { UserDocument } from "@shared/types";
+import { UserDocument, UserRole, LoginType } from "@shared/types";
 import { Schema, model } from "mongoose";
 
 
@@ -11,8 +11,8 @@ const UserSchema = new Schema<UserDocument>({
   password: { type: String },
   phoneNumber: { type: String, unique: true, sparse: true },
   twoFactorEnabled: { type: Boolean, default: false },
-  role: { type: String, enum: ["user", "moderator", "admin"], default: "user" },
-  loginType: { type: String, enum: ["normal", "google", "github"], default: "normal" },
+  role: { type: String, enum: Object.values(UserRole), default: UserRole.USER },
+  loginType: { type: String, enum: Object.values(LoginType), default: LoginType.NORMAL },
   googleId: { type: String },
   githubId: { type: String },
   stats: {
@@ -49,3 +49,4 @@ const UserSchema = new Schema<UserDocument>({
 
 
 export const UserModel = model<UserDocument>('User', UserSchema);
+export { UserDocument };

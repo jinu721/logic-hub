@@ -274,7 +274,7 @@ export class ConversationRepository
         { new: true }
       ).populate("typingUsers");
   }
-  async getTypingUsers(conversationId: string): Promise<ConversationDocument[]> {
+  async getTypingUsers(conversationId: string): Promise<Types.ObjectId[]> {
     const conversation = await this.model
       .findById(conversationId)
       .select("typingUsers");

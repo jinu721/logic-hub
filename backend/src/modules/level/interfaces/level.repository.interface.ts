@@ -1,7 +1,7 @@
 import { LevelDocument } from "@shared/types";
 
 export interface ILevelRepository {
-    createLevel(data: LevelDocument): Promise<LevelDocument>;
+    createLevel(data: Partial<LevelDocument>): Promise<LevelDocument>;
     getLevelById(id: string): Promise<LevelDocument | null>;
     getAllLevels(skip: number, limit: number): Promise<LevelDocument[]>;
     countAllLevels(): Promise<number>;

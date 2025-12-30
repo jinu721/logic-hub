@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import { HttpStatus } from "@constants/http.status";
 import { IMarketController, IMarketService } from "@modules/market";
 import { CreateMarketItemDto, DeleteMarketItemDto, GetAllMarketItemsDto, GetMarketItemDto, UpdateMarketItemDto } from "@modules/market/dtos";
-import { sendSuccess, asyncHandler, AppError } from "@utils/application";
+import { sendSuccess, asyncHandler, AppError, toObjectId } from "@utils/application";
+import { MarketItemDocument } from "@shared/types";
 
 
 export class MarketController implements IMarketController {
@@ -15,7 +16,11 @@ export class MarketController implements IMarketController {
       throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._marketSvc.createItem(dto);
+    const result = await this._marketSvc.createItem({
+      ...dto,
+      itemId: toObjectId(dto.itemId),
+      category: dto.category as 'avatar' | 'banner' | 'badge'
+    });
     sendSuccess(res, HttpStatus.CREATED, result, "Item created successfully");
   });
 
@@ -25,7 +30,7 @@ export class MarketController implements IMarketController {
     if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
 
     const filter = {
-      category: dto.category,
+      category: dto.category as 'avatar' | 'banner' | 'badge' | undefined,
       searchQuery: dto.searchQuery,
       sortOption: dto.sortOption,
     };
@@ -58,7 +63,19 @@ export class MarketController implements IMarketController {
       throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
-    const result = await this._marketSvc.updateItem(dto.id, dto);
+    const updateData: Partial<MarketItemDocument> = {};
+    Object.keys(dto).forEach(key => {
+      if (key !== 'itemId') {
+        (updateData as unknown as Record<string, unknown>)[key] = (dto as unknown as Record<string, unknown>)[key];
+      }
+    });
+    if (dto.itemId) {
+      updateData.itemId = toObjectId(dto.itemId);
+    }
+    if (dto.category) {
+      updateData.category = dto.category as 'avatar' | 'banner' | 'badge';
+    }
+    const result = await this._marketSvc.updateItem(dto.id, updateData);
     if (!result) {
       throw new AppError(HttpStatus.NOT_FOUND, "Item not found");
     }

@@ -1,7 +1,8 @@
 import { MessageDocument, PopulatedMessage, MessageQueryFilter } from "@shared/types";
+import { Types } from "mongoose";
 
 export interface IMessageRepository {
-  createMessage(data: MessageDocument & { replyTo?: string }): Promise<MessageDocument>
+  createMessage(data: Partial<MessageDocument> & { sender: Types.ObjectId; conversationId: string | Types.ObjectId; replyTo?: string }): Promise<MessageDocument>
   getMessages(limit: number, query: MessageQueryFilter): Promise<PopulatedMessage[]>;
   editMessage(messageId: string, newText: string): Promise<MessageDocument | null>;
   deleteMessage(messageId: string): Promise<MessageDocument | null>;

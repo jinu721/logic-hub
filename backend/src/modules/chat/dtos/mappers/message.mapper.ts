@@ -10,7 +10,13 @@ export const toPublicMessageDTO = (message: PopulatedMessage): PublicMessageDTO 
   const isSystemSender = senderId === SYSTEM_USER_ID;
   const isSystemMessage = message.type === "system" || isSystemSender;
 
-  const getSafeId = (user) => (user?._id ? user._id.toString() : user?.toString());
+  const getSafeId = (user: unknown): string => {
+    if (user && typeof user === 'object' && '_id' in user) {
+      const id = (user as { _id: unknown })._id;
+      return id?.toString() || '';
+    }
+    return user?.toString() || '';
+  };
 
   return {
     _id: message._id.toString(),

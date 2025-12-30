@@ -11,6 +11,7 @@ import {
   GetInventoryDto,
   DeleteInventoryDto
 } from "@modules/inventory/dtos";
+import { InventoryDocument } from "@shared/types";
 
 export class InventoryController implements IInventoryController {
   constructor(private svc: IInventoryService) { }
@@ -30,6 +31,7 @@ export class InventoryController implements IInventoryController {
     const payload = {
       ...dto,
       image: imageFile,
+      rarity: dto.rarity as "common" | "uncommon" | "rare" | "epic" | "legendary",
     };
 
     const data = await this.svc.create(payload);
@@ -45,7 +47,8 @@ export class InventoryController implements IInventoryController {
     const page = dto.page ? Number(dto.page) : 1;
     const limit = dto.limit ? Number(dto.limit) : 10;
 
-    const data = await this.svc.getAll(search, page, limit);
+    const searchQuery = search || "";
+    const data = await this.svc.getAll(searchQuery, page, limit);
     sendSuccess(res, HttpStatus.OK, { data }, "Fetched");
   });
 
@@ -68,7 +71,16 @@ export class InventoryController implements IInventoryController {
     const validId = idDto.validate();
     if (!validId.valid) throw new AppError(HttpStatus.BAD_REQUEST, validId.errors.join(","));
 
-    const data = await this.svc.update(idDto.id, dto);
+    const updateData: Partial<InventoryDocument> = {};
+    Object.keys(dto).forEach(key => {
+      if (key !== 'rarity') {
+        (updateData as unknown as Record<string, unknown>)[key] = (dto as unknown as Record<string, unknown>)[key];
+      }
+    });
+    if (dto.rarity) {
+      updateData.rarity = dto.rarity as "common" | "uncommon" | "rare" | "epic" | "legendary";
+    }
+    const data = await this.svc.update(idDto.id, updateData);
     if (!data) throw new AppError(HttpStatus.NOT_FOUND, "Not Found");
     sendSuccess(res, HttpStatus.OK, { data }, "Updated");
   });

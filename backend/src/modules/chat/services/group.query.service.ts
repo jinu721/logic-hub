@@ -19,7 +19,7 @@ export class GroupQueryService
   }
 
   async findByUser(userId: string): Promise<PublicGroupDTO[]> {
-    const query = { $or: [{ createdBy: userId }, { admins: userId }] }
+    const query: Record<string, unknown> = { $or: [{ createdBy: userId }, { admins: userId }] }
     const groups = await this.groupRepo.getAllGroups(query, 0, 0)
     return this.mapMany(groups || [])
   }

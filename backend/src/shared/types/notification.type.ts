@@ -1,3 +1,4 @@
+import { Document } from "mongoose";
 import { InventoryBase } from "./inventory.types";
 
 export type NotificationItemData = InventoryBase | string | { [key: string]: unknown };

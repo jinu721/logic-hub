@@ -19,7 +19,7 @@ const MembershipPurchaseSchema: Schema<PurchaseDocument> = new Schema(
   { timestamps: true }
 );
 
-export const PurchaseModel: Model<PurchaseIF> = mongoose.model<PurchaseIF>(
+export const PurchaseModel: Model<PurchaseDocument> = mongoose.model<PurchaseDocument>(
   'Purchases',
   MembershipPurchaseSchema
 );

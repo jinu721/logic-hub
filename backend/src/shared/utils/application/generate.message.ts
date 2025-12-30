@@ -96,5 +96,5 @@ export const generateSystemMessage = async (
     updatedAt: new Date(),
   };
 
-  return await container.messageCommandSvc.createMessage(systemMessage, null);
+  return await container.messageCommandSvc.createMessageWithSender(systemMessage, null);
 };

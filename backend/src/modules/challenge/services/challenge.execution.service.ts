@@ -244,7 +244,7 @@ export class ChallengeExecutionService
       execution: {
         language,
         codeSubmitted: userCode,
-        resultOutput: results,
+        resultOutput: { results },
         testCasesPassed: results.filter((r) => r.passed).length,
         totalTestCases: results.length,
         runTime,
@@ -253,6 +253,10 @@ export class ChallengeExecutionService
         compileError,
       },
     });
+
+    // Calculate XP gained based on challenge level and performance
+    const baseXP = challenge.level === "novice" ? 10 : challenge.level === "adept" ? 20 : 30;
+    const xpGained = allPassed ? Math.round(baseXP * (score / 100)) : 0;
 
     return {
       challengeId,
@@ -263,6 +267,7 @@ export class ChallengeExecutionService
       timeTaken: runTime,
       results,
       rawExec: execDetails,
+      xpGained,
     };
   }
 }

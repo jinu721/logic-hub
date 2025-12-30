@@ -22,7 +22,9 @@ export function deepEqual<T>(a: T, b: T): boolean {
     for (let i = 0; i < aKeys.length; i++) {
       const key = aKeys[i];
       if (key !== bKeys[i]) return false;
-      if (!deepEqual(a[key], b[key])) return false;
+      const aValue = (a as Record<string, unknown>)[key];
+      const bValue = (b as Record<string, unknown>)[key];
+      if (!deepEqual(aValue, bValue)) return false;
     }
     return true;
   }
@@ -35,7 +37,7 @@ export function deepEqual<T>(a: T, b: T): boolean {
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return Object.prototype.toString.call(value) === "[object Object]";
+  return value !== null && typeof value === 'object' && Object.prototype.toString.call(value) === "[object Object]";
 }
 
 function areNumbers(a: unknown, b: unknown): boolean {

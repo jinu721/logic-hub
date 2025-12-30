@@ -1,4 +1,4 @@
-import { UpdateQuery } from "mongoose";
+import { UpdateQuery, Types } from "mongoose";
 import { BaseRepository } from "@core";
 import { IMembershipRepository, MembershipModel } from "@modules/membership";
 import { MembershipDocument } from "@shared/types";
@@ -39,5 +39,13 @@ export class MembershipRepository
   async deletePlan(id: string): Promise<boolean> {
     const result = await this.model.findByIdAndDelete(id);
     return !!result;
+  }
+
+  async findOne(filter: Record<string, unknown>): Promise<MembershipDocument | null> {
+    return await this.model.findOne(filter);
+  }
+
+  async findByObjectId(id: Types.ObjectId): Promise<MembershipDocument | null> {
+    return await super.findById(id);
   }
 }

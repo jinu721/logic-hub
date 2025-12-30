@@ -12,7 +12,7 @@ export class MembershipController implements IMembershipController {
     const dto = CreateMembershipDto.from(req.body);
     const validation = dto.validate();
     if (!validation.valid) {
-      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", ") || "Validation failed");
     }
 
     const result = await this._membershipSvc.createPlan(dto);
@@ -22,7 +22,10 @@ export class MembershipController implements IMembershipController {
   getAllMemberships = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const dto = GetAllMembershipsDto.from(req.query);
     const validation = dto.validate();
-    if (!validation.valid) throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
+    if (!validation.valid) {
+      const errors = (validation as any).errors || [];
+      throw new AppError(HttpStatus.BAD_REQUEST, errors.join(", ") || "Validation failed");
+    }
 
     const search = dto.search || "";
     const page = dto.page ? Number(dto.page) : 1;
@@ -41,7 +44,7 @@ export class MembershipController implements IMembershipController {
     const dto = GetMembershipDto.from(req.params);
     const validation = dto.validate();
     if (!validation.valid) {
-      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", ") || "Validation failed");
     }
 
     const result = await this._membershipSvc.getPlanById(dto.id);
@@ -56,7 +59,7 @@ export class MembershipController implements IMembershipController {
     const dto = UpdateMembershipDto.from({ id: req.params.id, ...req.body });
     const validation = dto.validate();
     if (!validation.valid) {
-      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", ") || "Validation failed");
     }
 
     const result = await this._membershipSvc.updatePlan(dto.id, dto);
@@ -71,7 +74,7 @@ export class MembershipController implements IMembershipController {
     const dto = DeleteMembershipDto.from(req.params);
     const validation = dto.validate();
     if (!validation.valid) {
-      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
+      throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", ") || "Validation failed");
     }
 
     const result = await this._membershipSvc.deletePlan(dto.id);

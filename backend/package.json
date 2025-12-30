@@ -48,7 +48,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc --skipLibCheck ",
+    "build": "tsc && tsc-alias",
     "start": "node ./dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts"
   },
@@ -60,6 +60,7 @@
     "@types/bcryptjs": "^3.0.0",
     "@types/date-fns": "^2.6.3",
     "@types/dotenv": "^8.2.3",
-    "ts-node-dev": "^2.0.0"
+    "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.16"
   }
 }

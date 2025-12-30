@@ -1,14 +1,14 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
 import logger from "../utils/application/logger";
 import { AppError, isErrorDetailsObject } from "../utils/application/app.error";
 import { env } from "@config/env";
 
-export function errorHandler(
+export const errorHandler: ErrorRequestHandler = (
   err: unknown,
   req: Request,
   res: Response,
   _next: NextFunction
-) {
+): void => {
   const isAppError = err instanceof AppError;
 
   const statusCode = isAppError ? err.statusCode : 500;
@@ -22,7 +22,7 @@ export function errorHandler(
     details: safeDetails ?? null,
   });
 
-  return res.status(statusCode).json({
+  res.status(statusCode).json({
     success: false,
     message,
     ...(env.NODE_ENV === "development" && {
@@ -30,4 +30,4 @@ export function errorHandler(
       details: safeDetails,
     }),
   });
-}
+};

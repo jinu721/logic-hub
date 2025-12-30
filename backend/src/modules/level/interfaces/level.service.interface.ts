@@ -1,11 +1,11 @@
-import { PublicLevelDTO } from "@modules/level/dtos";
+import { PublicLevelDTO, CreateLevelDto, UpdateLevelDto } from "@modules/level/dtos";
 import { LevelDocument } from "@shared/types";
 
 export interface ILevelService {
-    createLevel(data: LevelDocument): Promise<PublicLevelDTO>;
+    createLevel(data: CreateLevelDto): Promise<PublicLevelDTO>;
     getLevelById(id: string): Promise<PublicLevelDTO | null>;
     getAllLevels(page: number, limit: number): Promise<{ levels: PublicLevelDTO[], totalItems: number }>;
-    updateLevel(id: string, data: Partial<LevelDocument>): Promise<PublicLevelDTO | null>;
+    updateLevel(id: string, data: UpdateLevelDto): Promise<PublicLevelDTO | null>;
     deleteLevel(id: string): Promise<PublicLevelDTO | null>;
     getLevelByXP(xp: number): Promise<PublicLevelDTO | null>;
     getLevelByLevel(level: number): Promise<PublicLevelDTO | null>;

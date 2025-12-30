@@ -14,9 +14,12 @@ export interface PopulatedInventory extends InventoryBase {
 
 export interface InventoryDocument extends InventoryBase, Document { }
 
+// Legacy interface name for backward compatibility
+export interface InventoryAttrs extends InventoryBase { }
+
 
 export interface InventoryQueryFilter {
-    name?: string;
+    name?: string | { $regex: string; $options: string };
     description?: string;
     image?: string;
     isActive?: boolean;

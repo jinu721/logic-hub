@@ -32,7 +32,11 @@ export class InventoryService
     return item;
   }
 
-  async create(data: InventoryDocument) {
+  async create(data: Partial<InventoryDocument>) {
+    if (!data.image) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Image is required");
+    }
+    
     const uploaded = await this.uploader.upload(data.image);
 
     const created = await this.repo.create({

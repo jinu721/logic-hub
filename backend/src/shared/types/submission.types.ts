@@ -37,6 +37,8 @@ export interface SubmitChallengeResult {
   timeTaken: number;
   results: ChallengeExecutionResultItem[];
   rawExec: unknown;
+  xpGained: number;
+  newLevel?: number;
 }
 
 

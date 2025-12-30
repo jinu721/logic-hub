@@ -43,7 +43,7 @@ export class GroupHandler {
 
       console.log("Group Update Data:-", type, conversationId, groupId, members, userId, newGroupData, removeMember);
 
-      let updatedConversation: PublicConversationDTO | null = null;
+      let updatedConversation: PublicConversationDTO | boolean | null = null;
 
       let finalConversationId = conversationId;
       let finalUserId = userId;
@@ -87,11 +87,12 @@ export class GroupHandler {
             groupType: newGroupData?.groupType,
             userRequests: newGroupData?.userRequests,
           };
-          updatedConversation = await this.container.groupCommandSvc.updateGroupInfo(
+          const editResult = await this.container.groupCommandSvc.updateGroupInfo(
             conversationId,
             groupId,
             editedGroupDocument
           );
+          updatedConversation = editResult as unknown as PublicConversationDTO;
           break;
         case "leave_group":
           updatedConversation = await this.container.groupMemberSvc.leaveGroup(
@@ -101,9 +102,10 @@ export class GroupHandler {
           );
           break;
         case "delete_group":
-          updatedConversation = await this.container.groupCommandSvc.deleteGroup(
+          const deleteResult = await this.container.groupCommandSvc.deleteGroup(
             groupId
           );
+          updatedConversation = deleteResult ? true : null;
           break;
         case "join_group":
           console.log("JOIN GROUP");
@@ -156,13 +158,25 @@ export class GroupHandler {
             groupId
           );
 
-          this.io.to(finalConversationId.toString()).emit("group_updated", {
-            conversationId: finalConversationId,
-            updatedMembers: updatedConversation.participants,
-            groupInfo: updatedGroup,
-            removeMember,
-            type,
-          });
+          // Only emit group_updated if we have a valid conversation object
+          if (typeof updatedConversation === 'object' && updatedConversation !== null) {
+            this.io.to(finalConversationId.toString()).emit("group_updated", {
+              conversationId: finalConversationId,
+              updatedMembers: updatedConversation.participants,
+              groupInfo: updatedGroup,
+              removeMember,
+              type,
+            });
+          } else {
+            // For delete operations or other boolean results
+            this.io.to(finalConversationId.toString()).emit("group_updated", {
+              conversationId: finalConversationId,
+              updatedMembers: [],
+              groupInfo: updatedGroup,
+              removeMember,
+              type,
+            });
+          }
         } catch (socketErr) {
           console.error("Socket room/message error:", socketErr);
           socket.emit("send_error", {
