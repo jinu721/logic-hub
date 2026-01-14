@@ -47,8 +47,11 @@ export class GroupQueryService
       query.category = filter.category;
     }
 
-    if (filter.tags && filter.tags.length > 0) {
-      query.tags = { $in: filter.tags };
+    if (filter.tags) {
+      const tagsArray = Array.isArray(filter.tags) ? filter.tags : (filter.tags as any).$in;
+      if (Array.isArray(tagsArray) && tagsArray.length > 0) {
+        query.tags = { $in: tagsArray };
+      }
     }
 
     console.log("GROUP FETCHING STARTED WITH QUERY: ", query)

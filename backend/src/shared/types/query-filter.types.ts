@@ -1,4 +1,4 @@
-import { FilterQuery, SortOrder as MongoSortOrder } from "mongoose";
+import { FilterQuery, SortOrder as MongoSortOrder, Types } from "mongoose";
 
 export type MongoQueryFilter<T> = FilterQuery<T>;
 
@@ -34,8 +34,8 @@ export interface MarketItemFilter {
 }
 
 export interface SubmissionFilter {
-    userId?: string;
-    challengeId?: string;
+    userId?: string | Types.ObjectId;
+    challengeId?: string | Types.ObjectId;
     passed?: boolean;
     status?: "completed" | "failed-timeout" | "failed-output" | "pending";
     level?: "novice" | "adept" | "master";
