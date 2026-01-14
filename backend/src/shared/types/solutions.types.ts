@@ -19,9 +19,11 @@ export interface CommentPopulated extends CommentBase {
 export interface SolutionBase {
   title: string;
   content: string;
-  codeSnippet?: string;
-  language?: string;
-  likes: Types.ObjectId[]; 
+  implementations: {
+    language: string;
+    codeSnippet: string;
+  }[];
+  likes: Types.ObjectId[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -39,15 +41,17 @@ export interface PopulatedSolution extends SolutionBase {
   comments: CommentPopulated[];
 }
 
-export interface SolutionDocument extends SolutionRaw, Document {}
+export interface SolutionDocument extends SolutionRaw, Document { }
 
 export interface CreateSolutionInput {
   user: string;
   challenge: string;
   title: string;
   content: string;
-  codeSnippet?: string;
-  language?: string;
+  implementations: {
+    language: string;
+    codeSnippet: string;
+  }[];
 }
 
 export interface SolutionUpdatePayload {
@@ -60,8 +64,10 @@ export interface SolutionUpdatePayload {
 export interface UpdateSolutionInput {
   title?: string;
   content?: string;
-  codeSnippet?: string;
-  language?: string;
+  implementations?: {
+    language: string;
+    codeSnippet: string;
+  }[];
 }
 
 export interface SolutionQuery {

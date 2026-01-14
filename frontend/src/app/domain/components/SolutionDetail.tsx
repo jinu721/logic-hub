@@ -43,6 +43,7 @@ const SolutionDetail: React.FC<SolutionDetailProps> = ({
 }) => {
   const [newComment, setNewComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
+  const [activeImplementationIdx, setActiveImplementationIdx] = useState(0);
   const [likeCount, setLikeCount] = useState(solution.likes.length || 0);
   const [showSolutionEditModal, setShowSolutionEditModal] = useState(false);
   const [showSolutionDeleteModal, setShowSolutionDeleteModal] = useState(false);
@@ -93,7 +94,7 @@ const SolutionDetail: React.FC<SolutionDetailProps> = ({
   };
 
   const handleEditSolution = async (updateData: Partial<SolutionIF>) => {
-    if(!updateData.title || !updateData.content) return
+    if (!updateData.title || !updateData.content) return
     try {
       await updateSolution(solution._id || "", updateData);
       solution.title = updateData.title;
@@ -179,22 +180,43 @@ const SolutionDetail: React.FC<SolutionDetailProps> = ({
 
             <div className="text-gray-300 leading-relaxed">{solution.content}</div>
 
-            {solution.codeSnippet && (
-              <div className="my-6">
-                <CodeBlock
-                  code={solution.codeSnippet}
-                  language={solution.language || "javascript"}
-                />
+            {solution.implementations && solution.implementations.length > 0 && (
+              <div className="my-6 space-y-4">
+                <div className="flex border-b border-gray-700 overflow-x-auto no-scrollbar">
+                  {solution.implementations.map((impl, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImplementationIdx(idx)}
+                      className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeImplementationIdx === idx
+                        ? "text-indigo-400 border-indigo-500"
+                        : "text-gray-500 border-transparent hover:text-gray-300"
+                        }`}
+                    >
+                      {impl.language.charAt(0).toUpperCase() + impl.language.slice(1)}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="relative group">
+                  <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-[10px] uppercase font-bold text-gray-500 bg-gray-950 px-2 py-1 rounded border border-gray-800">
+                      {solution.implementations[activeImplementationIdx].language}
+                    </span>
+                  </div>
+                  <CodeBlock
+                    code={solution.implementations[activeImplementationIdx].codeSnippet}
+                    language={solution.implementations[activeImplementationIdx].language}
+                  />
+                </div>
               </div>
             )}
 
             <div className="flex space-x-4 py-4 border-t border-b border-gray-700">
               <button
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-                  isLiked
-                    ? "text-pink-400 bg-opacity-10"
-                    : "text-gray-400 hover:text-pink-400"
-                }`}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${isLiked
+                  ? "text-pink-400 bg-opacity-10"
+                  : "text-gray-400 hover:text-pink-400"
+                  }`}
                 onClick={handleLike}
               >
                 <Heart size={18} fill={isLiked ? "currentColor" : "none"} />

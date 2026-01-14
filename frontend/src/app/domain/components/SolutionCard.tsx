@@ -49,13 +49,21 @@ const SolutionCard: FC<SolutionCardProps> = ({ solution, onClick }) => {
         </div>
 
         <div className="mt-3 flex items-center flex-wrap gap-2">
-          <span className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded">
-            {solution.language || "JavaScript"}
-          </span>
+          {solution.implementations && solution.implementations.length > 0 ? (
+            solution.implementations.map((impl, idx) => (
+              <span key={idx} className="bg-gray-700 text-indigo-300 text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-indigo-500/20">
+                {impl.language}
+              </span>
+            ))
+          ) : (
+            <span className="bg-gray-700 text-gray-400 text-[10px] px-2 py-0.5 rounded">
+              Logic
+            </span>
+          )}
           {solution.likes.length > 5 && (
-            <span className="bg-pink-500 bg-opacity-20 text-pink-400 text-xs px-2 py-1 rounded flex items-center">
+            <span className="bg-pink-500 bg-opacity-10 text-pink-400 text-[10px] px-2 py-0.5 rounded flex items-center border border-pink-500/20">
               <Heart size={10} className="mr-1" fill="currentColor" />
-              Popular
+              POPULAR
             </span>
           )}
         </div>

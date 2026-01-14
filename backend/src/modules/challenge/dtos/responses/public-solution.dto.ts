@@ -3,12 +3,14 @@ import { PublicChallengeDTO } from "@modules/challenge/dtos";
 
 export interface PublicSolutionDTO {
   _id: string;
-  user: PublicUserDTO | string; 
+  user: PublicUserDTO | string;
   challenge: PublicChallengeDTO | string;
   title: string;
   content: string;
-  codeSnippet?: string | null;
-  language?: string | null;
+  implementations: {
+    language: string;
+    codeSnippet: string;
+  }[];
   likes: string[];
   likesCount: number;
   comments: {
