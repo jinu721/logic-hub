@@ -1,5 +1,4 @@
 import { PublicSolutionDTO } from "../responses/public-solution.dto";
-import { toPublicChallengeDTO } from "./challenge.mapper";
 import { toPublicUserDTO } from "@modules/user/dtos";
 import { PopulatedSolution } from "@shared/types";
 
@@ -8,7 +7,9 @@ export const toPublicSolutionDTO = (solution: PopulatedSolution): PublicSolution
   return {
     _id: solution._id.toString(),
     user: toPublicUserDTO(solution.user),
-    challenge: toPublicChallengeDTO(solution.challenge),
+    challenge: typeof solution.challenge === 'object' && solution.challenge._id
+      ? solution.challenge._id.toString()
+      : solution.challenge.toString(),
     title: solution.title,
     content: solution.content,
     implementations: solution.implementations && solution.implementations.length > 0
