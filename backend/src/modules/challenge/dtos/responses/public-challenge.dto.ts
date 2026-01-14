@@ -1,4 +1,5 @@
 import { TestCaseIF } from "@shared/types";
+import { PublicSubmissionDTO } from "./public-submission.dto";
 
 export interface PublicChallengeDTO {
   _id: string;
@@ -24,5 +25,7 @@ export interface PublicChallengeDTO {
   endTime?: Date;
   xpRewards: number;
   createdAt?: Date;
+  recentSubmission?: PublicSubmissionDTO;
+  submisionHistory?: PublicSubmissionDTO[];
 }
 

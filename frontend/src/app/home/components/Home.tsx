@@ -94,7 +94,7 @@ const Home = () => {
         try {
           const [userData, data] = await Promise.all([
             getMyProfile(),
-            getChallenges({}) 
+            getChallenges({})
           ]);
 
           dispatch(setUser(userData.user));
@@ -123,7 +123,7 @@ const Home = () => {
 
     initData();
     socket.emit("user-online", localStorage.getItem("accessToken"));
-  }, [dispatch, lastFetch, challenges.length]); 
+  }, [dispatch, lastFetch, challenges.length]);
 
 
 
@@ -430,7 +430,7 @@ const Home = () => {
         />
       )}
       {showGiftRecive && <GiftReceivedModal />}
-      {showDailyReward && <DailyReward user={user} />}
+      {showDailyReward && <DailyReward user={user || (highlightedDomain as any)?.user} />}
     </>
   );
 };

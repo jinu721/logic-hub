@@ -16,10 +16,17 @@ export class MarketController implements IMarketController {
       throw new AppError(HttpStatus.BAD_REQUEST, validation.errors?.join(", "));
     }
 
+    const itemModelMap: Record<string, 'Avatar' | 'Banner' | 'Badge'> = {
+      'avatar': 'Avatar',
+      'banner': 'Banner',
+      'badge': 'Badge'
+    };
+
     const result = await this._marketSvc.createItem({
       ...dto,
       itemId: toObjectId(dto.itemId),
-      category: dto.category as 'avatar' | 'banner' | 'badge'
+      category: dto.category as 'avatar' | 'banner' | 'badge',
+      itemModel: itemModelMap[dto.category] || 'Avatar' as any
     });
     sendSuccess(res, HttpStatus.CREATED, result, "Item created successfully");
   });
@@ -74,6 +81,12 @@ export class MarketController implements IMarketController {
     }
     if (dto.category) {
       updateData.category = dto.category as 'avatar' | 'banner' | 'badge';
+      const itemModelMap: Record<string, 'Avatar' | 'Banner' | 'Badge'> = {
+        'avatar': 'Avatar',
+        'banner': 'Banner',
+        'badge': 'Badge'
+      };
+      updateData.itemModel = itemModelMap[dto.category];
     }
     const result = await this._marketSvc.updateItem(dto.id, updateData);
     if (!result) {

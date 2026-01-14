@@ -4,7 +4,9 @@ import { HttpStatus } from "@constants";
 import {
   PublicChallengeDTO,
   toPublicChallengeDTO,
-  toPublicChallengeDTOs
+  toPublicChallengeDTOs,
+  toPublicSubmissionDTO,
+  toPublicSubmissionDTOs
 } from "@modules/challenge/dtos";
 import {
   IChallengeQueryService,
@@ -40,8 +42,20 @@ export class ChallengeQueryService
     const challenge = await this._challengeRepo.getChallengeById(toObjectId(id));
     if (!challenge) throw new AppError(HttpStatus.NOT_FOUND, "Challenge not found");
 
+    const challengeDTO = this.mapOne(challenge);
+
+    if (userId) {
+      const [history, recent] = await Promise.all([
+        this._submissionRepo.getSubmissionsByUserAndChallenge(toObjectId(userId), toObjectId(id)),
+        this._submissionRepo.getLatestSubmissionByUserAndChallenge(toObjectId(userId), toObjectId(id))
+      ]);
+
+      challengeDTO.submisionHistory = toPublicSubmissionDTOs(history);
+      challengeDTO.recentSubmission = recent ? toPublicSubmissionDTO(recent) : undefined;
+    }
+
     return {
-      ...this.mapOne(challenge),
+      ...challengeDTO,
       userId
     };
   }

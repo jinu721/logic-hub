@@ -43,13 +43,13 @@ export const toPublicUserDTO = (user: PopulatedUser & { currentUser?: boolean })
     },
     inventory: {
       keys: user.inventory?.keys || 0,
-      badges: user.inventory?.badges ? user.inventory.badges.map(item => 
+      badges: user.inventory?.badges ? user.inventory.badges.map(item =>
         isPopulatedInventory(item) ? toPublicInventoryDTO(item as PopulatedInventory)! : inventoryDocumentToDTO(item)
       ).filter(Boolean) : [],
-      ownedAvatars: user.inventory?.ownedAvatars ? user.inventory.ownedAvatars.map(item => 
+      ownedAvatars: user.inventory?.ownedAvatars ? user.inventory.ownedAvatars.map(item =>
         isPopulatedInventory(item) ? toPublicInventoryDTO(item as PopulatedInventory)! : inventoryDocumentToDTO(item)
       ).filter(Boolean) : [],
-      ownedBanners: user.inventory?.ownedBanners ? user.inventory.ownedBanners.map(item => 
+      ownedBanners: user.inventory?.ownedBanners ? user.inventory.ownedBanners.map(item =>
         isPopulatedInventory(item) ? toPublicInventoryDTO(item as PopulatedInventory)! : inventoryDocumentToDTO(item)
       ).filter(Boolean) : [],
     },
@@ -59,12 +59,12 @@ export const toPublicUserDTO = (user: PopulatedUser & { currentUser?: boolean })
     membership: user.membership
       ? {
         planId: user.membership.planId?._id?.toString() || user.membership.planId?.toString() || "",
-        type: user.membership.type, 
+        type: user.membership.type,
         isActive: user.membership.isActive,
       }
       : undefined,
     dailyRewardDay: user.dailyRewardDay,
-    lastRewardClaimDate: user.lastRewardClaimDate || new Date(), 
+    lastRewardClaimDate: user.lastRewardClaimDate || null,
     twoFactorEnabled: user.twoFactorEnabled,
     lastSeen: user.lastSeen || null,
     currentUser: user.currentUser ? user.currentUser : false,

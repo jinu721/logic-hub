@@ -5,6 +5,7 @@ export interface MarketItemAttrs {
   description?: string;
   costXP: number;
   itemId: Types.ObjectId;
+  itemModel: 'Avatar' | 'Banner' | 'Badge';
   category: 'avatar' | 'banner' | 'badge';
   available?: boolean;
   limitedTime?: boolean;

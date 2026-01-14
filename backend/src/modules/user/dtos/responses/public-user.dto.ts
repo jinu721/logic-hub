@@ -34,7 +34,7 @@ export interface PublicUserDTO {
     isActive: boolean;
   };
   dailyRewardDay: number;
-  lastRewardClaimDate: Date;
+  lastRewardClaimDate: Date | null;
   twoFactorEnabled: boolean;
   lastSeen: Date | null;
   currentUser: boolean;

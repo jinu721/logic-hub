@@ -10,8 +10,8 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <>
+      {children}
+    </>
   );
 }

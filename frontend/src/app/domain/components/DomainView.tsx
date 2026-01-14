@@ -104,24 +104,23 @@ const DomainView: React.FC<DomainViewProps> = () => {
         ]);
 
         setChallenge(challengeData);
-        setCurrentLanguage(Object.keys(challengeData.initialCode)[0] as Language);
         setUser(userData.user);
-
         const initialCodeState = { ...challengeData.initialCode };
         const recent = challengeData.recentSubmission;
+        let selectedLang = Object.keys(challengeData.initialCode)[0] as Language;
 
         if (
           recent?.execution?.language &&
           recent?.execution?.codeSubmitted &&
           initialCodeState[recent.execution.language]
         ) {
-          initialCodeState[recent.execution.language] = recent.execution.codeSubmitted;
+          selectedLang = recent.execution.language as Language;
+          initialCodeState[selectedLang] = recent.execution.codeSubmitted;
         }
 
+        setCurrentLanguage(selectedLang);
         setCodeToShow(initialCodeState);
-
-        const firstLang = Object.keys(challengeData.initialCode)[0] as Language;
-        setUserInput(initialCodeState[firstLang] || "");
+        setUserInput(initialCodeState[selectedLang] || "");
 
       } catch (error) {
         console.error("Error fetching challenge:", error);

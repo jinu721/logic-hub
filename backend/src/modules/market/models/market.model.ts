@@ -14,12 +14,17 @@ const marketItemSchema = new Schema<MarketItemDocument>({
   itemId: {
     type: Schema.Types.ObjectId,
     required: true,
-    ref: 'Inventory',
+    refPath: 'itemModel',
+  },
+  itemModel: {
+    type: String,
+    required: true,
+    enum: ['Avatar', 'Banner', 'Badge']
   },
   category: {
     type: String,
     enum: ['avatar', 'banner', 'badge'],
-    required:true
+    required: true
   },
   available: {
     type: Boolean,
@@ -42,4 +47,4 @@ const marketItemSchema = new Schema<MarketItemDocument>({
   },
 });
 
-export const MarketModel =  model<MarketItemDocument>('MarketItem', marketItemSchema);
+export const MarketModel = model<MarketItemDocument>('MarketItem', marketItemSchema);

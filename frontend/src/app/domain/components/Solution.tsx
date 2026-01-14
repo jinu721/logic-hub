@@ -63,9 +63,9 @@ const SolutionsSection: React.FC<SolutionsSectionProps> = ({
       );
 
       if (page === 1) {
-        setSolutionsData(result.data);
+        setSolutionsData(result || []);
       } else {
-        setSolutionsData((prev) => [...prev, ...result.data]);
+        setSolutionsData((prev) => [...(prev || []), ...(result || [])]);
       }
     } catch (error) {
       console.error(error);
@@ -117,7 +117,7 @@ const SolutionsSection: React.FC<SolutionsSectionProps> = ({
   const handleAddSolution = async (newSolutionData: Partial<SolutionIF>) => {
     try {
       const result = await addSolution(newSolutionData);
-      setSolutionsData([...solutionsData, result.data]);
+      setSolutionsData([...solutionsData, result]);
       setShowAddSolution(false);
       showToast({ type: "success", message: "Solution Added" });
     } catch (err) {
@@ -130,7 +130,7 @@ const SolutionsSection: React.FC<SolutionsSectionProps> = ({
     setShowAddSolution(false);
   };
 
-  const sortedSolutions = [...solutionsData].sort((a, b) => {
+  const sortedSolutions = [...(solutionsData || [])].sort((a, b) => {
     if (sortBy === "likes") {
       return b.likes.length - a.likes.length;
     } else if (sortBy === "newest") {
@@ -185,8 +185,8 @@ const SolutionsSection: React.FC<SolutionsSectionProps> = ({
                   {sortBy === "likes"
                     ? "Most Likes"
                     : sortBy === "newest"
-                    ? "Newest"
-                    : "Most Comments"}
+                      ? "Newest"
+                      : "Most Comments"}
                 </span>
                 <ChevronDown size={14} />
               </button>
@@ -195,25 +195,22 @@ const SolutionsSection: React.FC<SolutionsSectionProps> = ({
                 <div className="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-lg">
                   <div
                     onClick={() => handleSelect("likes")}
-                    className={`px-4 py-2 hover:bg-gray-700 cursor-pointer ${
-                      sortBy === "likes" ? "bg-gray-700 font-medium" : ""
-                    }`}
+                    className={`px-4 py-2 hover:bg-gray-700 cursor-pointer ${sortBy === "likes" ? "bg-gray-700 font-medium" : ""
+                      }`}
                   >
                     Most Likes
                   </div>
                   <div
                     onClick={() => handleSelect("newest")}
-                    className={`px-4 py-2 hover:bg-gray-700 cursor-pointer ${
-                      sortBy === "newest" ? "bg-gray-700 font-medium" : ""
-                    }`}
+                    className={`px-4 py-2 hover:bg-gray-700 cursor-pointer ${sortBy === "newest" ? "bg-gray-700 font-medium" : ""
+                      }`}
                   >
                     Newest
                   </div>
                   <div
                     onClick={() => handleSelect("comments")}
-                    className={`px-4 py-2 hover:bg-gray-700 cursor-pointer ${
-                      sortBy === "comments" ? "bg-gray-700 font-medium" : ""
-                    }`}
+                    className={`px-4 py-2 hover:bg-gray-700 cursor-pointer ${sortBy === "comments" ? "bg-gray-700 font-medium" : ""
+                      }`}
                   >
                     Most Comments
                   </div>
@@ -255,7 +252,7 @@ const SolutionsSection: React.FC<SolutionsSectionProps> = ({
       <div ref={containerRef} className="flex-1 overflow-auto p-4">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6">
-          <div className="text-center py-4 text-gray-400">Loading...</div>
+            <div className="text-center py-4 text-gray-400">Loading...</div>
           </div>
         ) : solutionsData.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6">

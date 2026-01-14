@@ -10,13 +10,12 @@ import { IUserRepository } from "@modules/user";
 import { ILevelRepository } from "@modules/level";
 
 import { PublicChallengeDTO, toPublicChallengeDTO, toPublicChallengeDTOs } from "@modules/challenge/dtos";
-import { ChallengeDocument, LevelDocument, SubmissionAttrs, SubmissionEffectsData, SubmissionEffectsResult} from "@shared/types";
+import { ChallengeDocument, LevelDocument, SubmissionAttrs, SubmissionEffectsData, SubmissionEffectsResult } from "@shared/types";
 import { Types } from "mongoose";
 
 export class ChallengeStatsService
   extends BaseService<ChallengeDocument, PublicChallengeDTO>
-  implements IChallengeStatsService
-{
+  implements IChallengeStatsService {
   constructor(
     private readonly challengeRepo: IChallengeRepository,
     private readonly submissionRepo: ISubmissionRepository,
@@ -46,18 +45,25 @@ export class ChallengeStatsService
     const user = await this.userRepo.getUserById(userId);
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
-    const existing = await this.submissionRepo.getSubmissionsByUserAndChallenge(
-      user._id,
-      toObjectId(challengeId)
-    );
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setHours(0, 0, 0, 0);
+    startOfWeek.setDate(now.getDate() - now.getDay());
 
-    const alreadyCompleted = !!existing;
+    const existing = await this.submissionRepo.getSubmissions({
+      userId: user._id,
+      challengeId: toObjectId(challengeId),
+      passed: true,
+      submittedAt: { $gte: startOfWeek }
+    });
+
+    const alreadyCompletedThisWeek = existing.length > 1;
 
     let xpGained = 0;
     let newXP = user.stats.xpPoints;
     let newLevel = user.stats.level;
 
-    if (passed && !alreadyCompleted) {
+    if (passed && !alreadyCompletedThisWeek) {
       xpGained = challenge.xpRewards;
       newXP += xpGained;
 
@@ -72,17 +78,17 @@ export class ChallengeStatsService
       user.stats.xpPoints = newXP;
       user.stats.totalXpPoints += xpGained;
       user.stats.level = newLevel;
-          const updateData = {
-      $set: {
-        "stats.xpPoints": newXP,
-        "stats.level": newLevel,
-      },
-      $inc: {
-        "stats.totalXpPoints": xpGained,
-      },
-    };
+      const updateData = {
+        $set: {
+          "stats.xpPoints": newXP,
+          "stats.level": newLevel,
+        },
+        $inc: {
+          "stats.totalXpPoints": xpGained,
+        },
+      };
 
-    await this.userRepo.updateUser(user._id, updateData);
+      await this.userRepo.updateUser(user._id, updateData);
 
     }
 

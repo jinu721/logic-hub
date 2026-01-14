@@ -5,7 +5,7 @@ import { claimDailyReward } from "@/services/client/clientServices";
 
 export default function GameDailyRewards({ user }) {
   const [showModal, setShowModal] = useState(true);
-  const [currentDay] = useState(user.dailyRewardDay || 1);
+  const [currentDay, setCurrentDay] = useState(1);
   const [claimedToday, setClaimedToday] = useState(false);
   const [animate, setAnimate] = useState(false);
   const [animateRewards, setAnimateRewards] = useState(false);
@@ -14,6 +14,12 @@ export default function GameDailyRewards({ user }) {
   const [hoveredDay, setHoveredDay] = useState(null);
 
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      setCurrentDay(user.dailyRewardDay || 1);
+    }
+  }, [user]);
 
   const isGoldMember =
     user.membership?.isActive && user.membership?.type === "gold";
@@ -69,20 +75,20 @@ export default function GameDailyRewards({ user }) {
   const handleClaim = async () => {
     if (claimedToday) return;
     setClaimAnimation(true);
-    
+
     try {
-        await claimDailyReward();
-        setTimeout(() => {
-            setClaimAnimation(false);
-            setConfetti(true);
+      await claimDailyReward();
+      setTimeout(() => {
+        setClaimAnimation(false);
+        setConfetti(true);
         setClaimedToday(true);
       }, 1500);
       showToast({
         type: "success",
         message: "Daily reward claimed successfully",
-    });
-} catch (error) {
-       setClaimAnimation(false);
+      });
+    } catch (error) {
+      setClaimAnimation(false);
       showToast({ type: "error", message: "Error claiming daily reward" });
       console.error("Error claiming daily reward:", error);
     }
@@ -102,14 +108,13 @@ export default function GameDailyRewards({ user }) {
   const isDayClaimed = (day) =>
     day < currentDay || (day === currentDay && claimedToday);
 
-  if (!showModal) return null;
+  if (!showModal || !user) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-opacity-70 backdrop-blur-md">
       <div
-        className={`relative bg-gradient-to-br from-gray-900 via-gray-900 to-indigo-950 rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-indigo-500/10 transition-all duration-700 transform ${
-          animate ? "opacity-100 scale-100" : "opacity-0 scale-90"
-        }`}
+        className={`relative bg-gradient-to-br from-gray-900 via-gray-900 to-indigo-950 rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-indigo-500/10 transition-all duration-700 transform ${animate ? "opacity-100 scale-100" : "opacity-0 scale-90"
+          }`}
       >
         <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
           <div className="w-64 h-64 bg-indigo-600/5 rounded-full filter blur-3xl absolute top-0 -left-32 animate-pulse"></div>
@@ -127,9 +132,8 @@ export default function GameDailyRewards({ user }) {
                   top: `${Math.random() * 100}%`,
                   left: `${Math.random() * 100}%`,
                   opacity: Math.random() * 0.5 + 0.2,
-                  animation: `twinkle ${
-                    Math.random() * 3 + 2
-                  }s infinite alternate`,
+                  animation: `twinkle ${Math.random() * 3 + 2
+                    }s infinite alternate`,
                 }}
               />
             ))}
@@ -172,9 +176,8 @@ export default function GameDailyRewards({ user }) {
                     left: `${Math.random() * 100}%`,
                     top: `-5%`,
                     transform: `rotate(${Math.random() * 360}deg)`,
-                    animation: `confetti-fall-${i % 3} ${
-                      Math.random() * 2 + 2
-                    }s ease-out forwards`,
+                    animation: `confetti-fall-${i % 3} ${Math.random() * 2 + 2
+                      }s ease-out forwards`,
                     animationDelay: `${Math.random() * 0.8}s`,
                     zIndex: 50,
                     boxShadow: "0 0 2px rgba(255,255,255,0.3)",
@@ -229,9 +232,8 @@ export default function GameDailyRewards({ user }) {
         </button>
 
         <div
-          className={`flex flex-col items-center justify-center mb-6 transition-all duration-700 ${
-            animate ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
-          }`}
+          className={`flex flex-col items-center justify-center mb-6 transition-all duration-700 ${animate ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+            }`}
         >
           <div className="relative mb-2">
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full opacity-25 blur-md animate-pulse"></div>
@@ -271,9 +273,8 @@ export default function GameDailyRewards({ user }) {
           </p>
         </div>
         <div
-          className={`mb-8 transition-all duration-700 delay-100 ${
-            animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
+          className={`mb-8 transition-all duration-700 delay-100 ${animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
         >
           <div className="flex justify-between mb-2">
             <div className="flex items-center text-xs">
@@ -317,9 +318,8 @@ export default function GameDailyRewards({ user }) {
         </div>
 
         <div
-          className={`relative mb-8 transition-all duration-700 delay-200 ${
-            animate ? "opacity-100" : "opacity-0"
-          }`}
+          className={`relative mb-8 transition-all duration-700 delay-200 ${animate ? "opacity-100" : "opacity-0"
+            }`}
         >
           <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-700 transform -translate-y-1/2 z-0"></div>
 
@@ -334,10 +334,9 @@ export default function GameDailyRewards({ user }) {
                 <div
                   key={`day-${day}`}
                   className={`flex flex-col items-center m-3 transition-all duration-500 transform cursor-pointer
-                    ${
-                      animateRewards
-                        ? "translate-y-0 opacity-100"
-                        : "translate-y-4 opacity-0"
+                    ${animateRewards
+                      ? "translate-y-0 opacity-100"
+                      : "translate-y-4 opacity-0"
                     }
                     ${isHovered || isToday ? "scale-110" : "scale-100"}
                   `}
@@ -347,22 +346,19 @@ export default function GameDailyRewards({ user }) {
                 >
                   <div
                     className={`relative w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300
-                      ${
-                        claimed
-                          ? "bg-gradient-to-br from-green-400 to-emerald-600"
-                          : isToday
+                      ${claimed
+                        ? "bg-gradient-to-br from-green-400 to-emerald-600"
+                        : isToday
                           ? "bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500"
                           : "bg-gray-800 border border-gray-700"
                       }
-                      ${
-                        isToday && !claimed
-                          ? "animate-pulse shadow-lg shadow-purple-500/30"
-                          : ""
+                      ${isToday && !claimed
+                        ? "animate-pulse shadow-lg shadow-purple-500/30"
+                        : ""
                       }
-                      ${
-                        isHovered && !claimed && !isToday
-                          ? "shadow-md shadow-indigo-500/20"
-                          : ""
+                      ${isHovered && !claimed && !isToday
+                        ? "shadow-md shadow-indigo-500/20"
+                        : ""
                       }
                     `}
                   >
@@ -386,10 +382,9 @@ export default function GameDailyRewards({ user }) {
 
                   <div
                     className={`text-xs font-bold mt-2 transition-all duration-300
-                      ${
-                        claimed
-                          ? "text-green-400"
-                          : isToday
+                      ${claimed
+                        ? "text-green-400"
+                        : isToday
                           ? "text-purple-300"
                           : "text-gray-400"
                       }
@@ -404,10 +399,10 @@ export default function GameDailyRewards({ user }) {
                       {claimed
                         ? "Claimed on Day " + day
                         : isToday
-                        ? "Available today!"
-                        : day > currentDay
-                        ? "Unlock on Day " + day
-                        : "Missed reward"}
+                          ? "Available today!"
+                          : day > currentDay
+                            ? "Unlock on Day " + day
+                            : "Missed reward"}
                     </div>
                   )}
                 </div>
@@ -429,11 +424,10 @@ export default function GameDailyRewards({ user }) {
             <div className="flex items-center">
               <div
                 className={`p-2 rounded-lg mr-3 transition-all duration-300
-                ${
-                  claimedToday
+                ${claimedToday
                     ? "bg-green-500/20"
                     : "bg-gradient-to-br from-indigo-500/20 to-purple-500/20"
-                }`}
+                  }`}
               >
                 {claimedToday ? (
                   <Check size={18} className="text-green-400" />
@@ -446,11 +440,10 @@ export default function GameDailyRewards({ user }) {
                   Day {currentDay} Reward
                 </h3>
                 <p
-                  className={`text-sm font-bold ${
-                    claimedToday
-                      ? "text-green-400"
-                      : "bg-gradient-to-r from-indigo-300 to-purple-300 text-transparent bg-clip-text"
-                  }`}
+                  className={`text-sm font-bold ${claimedToday
+                    ? "text-green-400"
+                    : "bg-gradient-to-r from-indigo-300 to-purple-300 text-transparent bg-clip-text"
+                    }`}
                 >
                   {rewards[currentDay - 1].value} XP
                 </p>
@@ -476,13 +469,12 @@ export default function GameDailyRewards({ user }) {
           <button
             onClick={handleClaim}
             disabled={claimedToday || claimAnimation}
-            className={`w-full py-3 rounded-xl font-bold text-white text-sm transition-all duration-500 relative overflow-hidden ${
-              claimedToday
-                ? "bg-gray-700 cursor-not-allowed"
-                : claimAnimation
+            className={`w-full py-3 rounded-xl font-bold text-white text-sm transition-all duration-500 relative overflow-hidden ${claimedToday
+              ? "bg-gray-700 cursor-not-allowed"
+              : claimAnimation
                 ? "bg-gradient-to-r from-indigo-500 to-purple-500 opacity-80"
                 : "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-400 hover:via-purple-400 hover:to-pink-400 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30"
-            }`}
+              }`}
           >
             {!claimedToday && !claimAnimation && (
               <div className="absolute inset-0 w-full h-full">
@@ -526,9 +518,8 @@ export default function GameDailyRewards({ user }) {
             )}
 
             <span
-              className={`flex items-center justify-center relative z-10 transition-all duration-300 ${
-                claimAnimation ? "opacity-0" : "opacity-100"
-              }`}
+              className={`flex items-center justify-center relative z-10 transition-all duration-300 ${claimAnimation ? "opacity-0" : "opacity-100"
+                }`}
             >
               {claimedToday ? (
                 <>
@@ -546,9 +537,8 @@ export default function GameDailyRewards({ user }) {
         </div>
 
         <div
-          className={`mt-5 text-center transform transition-all duration-700 delay-500 ${
-            animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
+          className={`mt-5 text-center transform transition-all duration-700 delay-500 ${animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
         >
           <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/10 backdrop-blur-sm border border-amber-500/20">
             <Crown size={12} className="text-amber-400 mr-1" />
