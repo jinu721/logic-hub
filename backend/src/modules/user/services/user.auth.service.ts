@@ -11,7 +11,7 @@ import { env } from "@config/env"
 import { setAccessToken, setRefreshToken, clearAuthCookies, verifyLinkToken } from "@utils/token"
 import { RedisHelper } from "@utils/database"
 import { HttpContext } from "@shared/types/core.types"
-import { SocialLoginInput, PopulatedUser, UserDocument } from "@shared/types"
+import { SocialLoginInput, PopulatedUser, UserDocument, JwtPayloadBase } from "@shared/types"
 import { Response } from "express"
 
 
@@ -65,9 +65,17 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
 
     await this.pendingRepo.deletePendingUser(dto.email);
 
-    const pub = this.mapOne(user);
-    const accessToken = this.tokenProv.generateAccessToken(pub);
-    const refreshToken = this.tokenProv.generateRefreshToken(pub);
+    const payload: JwtPayloadBase = {
+      userId: String(user._id),
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      isBanned: user.isBanned,
+      isVerified: user.isVerified
+    };
+
+    const accessToken = this.tokenProv.generateAccessToken(payload);
+    const refreshToken = this.tokenProv.generateRefreshToken(payload);
 
     await this.tokenSvc.createToken({
       userId: String(user._id),
@@ -81,7 +89,7 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
       setRefreshToken(ctx.res, refreshToken);
     }
 
-    return { accessToken, refreshToken, user: pub };
+    return { accessToken, refreshToken, user: this.mapOne(user) };
   }
 
   async login(dto: { identifier: string; password: string }, ctx: HttpContext) {
@@ -93,9 +101,17 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
     const valid = await this.hashProv.comparePasswords(dto.password, user.password as string);
     if (!valid) throw new AppError(HttpStatus.UNAUTHORIZED, "Invalid credentials");
 
-    const pub = this.mapOne(user);
-    const accessToken = this.tokenProv.generateAccessToken(pub);
-    const refreshToken = this.tokenProv.generateRefreshToken(pub);
+    const payload: JwtPayloadBase = {
+      userId: String(user._id),
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      isBanned: user.isBanned,
+      isVerified: user.isVerified
+    };
+
+    const accessToken = this.tokenProv.generateAccessToken(payload);
+    const refreshToken = this.tokenProv.generateRefreshToken(payload);
 
     await this.tokenSvc.createToken({
       userId: String(user._id),
@@ -109,7 +125,7 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
       setRefreshToken(ctx.res, refreshToken);
     }
 
-    return { isVerified: true, security: false, accessToken, refreshToken, user: pub };
+    return { isVerified: true, security: false, accessToken, refreshToken, user: this.mapOne(user) };
   }
 
   async verifyLogin(token: string, ctx: HttpContext) {
@@ -117,9 +133,17 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
     const user = await this.userRepo.getUserById(decoded.userId);
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
-    const pub = this.mapOne(user);
-    const accessToken = this.tokenProv.generateAccessToken(pub);
-    const refreshToken = this.tokenProv.generateRefreshToken(pub);
+    const payload: JwtPayloadBase = {
+      userId: String(user._id),
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      isBanned: user.isBanned,
+      isVerified: user.isVerified
+    };
+
+    const accessToken = this.tokenProv.generateAccessToken(payload);
+    const refreshToken = this.tokenProv.generateRefreshToken(payload);
 
     await this.tokenSvc.createToken({
       userId: String(user._id),
@@ -133,7 +157,7 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
       setRefreshToken(ctx.res, refreshToken);
     }
 
-    return { accessToken, refreshToken, user: pub };
+    return { accessToken, refreshToken, user: this.mapOne(user) };
   }
 
   async refreshAccessToken(refreshTokenCookie: string | undefined, ctx: HttpContext) {
@@ -149,8 +173,16 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
     const user = await this.userRepo.getUserById(decoded.userId);
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
-    const pub = this.mapOne(user);
-    const newAccessToken = this.tokenProv.generateAccessToken(pub);
+    const payload: JwtPayloadBase = {
+      userId: String(user._id),
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      isBanned: user.isBanned,
+      isVerified: user.isVerified
+    };
+
+    const newAccessToken = this.tokenProv.generateAccessToken(payload);
 
     if (ctx.res) setAccessToken(ctx.res, newAccessToken);
     return { accessToken: newAccessToken };
@@ -160,15 +192,19 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
     const user = await this.userRepo.getByEmailOrUsername(data.email);
 
     if (user) {
-      // user is PopulatedUser.
-      if (user.loginType !== data.loginType) {
-        throw new AppError(HttpStatus.BAD_REQUEST, "Login type mismatch");
+      const updates: any = {};
+      if (data.loginType === "google" && !user.googleId) {
+        updates.googleId = data.profileId;
       }
-      // Return document (Raw or Populated? Strategy expects a user to pass to callback).
-      // DTOs usually work with Raw in Strategy? No, standard is Document.
-      // I can return user (Populated via inheritance matches UserRaw structure closely enough for strategy usage, except reference types).
-      return user as unknown as UserDocument; // Casting for now to satisfy return type if it expects Document. 
-      // Ideally socialLogin return type should be explicit.
+      if (data.loginType === "github" && !user.githubId) {
+        updates.githubId = data.profileId;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await this.userRepo.updateUser(user._id, updates);
+      }
+
+      return user as unknown as UserDocument;
     }
 
     const username = await generateUsername(data.name);
@@ -193,10 +229,17 @@ export class AuthService extends BaseService<PopulatedUser, PublicUserDTO> imple
     const user = await this.userRepo.getUserById(userId);
     if (!user) throw new AppError(HttpStatus.NOT_FOUND, "User not found");
 
-    const pub: PublicUserDTO = this.mapOne(user);
+    const payload: JwtPayloadBase = {
+      userId: String(user._id),
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      isBanned: user.isBanned,
+      isVerified: user.isVerified
+    };
 
-    const accessToken = this.tokenProv.generateAccessToken(pub);
-    const refreshToken = this.tokenProv.generateRefreshToken(pub);
+    const accessToken = this.tokenProv.generateAccessToken(payload);
+    const refreshToken = this.tokenProv.generateRefreshToken(payload);
 
     await this.tokenSvc.createToken({
       userId,

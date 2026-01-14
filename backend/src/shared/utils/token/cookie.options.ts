@@ -7,7 +7,7 @@ export const getCookieOptions = (maxAge?: number) => ({
     | "none"
     | "lax"
     | "strict",
-  domain: env.NODE_ENV === "production" ? ".envriocart.shop" : undefined,
+  domain: undefined,
   path: "/",
   ...(maxAge ? { maxAge } : {}),
 });
