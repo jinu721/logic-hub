@@ -393,7 +393,7 @@ export const deleteItem = async (type: string, id: string) => {
   return response.data.result;
 };
 
-export const getItems = async (type: string, search: string, page: number, limit: number) => {
+export const getItems = async (type: string, search: string = "", page: number = 1, limit: number = 10) => {
   const response = await axiosInstance.get(
     `${ROUTES.INVENTORY.BASE(type)}?search=${search}&page=${page}&limit=${limit}`
   );
@@ -468,7 +468,7 @@ export const getUser = async (username: string) => {
   return response.data.result;
 };
 
-export const getUsers = async (search: string, page: number, limit: number) => {
+export const getUsers = async (search: string = "", page: number = 1, limit: number = 10) => {
   const response = await axiosInstance.get(
     `${ROUTES.USERS.SEARCH}?search=${search}&page=${page}&limit=${limit}`
   );

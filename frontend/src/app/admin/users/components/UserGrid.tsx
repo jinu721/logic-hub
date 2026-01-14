@@ -11,7 +11,7 @@ interface Props {
 const UserGrid: React.FC<Props> = ({ user, handleViewUser, handleBanUser }) => {
   return (
     <div
-      key={user._id}
+      key={user.userId}
       className="group bg-gray-900/70 backdrop-blur-sm rounded-xl overflow-hidden hover:shadow-xl hover:shadow-indigo-600/10 transition-all duration-300 border border-indigo-900/30 hover:border-indigo-500/70"
     >
       <div className="relative h-32 overflow-hidden">
@@ -30,11 +30,10 @@ const UserGrid: React.FC<Props> = ({ user, handleViewUser, handleBanUser }) => {
         )}
 
         <div
-          className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md ${
-            user.isBanned
-              ? "bg-red-500/70 text-green-100"
-              : "bg-green-500/70 text-gray-100"
-          }`}
+          className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md ${user.isBanned
+            ? "bg-red-500/70 text-green-100"
+            : "bg-green-500/70 text-gray-100"
+            }`}
         >
           {user.isBanned ? "Banned" : "Active"}
         </div>
@@ -61,9 +60,8 @@ const UserGrid: React.FC<Props> = ({ user, handleViewUser, handleBanUser }) => {
 
         <div className="mb-2 flex items-center space-x-1">
           <div
-            className={`w-3 h-3 rounded-full ${
-              user.isVerified ? "bg-blue-500" : "bg-transparent"
-            }`}
+            className={`w-3 h-3 rounded-full ${user.isVerified ? "bg-blue-500" : "bg-transparent"
+              }`}
           ></div>
           <p className="text-gray-400 text-sm">
             {user.role || "Member"}
@@ -76,7 +74,7 @@ const UserGrid: React.FC<Props> = ({ user, handleViewUser, handleBanUser }) => {
 
         <div className="flex justify-between items-center w-full mb-6">
           <div className="text-gray-500 text-sm">
-            ID: {user._id?.substring(0, 8)}...
+            ID: {user.userId?.substring(0, 8)}...
           </div>
 
           <div className="flex space-x-2">
@@ -87,7 +85,7 @@ const UserGrid: React.FC<Props> = ({ user, handleViewUser, handleBanUser }) => {
               <Eye size={16} className="text-white" />
             </button>
             <button
-              onClick={() => handleBanUser(user._id)}
+              onClick={() => handleBanUser(user.userId as string)}
               className="bg-gray-800 hover:bg-red-600 p-2 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-red-600/30"
             >
               <Ban size={16} className="text-white" />

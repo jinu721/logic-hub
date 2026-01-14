@@ -73,7 +73,7 @@ export class UserController implements IUserController {
   });
 
   toggleBan = asyncHandler(async (req: Request, res: Response) => {
-    const dto = ToggleBanRequestDto.from(req.body);
+    const dto = ToggleBanRequestDto.from(req.params as any);
     const val = dto.validate();
     if (!val.valid) throw new AppError(400, val.errors?.join(", "));
     const result = await this.commandSvc.toggleBanStatus(dto.userId);
