@@ -1,4 +1,4 @@
-import { PublicChallengeDTO } from "@modules/challenge/dtos";
+import { PublicChallengeDTO } from "../responses/public-challenge.dto";
 import { ChallengeDocument } from "@shared/types";
 
 export const toPublicChallengeDTO = (item: ChallengeDocument): PublicChallengeDTO => {

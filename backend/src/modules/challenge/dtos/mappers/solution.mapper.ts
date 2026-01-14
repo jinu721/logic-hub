@@ -1,4 +1,5 @@
-import { PublicSolutionDTO, toPublicChallengeDTO } from "@modules/challenge/dtos";
+import { PublicSolutionDTO } from "../responses/public-solution.dto";
+import { toPublicChallengeDTO } from "./challenge.mapper";
 import { toPublicUserDTO } from "@modules/user/dtos";
 import { PopulatedSolution } from "@shared/types";
 
