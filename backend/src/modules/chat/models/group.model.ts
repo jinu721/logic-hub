@@ -34,6 +34,15 @@ const GroupSchema = new Schema<GroupDocument>(
       required: true,
       default: 'public-open',
     },
+    category: {
+      type: String,
+      default: 'General',
+    },
+    tags: [
+      {
+        type: String,
+      },
+    ],
     userRequests: [
       {
         type: Schema.Types.ObjectId,

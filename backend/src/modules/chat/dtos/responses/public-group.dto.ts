@@ -9,6 +9,8 @@ export interface PublicGroupDTO {
   admins: PublicUserDTO[];
   members: PublicUserDTO[];
   groupType: 'public-open' | 'public-approval';
+  category?: string;
+  tags?: string[];
   userRequests: PublicUserDTO[];
   isDeleted: boolean;
   createdAt: Date;

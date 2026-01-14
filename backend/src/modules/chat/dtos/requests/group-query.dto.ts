@@ -6,9 +6,11 @@ export class GroupQueryDto extends BaseDto {
   members?: string;
   createdBy?: string;
   type?: string;
+  category?: string;
+  tags?: string[];
   search?: string;
   page: number = 1;
-  limit: number = 10;
+  limit: number = 20;
 
   static fromQuery(query: Record<string, unknown>): GroupQueryDto {
     const dto = new GroupQueryDto();
@@ -18,6 +20,12 @@ export class GroupQueryDto extends BaseDto {
     if (query.isActive !== undefined) dto.isActive = query.isActive === "true" || query.isActive === true;
     if (query.members && typeof query.members === 'string') dto.members = query.members;
     if (query.createdBy && typeof query.createdBy === 'string') dto.createdBy = query.createdBy;
+    if (query.category && typeof query.category === 'string') dto.category = query.category;
+    if (query.tags && typeof query.tags === 'string') {
+      dto.tags = query.tags.split(",");
+    } else if (Array.isArray(query.tags)) {
+      dto.tags = query.tags.map(String);
+    }
 
     if (query.page) dto.page = parseInt(query.page.toString(), 10) || 1;
     if (query.limit) dto.limit = parseInt(query.limit.toString(), 10) || 10;

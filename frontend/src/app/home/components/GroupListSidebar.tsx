@@ -38,7 +38,7 @@ const GroupsSidebar = ({ user }: Params) => {
       userId: user?.userId as string,
       members: [],
     });
-    socket.on("group_updated", ({}) => {});
+    socket.on("group_updated", ({ }) => { });
   };
 
   const fetchGroupData = async () => {
@@ -144,11 +144,10 @@ const GroupsSidebar = ({ user }: Params) => {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  selectedCategory === category
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${selectedCategory === category
                     ? "bg-indigo-600 text-white"
                     : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50"
-                }`}
+                  }`}
               >
                 {category === "all" ? "All" : category}
               </button>
@@ -228,13 +227,12 @@ const GroupsSidebar = ({ user }: Params) => {
                           .map((user, i) => (
                             <div
                               key={user.userId || i}
-                              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium border-2 border-gray-900 ${
-                                i === 0
+                              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium border-2 border-gray-900 ${i === 0
                                   ? "bg-indigo-500 text-white"
                                   : i === 1
-                                  ? "bg-purple-500 text-white"
-                                  : "bg-pink-500 text-white"
-                              }`}
+                                    ? "bg-purple-500 text-white"
+                                    : "bg-pink-500 text-white"
+                                }`}
                             >
                               {user.username?.charAt(0).toUpperCase() || "?"}
                             </div>
@@ -242,13 +240,13 @@ const GroupsSidebar = ({ user }: Params) => {
                         {(group.admins?.length || 0) +
                           (group.members?.length || 0) >
                           3 && (
-                          <div className="w-6 h-6 rounded-full bg-gray-700 border-2 border-gray-900 flex items-center justify-center text-xs text-gray-300">
-                            +
-                            {(group.admins?.length || 0) +
-                              (group.members?.length || 0) -
-                              3}
-                          </div>
-                        )}
+                            <div className="w-6 h-6 rounded-full bg-gray-700 border-2 border-gray-900 flex items-center justify-center text-xs text-gray-300">
+                              +
+                              {(group.admins?.length || 0) +
+                                (group.members?.length || 0) -
+                                3}
+                            </div>
+                          )}
                       </div>
                     </div>
 
@@ -298,7 +296,7 @@ const GroupsSidebar = ({ user }: Params) => {
                 <ChevronLeft size={14} />
                 <span>Prev</span>
               </button>
-              
+
               <div className="flex items-center space-x-1">
                 <span className="text-xs text-gray-400">
                   {currentPage} of {totalPages}
@@ -319,10 +317,12 @@ const GroupsSidebar = ({ user }: Params) => {
 
         {groupData.length > 0 && (
           <div className="p-4 pt-0">
-            <button className="w-full text-indigo-400 hover:text-indigo-300 text-sm font-medium py-2 transition-colors flex items-center justify-center space-x-1">
-              <span>View All Groups</span>
-              <ChevronRight size={14} />
-            </button>
+            <Link href="/groups">
+              <button className="w-full text-indigo-400 hover:text-indigo-300 text-sm font-medium py-2 transition-colors flex items-center justify-center space-x-1">
+                <span>View All Groups</span>
+                <ChevronRight size={14} />
+              </button>
+            </Link>
           </div>
         )}
       </div>

@@ -43,6 +43,14 @@ export class GroupQueryService
       query.name = { $regex: filter.search, $options: "i" }
     }
 
+    if (filter.category && filter.category !== "all") {
+      query.category = filter.category;
+    }
+
+    if (filter.tags && filter.tags.length > 0) {
+      query.tags = { $in: filter.tags };
+    }
+
     console.log("GROUP FETCHING STARTED WITH QUERY: ", query)
 
     const groups = await this.groupRepo.getAllGroups(query, skip, limit)

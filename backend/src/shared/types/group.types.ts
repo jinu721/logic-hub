@@ -8,6 +8,8 @@ export interface GroupAttrs {
     admins: Types.ObjectId[];
     members: Types.ObjectId[];
     groupType: 'public-open' | 'public-approval';
+    category?: string;
+    tags?: string[];
     userRequests: Types.ObjectId[];
     voiceRoom?: {
         topic?: string;
@@ -75,4 +77,6 @@ export interface GroupQueryFilter {
     page?: string;
     limit?: string;
     type?: string;
+    category?: string;
+    tags?: string[] | { $in: string[] };
 }

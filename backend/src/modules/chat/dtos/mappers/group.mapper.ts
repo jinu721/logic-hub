@@ -14,15 +14,17 @@ export const toPublicGroupDTO = (group: GroupDocument): PublicGroupDTO => {
     description: group.description,
     image: group.image,
     createdBy: isPopulatedUser(group.createdBy) ? toPublicUserDTO(group.createdBy) : {} as PublicUserDTO,
-    admins: Array.isArray(group.admins) && group.admins.length > 0 && isPopulatedUser(group.admins[0]) 
-      ? toPublicUserDTOs(group.admins as unknown as PopulatedUser[]) 
+    admins: Array.isArray(group.admins) && group.admins.length > 0 && isPopulatedUser(group.admins[0])
+      ? toPublicUserDTOs(group.admins as unknown as PopulatedUser[])
       : [],
-    members: Array.isArray(group.members) && group.members.length > 0 && isPopulatedUser(group.members[0]) 
-      ? toPublicUserDTOs(group.members as unknown as PopulatedUser[]) 
+    members: Array.isArray(group.members) && group.members.length > 0 && isPopulatedUser(group.members[0])
+      ? toPublicUserDTOs(group.members as unknown as PopulatedUser[])
       : [],
     groupType: group.groupType,
-    userRequests: Array.isArray(group.userRequests) && group.userRequests.length > 0 && isPopulatedUser(group.userRequests[0]) 
-      ? toPublicUserDTOs(group.userRequests as unknown as PopulatedUser[]) 
+    category: group.category || "General",
+    tags: group.tags || [],
+    userRequests: Array.isArray(group.userRequests) && group.userRequests.length > 0 && isPopulatedUser(group.userRequests[0])
+      ? toPublicUserDTOs(group.userRequests as unknown as PopulatedUser[])
       : [],
     isDeleted: group.isDeleted,
     createdAt: group.createdAt,
