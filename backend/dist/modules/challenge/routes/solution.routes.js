@@ -1,0 +1,21 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.solutionRoutes = void 0;
+const express_1 = require("express");
+const _middlewares_1 = require("../../../shared/middlewares");
+const _constants_1 = require("../../../shared/constants");
+const solutionRoutes = (container) => {
+    const router = (0, express_1.Router)();
+    const solutionController = container.solutionCtrl;
+    router.use(_middlewares_1.authMiddleware);
+    router.post(_constants_1.SOLUTION_ROUTES.BASE, solutionController.createSolution.bind(solutionController));
+    router.get(_constants_1.SOLUTION_ROUTES.BY_CHALLENGE, solutionController.getSolutionsByChallenge.bind(solutionController));
+    router.get(_constants_1.SOLUTION_ROUTES.BY_USER, solutionController.getSolutionsByUser.bind(solutionController));
+    router.post(_constants_1.SOLUTION_ROUTES.LIKE, solutionController.likeSolution.bind(solutionController));
+    router.post(_constants_1.SOLUTION_ROUTES.COMMENT, solutionController.commentSolution.bind(solutionController));
+    router.delete(_constants_1.SOLUTION_ROUTES.DELETE_COMMENT, solutionController.deleteComment.bind(solutionController));
+    router.put(_constants_1.SOLUTION_ROUTES.UPDATE, solutionController.updateSolution.bind(solutionController));
+    router.delete(_constants_1.SOLUTION_ROUTES.DELETE, solutionController.deleteSolution.bind(solutionController));
+    return router;
+};
+exports.solutionRoutes = solutionRoutes;

@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UpdateReportStatusDto = void 0;
+const base_dto_1 = require("../../../../shared/dtos/base.dto");
+class UpdateReportStatusDto extends base_dto_1.BaseDto {
+    validate() {
+        const errors = [];
+        if (!this.id)
+            errors.push("ID is required");
+        if (!this.status)
+            errors.push("status is required");
+        return { valid: errors.length === 0, errors };
+    }
+}
+exports.UpdateReportStatusDto = UpdateReportStatusDto;

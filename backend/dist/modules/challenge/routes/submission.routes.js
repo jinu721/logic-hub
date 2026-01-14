@@ -1,0 +1,23 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.submissionRoutes = void 0;
+const express_1 = require("express");
+const _middlewares_1 = require("../../../shared/middlewares");
+const _constants_1 = require("../../../shared/constants");
+const submissionRoutes = (container) => {
+    const router = (0, express_1.Router)();
+    const submissionController = container.submissionCtrl;
+    router.use(_middlewares_1.authMiddleware);
+    router.post(_constants_1.SUBMISSION_ROUTES.BASE, submissionController.createSubmission.bind(submissionController));
+    router.get(_constants_1.SUBMISSION_ROUTES.BASE, submissionController.getAllSubmissions.bind(submissionController));
+    router.get(_constants_1.SUBMISSION_ROUTES.BY_ID, submissionController.getSubmissionById.bind(submissionController));
+    router.put(_constants_1.SUBMISSION_ROUTES.UPDATE, submissionController.updateSubmission.bind(submissionController));
+    router.delete(_constants_1.SUBMISSION_ROUTES.DELETE, submissionController.deleteSubmission.bind(submissionController));
+    router.get(_constants_1.SUBMISSION_ROUTES.BY_USER, submissionController.getAllSubmissionsByUser.bind(submissionController));
+    router.get(_constants_1.SUBMISSION_ROUTES.RECENT_BY_USER, submissionController.getRecentSubmissions.bind(submissionController));
+    router.get(_constants_1.SUBMISSION_ROUTES.BY_CHALLENGE, submissionController.getAllSubmissionsByChallenge.bind(submissionController));
+    router.get(_constants_1.SUBMISSION_ROUTES.HEATMAP, submissionController.getHeatmap.bind(submissionController));
+    router.get(_constants_1.SUBMISSION_ROUTES.BY_USER_AND_CHALLENGE, submissionController.getSubmissionsByUserAndChallenge.bind(submissionController));
+    return router;
+};
+exports.submissionRoutes = submissionRoutes;

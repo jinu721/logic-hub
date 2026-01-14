@@ -27,7 +27,7 @@ tmp/
 temp/
 
 
-dist/
+# dist/
 build/
 scripts/
 

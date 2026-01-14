@@ -1,0 +1,63 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createApp = void 0;
+const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
+const morgan_1 = __importDefault(require("morgan"));
+const helmet_1 = __importDefault(require("helmet"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const passport_1 = __importDefault(require("passport"));
+const db_config_1 = __importDefault(require("./config/db.config"));
+const redis_config_1 = require("./config/redis.config");
+const user_1 = require("./modules/user");
+const inventory_1 = require("./modules/inventory");
+const level_1 = require("./modules/level");
+const market_1 = require("./modules/market");
+const report_1 = require("./modules/report");
+const chat_1 = require("./modules/chat");
+const notification_1 = require("./modules/notification");
+const challenge_1 = require("./modules/challenge");
+const purchase_1 = require("./modules/purchase");
+const membership_1 = require("./modules/membership");
+const analytics_1 = require("./modules/analytics");
+const err_middleware_1 = require("./shared/middlewares/err.middleware");
+const env_1 = require("./config/env");
+const passport_config_1 = require("./config/passport.config");
+const createApp = (container) => {
+    const app = (0, express_1.default)();
+    db_config_1.default.getInstance();
+    (0, redis_config_1.redisConnect)();
+    app.use((0, helmet_1.default)());
+    app.use((0, cookie_parser_1.default)());
+    app.use((0, cors_1.default)({
+        origin: env_1.env.FRONTEND_URL,
+        credentials: true
+    }));
+    app.use(express_1.default.json());
+    app.use(express_1.default.urlencoded());
+    app.use((0, morgan_1.default)('dev'));
+    app.use(passport_1.default.initialize());
+    (0, passport_config_1.setupPassport)(container);
+    app.use('/auth', (0, user_1.authRoutes)(container));
+    app.use('/users', (0, user_1.userRoutes)(container));
+    app.use('/inventory', (0, inventory_1.inventoryRoutes)(container));
+    app.use('/levels', (0, level_1.levelsRoutes)(container));
+    app.use('/market', (0, market_1.marketRoutes)(container));
+    app.use('/reports', (0, report_1.reportRoutes)(container));
+    app.use('/conversations', (0, chat_1.conversationRoutes)(container));
+    app.use('/messages', (0, chat_1.messageRoutes)(container));
+    app.use('/groups', (0, chat_1.groupRoutes)(container));
+    app.use('/notifications', (0, notification_1.notificationRoutes)(container));
+    app.use('/challenges', (0, challenge_1.challengeRoutes)(container));
+    app.use('/submissions', (0, challenge_1.submissionRoutes)(container));
+    app.use('/solutions', (0, challenge_1.solutionRoutes)(container));
+    app.use('/purchases', (0, purchase_1.purchaseRoutes)(container));
+    app.use('/memberships', (0, membership_1.membershipRoutes)(container));
+    app.use('/analytics', (0, analytics_1.analyticsRoutes)(container));
+    app.use(err_middleware_1.errorHandler);
+    return app;
+};
+exports.createApp = createApp;
