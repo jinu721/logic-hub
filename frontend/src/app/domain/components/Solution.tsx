@@ -75,9 +75,20 @@ const SolutionsSection: React.FC<SolutionsSectionProps> = ({
     }
   };
 
+  // Debounced search effect
   useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      setSearch(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  // Fetch solutions when dependencies change
+  useEffect(() => {
+    if (!challenge._id) return;
     fetchSolutions(challenge._id as string, search, page, limit, sortBy);
-  }, [search, page, sortBy]);
+  }, [challenge._id, search, page, sortBy]);
 
   useEffect(() => {
     const container = containerRef.current;

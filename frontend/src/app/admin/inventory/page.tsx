@@ -4,7 +4,7 @@ import { Metadata } from "next";
 import AdminInventory from "./components/Inventory";
 
 export const metadata: Metadata = {
-  title: "CodeMaze | Admin Inventory",
+  title: "LogicHub | Admin Inventory",
   description: "Manage avatar, banner, and badges in Admin Side",
 };
 

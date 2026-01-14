@@ -4,7 +4,7 @@ import Leaderboard from "./components/Leaderboard";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "CodeMaze | Leaderboard",
+  title: "LogicHub | Leaderboard",
   description:
     "View Escapers Leaderboard.",
 };
@@ -12,6 +12,6 @@ export const metadata: Metadata = {
 
 export default async function ProfilePage() {
   return (
-    <Leaderboard/>
+    <Leaderboard />
   );
 }

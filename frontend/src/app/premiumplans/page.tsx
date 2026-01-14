@@ -1,13 +1,13 @@
 
 export const dynamic = 'force-dynamic';
 
-import { redirect } from "next/navigation"; 
+import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import { getMyProfile } from "@/services/server/serverServices";
 import PurchasePremium from "./components/PurchasePremium";
 
 export const metadata: Metadata = {
-  title: "CodeMaze | Purchase Premium",
+  title: "LogicHub | Purchase Premium",
   description: "Purchase A Premium Plan",
 }
 

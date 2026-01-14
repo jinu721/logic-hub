@@ -5,14 +5,14 @@ import VerifyForm from './components/Verify';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Verify | CodeMaze',
+  title: 'Verify | LogicHub',
   description: 'Verify your account and start your journey',
 };
 
 export default function OtpVerification() {
   return (
     <div className="min-h-screen bg-[var(--logichub-primary-bg)] flex items-center justify-center p-4">
-      <GeometricBackground/>
+      <GeometricBackground />
       <div className="w-full max-w-md bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-2xl overflow-hidden">
         <div className="bg-[--logichub-secondary-bg] p-6 text-center">
           <h2 className="text-2xl font-bold text-white tracking-tight">Verify Your Account</h2>
@@ -20,7 +20,7 @@ export default function OtpVerification() {
             Enter the 6-digit code sent to your email
           </p>
         </div>
-        <VerifyForm/>
+        <VerifyForm />
       </div>
     </div>
   );

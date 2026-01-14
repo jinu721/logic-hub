@@ -11,10 +11,17 @@ export const toPublicSolutionDTO = (solution: PopulatedSolution): PublicSolution
     challenge: toPublicChallengeDTO(solution.challenge),
     title: solution.title,
     content: solution.content,
-    implementations: solution.implementations.map(impl => ({
-      language: impl.language,
-      codeSnippet: impl.codeSnippet
-    })),
+    implementations: solution.implementations && solution.implementations.length > 0
+      ? solution.implementations.map(impl => ({
+        language: impl.language,
+        codeSnippet: impl.codeSnippet
+      }))
+      : (solution as any).codeSnippet || (solution as any).language
+        ? [{
+          language: (solution as any).language || 'javascript',
+          codeSnippet: (solution as any).codeSnippet || '// No code provided'
+        }]
+        : [],
     likesCount: solution.likes?.length || 0,
     likes: solution.likes?.map(like => like.toString()) || [],
     comments: solution.comments?.map(comment => ({

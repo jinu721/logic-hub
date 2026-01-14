@@ -6,16 +6,16 @@ import { Terminal } from "lucide-react";
 import ResetPasswordForm from "./components/ResetPassword";
 
 export const metadata: Metadata = {
-  title: "Set New Password | CodeMaze",
+  title: "Set New Password | LogicHub",
   description: "Create a new password for your account",
 };
 
 
 type Props = {
-    searchParams: { token?: string };
-  };
+  searchParams: { token?: string };
+};
 
-export default function ResetPasswordPage({searchParams:{token}}:Props) {
+export default function ResetPasswordPage({ searchParams: { token } }: Props) {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-950 to-black p-4">

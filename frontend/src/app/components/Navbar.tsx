@@ -84,7 +84,7 @@ export default function Navbar() {
               onClick={() => router.push("/home")}
               className="text-xl font-bold cursor-pointer bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent hover:scale-105 transition-transform duration-200"
             >
-              CodeMaze
+              LogicHub
             </h1>
           </div>
 

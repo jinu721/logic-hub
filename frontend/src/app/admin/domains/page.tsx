@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import ChallengeManagement from './components/Domain';
 
 export const metadata: Metadata = {
-  title: 'CodeMaze | Admin Domains',
+  title: 'LogicHub | Admin Domains',
   description: 'Mange Challenges in Admin Side',
 };
 

@@ -4,18 +4,18 @@ import Link from "next/link";
 
 export async function generateMetadata({ params }: { params: { type: string } }): Promise<Metadata> {
   return {
-    title: `CodeMaze | Purchase Premium - ${params.type}`,
+    title: `LogicHub | Purchase Premium - ${params.type}`,
     description: "Purchase A Premium Plan",
   };
 }
 
 type Params = {
-    params:{
-        id:string
-    }
+  params: {
+    id: string
+  }
 }
 
-const getData = async (id:string) => {
+const getData = async (id: string) => {
   try {
     const membershipPlans = await getPlanHistory(id);
     return membershipPlans;
@@ -25,7 +25,7 @@ const getData = async (id:string) => {
   }
 };
 
-export default async function PremiumPurchase({ params:{id} }: Params ) {
+export default async function PremiumPurchase({ params: { id } }: Params) {
   const planHistory = await getData(id);
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
@@ -42,7 +42,7 @@ export default async function PremiumPurchase({ params:{id} }: Params ) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            
+
             <h2 className="text-2xl font-bold text-center mb-2">Payment Completed!</h2>
             <p className="text-gray-400 text-center">Your premium subscription has been activated</p>
           </div>
@@ -68,7 +68,7 @@ export default async function PremiumPurchase({ params:{id} }: Params ) {
 
           <div className="flex flex-col space-y-4">
             <Link
-            href={'/home'} 
+              href={'/home'}
               className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-md w-full font-medium transition duration-200"
             >
               Go Home

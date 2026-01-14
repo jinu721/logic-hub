@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import MarketManagement from './components/Market';
 
 export const metadata: Metadata = {
-  title: 'CodeMaze | Admin Market',
+  title: 'LogicHub | Admin Market',
   description: 'Mange Market in Admin Side',
 };
 

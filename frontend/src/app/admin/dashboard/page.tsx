@@ -4,7 +4,7 @@ import { Metadata } from "next";
 import Dashboard from "./components/Dashboard";
 
 export const metadata: Metadata = {
-  title: "CodeMaze | Admin Dashboard",
+  title: "LogicHub | Admin Dashboard",
   description: "Admin Dashboard",
 };
 

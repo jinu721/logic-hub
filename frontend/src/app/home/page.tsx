@@ -4,7 +4,7 @@ import { Metadata } from "next";
 import Home from "./components/Home";
 
 export const metadata: Metadata = {
-  title: "Home | CodeMaze",
+  title: "Home | LogicHub",
   description: "Explore the domains",
 };
 

@@ -13,7 +13,7 @@ const DomainHints: FC<DomainHintsProps> = ({ challenge }) => {
   ];
 
   return (
-    <div>
+    <div className="p-5">
       <h3 className="text-lg font-bold mb-4 flex items-center text-slate-100">
         <Lightbulb size={20} className="mr-2 text-amber-400" />
         <div className="w-1 h-6 bg-gradient-to-b from-amber-400 to-orange-400 rounded-full mr-3"></div>
