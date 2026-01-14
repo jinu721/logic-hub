@@ -18,7 +18,6 @@ export class SolutionRepository extends BaseRepository<SolutionDocument>
     return this.model
       .findById(solutionId)
       .populate("user")
-      .populate("challenge")
       .populate("comments.user") as unknown as PopulatedSolution;
   }
 
@@ -38,7 +37,6 @@ export class SolutionRepository extends BaseRepository<SolutionDocument>
       .skip((page - 1) * limit)
       .limit(limit)
       .populate("user")
-      .populate("challenge")
       .populate("comments.user") as unknown as PopulatedSolution[];
   }
 
@@ -46,7 +44,6 @@ export class SolutionRepository extends BaseRepository<SolutionDocument>
     return this.model
       .find({ user: userId })
       .populate("user")
-      .populate("challenge")
       .populate("comments.user") as unknown as PopulatedSolution[];
   }
 
