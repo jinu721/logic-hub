@@ -141,6 +141,11 @@ const SolutionsSection: React.FC<SolutionsSectionProps> = ({
     setShowAddSolution(false);
   };
 
+  const handleDeleteSolution = (id: string) => {
+    setSolutionsData((prev) => prev.filter((s) => s._id !== id));
+    setSelectedSolution(null);
+  };
+
   const sortedSolutions = [...(solutionsData || [])].sort((a, b) => {
     if (sortBy === "likes") {
       return b.likes.length - a.likes.length;
@@ -163,6 +168,7 @@ const SolutionsSection: React.FC<SolutionsSectionProps> = ({
         user={user}
         challenge={challenge}
         onBack={() => setSelectedSolution(null)}
+        onDelete={handleDeleteSolution}
       />
     );
   }

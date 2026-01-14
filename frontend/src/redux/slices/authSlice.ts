@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { register,verifyOtp, login } from "@/services/client/clientServices";
+import Cookies from "js-cookie";
+import { register, verifyOtp, login } from "@/services/client/clientServices";
 import { LoginIF, RegisterIF } from "@/types/auth.types";
 
 export const userRegister = createAsyncThunk<
@@ -19,14 +20,14 @@ export const userRegister = createAsyncThunk<
 
 
 export const userverify = createAsyncThunk<
-  any, 
-  { email:string, otp: string }, 
+  any,
+  { email: string, otp: string },
   { rejectValue: string }
 >(
   "auth/verify",
-  async ({email, otp }, { rejectWithValue }) => {
+  async ({ email, otp }, { rejectWithValue }) => {
     try {
-      const userData = await verifyOtp(email,otp);
+      const userData = await verifyOtp(email, otp);
       return userData;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || "Verification failed");
@@ -76,6 +77,8 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       localStorage.removeItem("user");
+      localStorage.removeItem("accessToken");
+      Cookies.remove("accessToken");
       state.user = null;
       state.loading = false;
       state.error = null;
@@ -109,11 +112,11 @@ const authSlice = createSlice({
     builder.addCase(userLogin.pending, (state) => {
       state.loading = true;
     });
-    builder.addCase(userLogin.rejected, (state,action) => {
+    builder.addCase(userLogin.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload;
     });
-    builder.addCase(userLogin.fulfilled, (state,action) => {
+    builder.addCase(userLogin.fulfilled, (state, action) => {
       state.loading = false;
       state.user = action.payload;
       state.error = null;
@@ -122,5 +125,5 @@ const authSlice = createSlice({
 });
 
 
-export const { setUser,logout } = authSlice.actions;
+export const { setUser, logout } = authSlice.actions;
 export default authSlice.reducer;

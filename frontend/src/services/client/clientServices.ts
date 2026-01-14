@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import { User } from "@/types/user.types";
 import { axiosInstance } from "../apiServices";
 import { ReportIF } from "@/types/report.types";
@@ -26,9 +27,10 @@ export const login = async (userData: LoginIF) => {
   if (!result.isVerified) {
     localStorage.setItem("userEmail", result.email);
   } else {
-    localStorage.setItem("user", "true");
+    localStorage.setItem("user", JSON.stringify(result.user || result));
     const accessToken = result.accessToken;
     localStorage.setItem("accessToken", accessToken);
+    Cookies.set("accessToken", accessToken, { expires: 7 });
   }
   return result;
 };
@@ -49,7 +51,8 @@ export const verifyOtp = async (email: string, otp: string) => {
   const accessToken = result.accessToken;
   localStorage.removeItem("userEmail");
   localStorage.setItem("accessToken", accessToken);
-  localStorage.setItem("user", "true");
+  localStorage.setItem("user", JSON.stringify(result.user || result));
+  Cookies.set("accessToken", accessToken, { expires: 7 });
   return result.user;
 };
 
@@ -57,8 +60,9 @@ export const verifyLogin = async (token: string) => {
   const response = await axiosInstance.get(`${ROUTES.AUTH.VERIFY_LOGIN}?token=${token}`);
   const result = response.data.result;
   const accessToken = result.accessToken;
-  localStorage.setItem("user", "true");
+  localStorage.setItem("user", JSON.stringify(result.user || result));
   localStorage.setItem("accessToken", accessToken);
+  Cookies.set("accessToken", accessToken, { expires: 7 });
   return result;
 };
 
@@ -428,7 +432,8 @@ export const deleteSolution = async (id: string) => {
 
 export const addComment = async (solutionId: string, content: any) => {
   const response = await axiosInstance.post(ROUTES.SOLUTIONS.COMMENT(solutionId), {
-    data: { solutionId, content },
+    solutionId,
+    content,
     accessToken: localStorage.getItem("accessToken"),
   });
   return response.data.result;

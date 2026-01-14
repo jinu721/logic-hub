@@ -12,7 +12,6 @@ export class LeaderboardQueryDto extends BaseDto {
   static from<T extends BaseDto>(this: new () => T, data: Partial<T>): T {
     const instance = new this();
     Object.assign(instance, data);
-    // Convert string query params to numbers
     if ('page' in instance && typeof (instance as any).page === 'string') {
       (instance as any).page = parseInt((instance as any).page, 10);
     }

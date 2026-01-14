@@ -33,6 +33,7 @@ interface SolutionDetailProps {
   currentUserId: string;
   user: any;
   challenge: ChallengeDomainIF;
+  onDelete?: (id: string) => void;
 }
 
 const SolutionDetail: React.FC<SolutionDetailProps> = ({
@@ -40,6 +41,7 @@ const SolutionDetail: React.FC<SolutionDetailProps> = ({
   onBack,
   currentUserId,
   challenge,
+  onDelete
 }) => {
   const [newComment, setNewComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
@@ -85,6 +87,11 @@ const SolutionDetail: React.FC<SolutionDetailProps> = ({
       await deleteSolution(solution._id || "");
       showToast({ type: "success", message: "Solution Deleted Successfully" });
       setShowSolutionDeleteModal(false);
+      if (onDelete && solution._id) {
+        onDelete(solution._id);
+      } else {
+        onBack();
+      }
     } catch (err: any) {
       console.error(err);
       showToast({ type: "error", message: err.message || "Error deleting solution" });

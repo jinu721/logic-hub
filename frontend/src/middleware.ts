@@ -17,20 +17,25 @@ const adminRoutes = [
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  
+
   const isAdminRoute = adminRoutes.some((route) =>
     pathname.startsWith(route)
-);
-
-  if (!isAdminRoute) {
-    return NextResponse.next(); 
-  }
+  );
 
   console.log("Reqest URL: ", request.url);
-  console.log("Reqest URL: ", request);
 
   const accessToken = request.cookies.get("accessToken")?.value;
   console.log("ACCESS TOKENN ", accessToken);
+
+  const isAuthRoute = pathname.startsWith("/auth/login") || pathname.startsWith("/auth/register");
+
+  if (isAuthRoute && accessToken) {
+    return NextResponse.redirect(new URL("/home", request.url));
+  }
+
+  if (!isAdminRoute) {
+    return NextResponse.next();
+  }
 
   if (!accessToken) {
     console.log("No access token found. Redirecting to login...");
@@ -38,9 +43,11 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const response = await axiosInstance.post("/users/verify-admin", {},{headers:{
-      Authorization: `Bearer ${accessToken}`,
-    }});
+    const response = await axiosInstance.post("/users/verify-admin", {}, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      }
+    });
 
     const result = response.data.result;
 
@@ -52,7 +59,7 @@ export async function middleware(request: NextRequest) {
     }
 
     console.log("Admin verified");
-    return NextResponse.next(); 
+    return NextResponse.next();
 
   } catch (err) {
     console.log("Token invalid or expired:", err);
@@ -61,5 +68,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"], 
+  matcher: ["/admin/:path*"],
 };

@@ -68,7 +68,11 @@ const Login: React.FC = () => {
 
   useLayoutEffect(() => {
     if (auth.user) {
-      router.replace("/home");
+      if (auth.user.role === "admin") {
+        router.replace("/admin/dashboard");
+      } else {
+        router.replace("/home");
+      }
     }
   }, [auth.user]);
 
@@ -135,7 +139,12 @@ const Login: React.FC = () => {
       }
 
       if (!response.isBanned && response.isVerified && !response.security) {
-        router.push("/home");
+        const userRole = response.role || response.user?.role;
+        if (userRole === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/home");
+        }
       }
     } catch (err: any) {
       console.log(err);

@@ -4,7 +4,7 @@ import Users from './components/Users';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'CodeMaze | Admin Users',
+  title: 'LogicHub | Admin Users',
   description: 'Manage users in Admin Side',
 };
 
