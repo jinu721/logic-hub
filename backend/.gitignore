@@ -29,6 +29,7 @@ temp/
 
 dist/
 build/
+scripts/
 
 coverage/
 .nyc_output/

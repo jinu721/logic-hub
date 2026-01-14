@@ -53,7 +53,7 @@ const POPULAR_TAGS = [
 
 export default function GroupExplore() {
     const { showToast } = useToast() as any;
-    const user = useSelector((state: any) => state.user.user);
+    const user = useSelector((state: any) => state.auth.user);
 
     const [groups, setGroups] = useState<Group[]>([]);
     const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
@@ -325,8 +325,8 @@ export default function GroupExplore() {
                                                         key={i}
                                                         onClick={() => setCurrentPage(pageNum)}
                                                         className={`w-10 h-10 rounded-xl transition-colors font-medium ${currentPage === pageNum
-                                                                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-900/30"
-                                                                : "bg-gray-800/50 text-gray-400 hover:bg-gray-700/50"
+                                                            ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-900/30"
+                                                            : "bg-gray-800/50 text-gray-400 hover:bg-gray-700/50"
                                                             }`}
                                                     >
                                                         {pageNum}
