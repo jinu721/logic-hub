@@ -47,4 +47,30 @@ const marketItemSchema = new Schema<MarketItemDocument>({
   },
 });
 
+marketItemSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function () {
+});
+
+marketItemSchema.post('init', function (doc) {
+  if (!doc.itemModel && doc.category) {
+    const map: any = {
+      'avatar': 'Avatar',
+      'banner': 'Banner',
+      'badge': 'Badge'
+    };
+    doc.itemModel = map[doc.category] || 'Avatar';
+  }
+});
+
+marketItemSchema.pre('save', function (next) {
+  if (!this.itemModel && this.category) {
+    const map: any = {
+      'avatar': 'Avatar',
+      'banner': 'Banner',
+      'badge': 'Badge'
+    };
+    this.itemModel = map[this.category] || 'Avatar';
+  }
+  next();
+});
+
 export const MarketModel = model<MarketItemDocument>('MarketItem', marketItemSchema);

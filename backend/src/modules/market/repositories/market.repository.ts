@@ -1,4 +1,4 @@
-import { UpdateQuery } from "mongoose";
+import { UpdateQuery, Types } from "mongoose";
 import { MarketModel, IMarketRepository } from "@modules/market";
 import { MarketItemDocument, MarketItemFilter, MongoSortOptions } from "@shared/types";
 import { BaseRepository } from "@core";
@@ -15,7 +15,30 @@ export class MarketRepository
   }
 
   async getAllItems(query: MarketItemFilter, sort: MongoSortOptions, skip: number, limit: number): Promise<MarketItemDocument[]> {
-    return await this.model.find(query).sort({ createdAt: -1, ...sort }).skip(skip).limit(limit).populate("itemId");
+    const items = await this.model.find(query).sort({ createdAt: -1, ...sort }).skip(skip).limit(limit);
+
+    // Auto-fix missing itemModel for population on legacy data
+    items.forEach(item => {
+      if (!item.itemModel && item.category) {
+        const itemModelMap: Record<string, 'Avatar' | 'Banner' | 'Badge'> = {
+          'avatar': 'Avatar',
+          'banner': 'Banner',
+          'badge': 'Badge'
+        };
+        item.itemModel = itemModelMap[item.category] || 'Avatar';
+      }
+    });
+
+    await this.model.populate(items, { path: 'itemId' });
+
+    items.forEach(item => {
+      const isPopulated = item.itemId && typeof item.itemId === 'object' && 'name' in (item.itemId as any);
+      if (!isPopulated) {
+        console.log(`[MarketRepo] Item ${item._id} (${item.name}) itemId STILL NOT populated. itemModel: ${item.itemModel}, category: ${item.category}`);
+      }
+    });
+
+    return items;
   }
 
   async countMarketItems(query: MarketItemFilter): Promise<number> {
@@ -23,11 +46,35 @@ export class MarketRepository
   }
 
   async getItemById(id: string): Promise<MarketItemDocument | null> {
-    return await this.model.findById(id);
+    const item = await this.model.findById(id);
+    if (item) {
+      if (!item.itemModel && item.category) {
+        const itemModelMap: Record<string, 'Avatar' | 'Banner' | 'Badge'> = {
+          'avatar': 'Avatar',
+          'banner': 'Banner',
+          'badge': 'Badge'
+        };
+        item.itemModel = itemModelMap[item.category] || 'Avatar';
+      }
+      await item.populate('itemId');
+    }
+    return item;
   }
 
   async updateItem(id: string, update: UpdateQuery<MarketItemDocument>): Promise<MarketItemDocument | null> {
-    return await this.model.findByIdAndUpdate(id, update, { new: true });
+    const item = await this.model.findByIdAndUpdate(id, update, { new: true });
+    if (item) {
+      if (!item.itemModel && item.category) {
+        const itemModelMap: Record<string, 'Avatar' | 'Banner' | 'Badge'> = {
+          'avatar': 'Avatar',
+          'banner': 'Banner',
+          'badge': 'Badge'
+        };
+        item.itemModel = itemModelMap[item.category] || 'Avatar';
+      }
+      await item.populate('itemId');
+    }
+    return item;
   }
 
   async deleteItem(id: string): Promise<boolean> {

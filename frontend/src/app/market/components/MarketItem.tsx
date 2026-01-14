@@ -73,8 +73,8 @@ const MarketItem: React.FC<MarketItemProps> = ({
             <Clock className="h-3 w-3 mr-1" />
             {item.expiresAt
               ? getTimeRemaining(
-                  item.expiresAt ? (item.expiresAt as string) : ""
-                )
+                item.expiresAt ? (item.expiresAt as string) : ""
+              )
               : "Limited"}
           </div>
         </div>
@@ -94,9 +94,12 @@ const MarketItem: React.FC<MarketItemProps> = ({
         <div className="h-48 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           <img
-            src={item.itemId?.image || "/api/placeholder/400/300"}
+            src={item.itemId?.image || (item as any).image || "https://placehold.co/400x300?text=No+Image"}
             alt={item.name}
             className="w-full h-full object-cover object-center transform group-hover:scale-110 transition-transform duration-500"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "https://placehold.co/400x300?text=No+Image";
+            }}
           />
         </div>
       </div>
@@ -104,13 +107,12 @@ const MarketItem: React.FC<MarketItemProps> = ({
       <div className="p-5">
         <div className="mb-2">
           <span
-            className={`text-xs px-2 py-1 rounded-full ${
-              item.category === "avatar"
-                ? "bg-blue-900/50 text-blue-300 border border-blue-700"
-                : item.category === "banner"
+            className={`text-xs px-2 py-1 rounded-full ${item.category === "avatar"
+              ? "bg-blue-900/50 text-blue-300 border border-blue-700"
+              : item.category === "banner"
                 ? "bg-green-900/50 text-green-300 border border-green-700"
                 : "bg-yellow-900/50 text-yellow-300 border border-yellow-700"
-            }`}
+              }`}
           >
             {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
           </span>

@@ -39,37 +39,45 @@ const UserProfileView = ({ username }: { username: string }) => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const userData = await getUser(username);
-      const levelData = await getLevels();
-      console.log("Level Data :- ", levelData);
-      const progressData = await getUserProgress(username);
-      console.log("userData", userData);
-      setCurrentUser(userData.user.currentUser);
-      setOnlineStatus(userData.user.isOnline);
-      setUserData(userData.user);
-      setProgressData(progressData);
+      try {
+        const [userData, levelData, progressData] = await Promise.all([
+          getUser(username),
+          getLevels(),
+          getUserProgress(username)
+        ]);
 
-      const currentLevel = levelData.levels.find(
-        (lvl: any) => lvl.levelNumber === userData.user.stats.level
-      );
-      const nextLevel = levelData.levels.find(
-        (lvl: any) => lvl.levelNumber === userData.user.stats.level + 1
-      );
+        console.log("Level Data :- ", levelData);
+        console.log("userData", userData);
 
-      let xpProgress = 100;
-      let xpLeft = 0;
-      let xpPerLevel = currentLevel?.requiredXP ?? 0;
+        setCurrentUser(userData.user.currentUser);
+        setOnlineStatus(userData.user.isOnline);
+        setUserData(userData.user);
+        setProgressData(progressData);
 
-      if (nextLevel) {
-        xpPerLevel = nextLevel.requiredXP;
-        xpProgress = Math.floor(
-          (userData.user.stats.xpPoints / xpPerLevel) * 100
+        const currentLevel = levelData.levels.find(
+          (lvl: any) => lvl.levelNumber === userData.user.stats.level
         );
-        xpLeft = xpPerLevel - userData.user.stats.xpPoints;
+        const nextLevel = levelData.levels.find(
+          (lvl: any) => lvl.levelNumber === userData.user.stats.level + 1
+        );
+
+        let xpProgress = 100;
+        let xpLeft = 0;
+        let xpPerLevel = currentLevel?.requiredXP ?? 0;
+
+        if (nextLevel) {
+          xpPerLevel = nextLevel.requiredXP;
+          xpProgress = Math.floor(
+            (userData.user.stats.xpPoints / xpPerLevel) * 100
+          );
+          xpLeft = xpPerLevel - userData.user.stats.xpPoints;
+        }
+        setNextLevel(nextLevel);
+        setXpProgress(xpProgress);
+        setXpLeft(xpLeft);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
       }
-      setNextLevel(nextLevel);
-      setXpProgress(xpProgress);
-      setXpLeft(xpLeft);
     };
     fetchUserData();
     setShowAnimation(true);

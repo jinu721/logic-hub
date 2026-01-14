@@ -89,9 +89,10 @@ const Home = () => {
     const initData = async () => {
       const isStale = Date.now() - lastFetch > CACHE_DURATION;
 
-      if (challenges.length === 0 || isStale) {
+      if (lastFetch === 0 || isStale) {
         dispatch(setLoading(true));
         try {
+          // Promise.all to fetch both in parallel
           const [userData, data] = await Promise.all([
             getMyProfile(),
             getChallenges({})
@@ -122,8 +123,12 @@ const Home = () => {
     };
 
     initData();
-    socket.emit("user-online", localStorage.getItem("accessToken"));
-  }, [dispatch, lastFetch, challenges.length]);
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      socket.emit("user-online", token);
+    }
+  }, [dispatch, lastFetch]); // Removed challenges.length to prevent unnecessary re-runs
+
 
 
 

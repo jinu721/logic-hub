@@ -3,8 +3,8 @@ import { toPublicInventoryDTO, IPublicInventoryDTO } from "@modules/inventory";
 import { PublicMarketItemDTO } from "@modules/market/dtos";
 
 export const toPublicMarketItemDTO = (item: MarketItemDocument): PublicMarketItemDTO => {
-  const isPopulated = (obj: unknown): obj is PopulatedInventory => {
-    return obj !== null && typeof obj === 'object' && 'name' in obj;
+  const isPopulated = (obj: any): obj is PopulatedInventory => {
+    return obj && typeof obj === 'object' && ('name' in obj || obj instanceof Object && obj.constructor.name !== 'ObjectId');
   };
 
   return {
@@ -14,15 +14,15 @@ export const toPublicMarketItemDTO = (item: MarketItemDocument): PublicMarketIte
     costXP: item.costXP,
     itemId: isPopulated(item.itemId) ? (toPublicInventoryDTO(item.itemId) || {
       _id: "",
-      name: "",
+      name: "Unknown Item",
       description: "",
       image: "",
       isActive: false,
       rarity: "common"
     } as IPublicInventoryDTO) : {
-      _id: "",
-      name: "",
-      description: "",
+      _id: item.itemId ? item.itemId.toString() : "",
+      name: "Unpopulated Item",
+      description: "This item's details could not be loaded.",
       image: "",
       isActive: false,
       rarity: "common"
